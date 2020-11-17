@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Appstract", "Appstract\Appstract.fsproj", "{1A4C116A-459A-448A-9AFB-DCA9B25E7F56}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RecordExtraction", "RecordExtraction\RecordExtraction.fsproj", "{5A7818E8-2405-4137-B76F-18C76BB8B23E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A4C116A-459A-448A-9AFB-DCA9B25E7F56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A4C116A-459A-448A-9AFB-DCA9B25E7F56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A4C116A-459A-448A-9AFB-DCA9B25E7F56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A4C116A-459A-448A-9AFB-DCA9B25E7F56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A7818E8-2405-4137-B76F-18C76BB8B23E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A7818E8-2405-4137-B76F-18C76BB8B23E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A7818E8-2405-4137-B76F-18C76BB8B23E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A7818E8-2405-4137-B76F-18C76BB8B23E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
