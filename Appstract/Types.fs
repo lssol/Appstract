@@ -1,4 +1,4 @@
-﻿namespace Appstract
+﻿namespace Appstract.Types
 
 open System.Collections.Generic
 
@@ -6,7 +6,7 @@ open System.Collections.Generic
     The objective of these types is to define the abstract model that will be inferred by Appstract.
     
     This abstraction must be able to model the following situations:
-    - Records stuff
+    - Intra-Page
         - An element is part of a record
         - An element is the maximal ancestor of a record
         - An element is the container of records
@@ -18,6 +18,9 @@ open System.Collections.Generic
               - The rank of the record in the container
               - The placeholder id of the record template
             - In addition to referencing a template id, an instance can reference another instance.
+    - Inter-page abstraction
+      - An element has a different content / tags / attributes between pages
+      - An element does not appear in all pages
             
     
     My biggest enemy: the free text. Free text is a problem by essence because it breaks our first assumption which is:
@@ -29,14 +32,32 @@ open System.Collections.Generic
     they are the last descendants.
 *)
 
+
+// DOM
+type Content = Content of string
 type Tag = Tag of string
 type AttributeValue = AttributeValue of string
 type AttributeName = AttributeName of string
-type Attribute = Attribute of IDictionary<AttributeName, AttributeValue>
+type Attribute = Attribute of AttributeName * AttributeValue
+    
+[<ReferenceEquality>]
+type Node =
+    | Element of name:Tag * attributes:Attribute list * children:Node list
+    | Text of content:Content
+    | EmptyNode
 
-type Variation<'a> = 
-type Element = { Tag: string; Attributes: Attribute seq; Content: string }
-type Web
-type PageModel = 
+// Variability
+type Id = Id of string
+type Ids = IDictionary<Node, Id>
 
-type AppModel = 
+type Cluster = Cluster of HashSet<Node>
+type ClusterData = IDictionary<Node,Cluster>
+type BoxData = IDictionary<Node, HashSet<Cluster>>
+type OptionalData = HashSet<Node>
+
+type IntraPageVariability = {
+    Clusters: Cluster seq
+    ClusterData: ClusterData
+    BoxData: BoxData
+    OptionalData: OptionalData
+}
