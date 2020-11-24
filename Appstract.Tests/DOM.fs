@@ -1,8 +1,9 @@
 module Appstract.Tests
 
+open Appstract.Types
 open Appstract.DOM
-open Appstract.DOM.Utils
 open NUnit.Framework
+open AutoOpenModule
 
 let areEqual a b = Assert.AreEqual(a, b)
 let fail () = Assert.Fail()
@@ -22,11 +23,19 @@ let htmlString = """
     </html>
 """
 
+
 [<Test>]
 let HtmlParsing () =
-    let root = Parse.fromString htmlString
-        
-    match root with
-    | None -> fail ()
-    | Some n -> n.GetNodes() |> List.length |> areEqual 8
-    
+    let root = Node.FromString(htmlString).Value
+    root.Nodes() |> List.length |> areEqual 8
+
+[<Test>]
+let RootFromLeaf () =
+    let root = Node.FromString(htmlString).Value
+    let getPath = computeRootFromLeafPath (root.ParentDict())
+    let paths = 
+        root.Nodes() 
+        |> List.filter isLeaf
+        |> List.map getPath
+        |> List.iter (printfn "%s")
+    Assert.Pass()
