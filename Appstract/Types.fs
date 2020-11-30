@@ -51,13 +51,10 @@ type Id = Id of string
 type Ids = IDictionary<Node, Id>
 
 type Cluster = Cluster of HashSet<Node>
-type ClusterData = IDictionary<Node,Cluster>
-type BoxData = IDictionary<Node, HashSet<Cluster>>
-type OptionalData = HashSet<Node>
 
 type IntraPageVariability = {
     Clusters: Cluster seq
-    ClusterData: ClusterData
-    BoxData: BoxData
-    OptionalData: OptionalData
+    ClusterData: IDictionary<Node,Cluster>
+    BoxData: IDictionary<Node, HashSet<Cluster>>
+    OptionalData: HashSet<Node>
 }
