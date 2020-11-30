@@ -3,6 +3,20 @@
 open Appstract.DOM
 open Appstract.Types
 open System.Collections.Generic
+open FSharp.Collections
+
+type Tag = {
+    Cluster: Cluster
+    Depth: int
+}
+
+let computeTagsOnABranch (parentDict: Dictionary<Node, Node>) (leaf: Node) (cluster: Cluster) : Map<Node, Map<Tag, int>> = 
+    let rec compute node level (map: Map<Tag, int>) =
+        let parent = parentDict[node]
+        let tag = {}
+        match (node, parent) with
+        | (_, EmptyNode) -> map
+        | _ -> compute parent (level + 1) (map.Change )
 
 let computeClusters (root: Node): Dictionary<Node, Cluster> =
     let nodes = root.Nodes()
