@@ -26,32 +26,35 @@ let htmlString = """
     </html>
 """
 
+[<TestFixture>]
+type TestClass () =
+    [<Test>]
+    member __.HtmlParsing () =
+        let root = Node.FromString(htmlString).Value
+        root.Nodes() |> List.length |> areEqual 8
 
-[<Test>]
-let HtmlParsing () =
-    let root = Node.FromString(htmlString).Value
-    root.Nodes() |> List.length |> areEqual 8
+    [<Test>]
+    member __.RootFromLeaf () =
+        let root = Node.FromString(htmlString).Value
+        let getPath = computeRootFromLeafPath (root.ParentDict())
+        let paths = 
+            root.Nodes() 
+            |> List.filter isLeaf
+            |> List.map getPath
+            |> List.iter (printfn "%s")
+        Assert.Pass()
 
-[<Test>]
-let RootFromLeaf () =
-    let root = Node.FromString(htmlString).Value
-    let getPath = computeRootFromLeafPath (root.ParentDict())
-    let paths = 
-        root.Nodes() 
-        |> List.filter isLeaf
-        |> List.map getPath
-        |> List.iter (printfn "%s")
-    Assert.Pass()
-
-[<Test>]
-let Clusters () =
-    let root = Node.FromString(htmlString).Value
-    let getPath = computeRootFromLeafPath (root.ParentDict())
-    let clusterDict = computeClusters root
-    let displayCluster (Cluster(nodes)) =
-        printfn "----"
-        nodes.ToList() |> Seq.map getPath |> Seq.iter (printfn "%s")
-    let clusters = clusterDict.Values.ToList()
-    clusterDict.Values |> Seq.iter displayCluster
-    Assert.Pass()
+    [<Test>]
+    member __.Clusters () =
+        let root = Node.FromString(htmlString).Value
+        let getPath = computeRootFromLeafPath (root.ParentDict())
+        let clusterDict = computeClusters root
+        let displayCluster (Cluster(nodes)) =
+            printfn "----"
+            nodes.ToList() |> Seq.map getPath |> Seq.iter (printfn "%s")
+        clusterDict 
+        |> Map.toSeq 
+        |> Seq.map snd 
+        |> Seq.iter displayCluster
+        Assert.Pass()
     

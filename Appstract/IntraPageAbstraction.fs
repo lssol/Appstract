@@ -10,32 +10,38 @@ type Tag = {
     Depth: int
 }
 
-let computeTagsOnABranch (parentDict: Dictionary<Node, Node>) (leaf: Node) (cluster: Cluster) : Map<Node, Map<Tag, int>> = 
-    let rec compute node level (map: Map<Tag, int>) =
-        let parent = parentDict[node]
-        let tag = {}
+let computeTags (parentDict: Dictionary<Node, Node>) (leaves: Node list) (cluster: Cluster) : Map<Node, Map<Tag, int>> =
+    let rec createTagsForBranch depth (map: Map<Node, Map<Tag, int>>) node =
+        let parent = parentDict.[node]
+        let tag = {Cluster = cluster; Depth = depth}
+        let newTagCount = function
+            | None -> Map([(tag, 1)])
+            | Some tagCount -> tagCount |> Map.change tag (function None -> Some 1 | Some i -> Some (i+1))
+        let newMap = map |> Map.change node (function tagCount -> Some (newTagCount tagCount))
         match (node, parent) with
-        | (_, EmptyNode) -> map
-        | _ -> compute parent (level + 1) (map.Change )
+        | (_, EmptyNode) -> newMap
+        | _ -> createTagsForBranch (depth + 1) newMap node
 
-let computeClusters (root: Node): Dictionary<Node, Cluster> =
+    leaves |> List.fold (createTagsForBranch 0) Map.empty
+
+
+let computeClusters (root: Node): Map<Node, Cluster> =
     let nodes = root.Nodes()
     let getNodePath = computeRootFromLeafPath (root.ParentDict())
-    let toCluster (nodes: Node list) = Cluster(HashSet<Node>(nodes))
+    let toCluster nodes = Cluster(Set(nodes))
     let clusters = 
         nodes 
         |> List.filter isLeaf
         |> List.map (fun n -> (n, getNodePath n))
         |> List.groupBy snd
-        |> List.map (fun (key, tupleList) -> tupleList)
-        |> List.map (List.map (fun (node, path) -> node))
-        |> List.map toCluster
+        |> List.map (snd >> List.map fst >> toCluster)
 
-    let clusterDict = Dictionary<Node, Cluster>()
-    let fillDict cluster = 
+    let createDictForOneCluster dict cluster =
+        let createDictForOneNode d node = d |> Map.add node cluster
         let (Cluster(nodes)) = cluster
-        nodes |> Seq.iter (fun n -> clusterDict.Add(n, cluster))
-    clusters |> List.iter fillDict
+        nodes |> Set.fold createDictForOneNode dict
 
-    clusterDict 
+    clusters |> List.fold createDictForOneCluster Map.empty
+        
+
          

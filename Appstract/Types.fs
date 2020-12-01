@@ -1,6 +1,7 @@
 ﻿namespace Appstract.Types
 
 open System.Collections.Generic
+open System
 
 (*
     The objective of these types is to define the abstract model that will be inferred by Appstract.
@@ -40,21 +41,25 @@ type AttributeValue = AttributeValue of string
 type AttributeName = AttributeName of string
 type Attribute = Attribute of AttributeName * AttributeValue
     
-[<ReferenceEquality>]
+[<CustomEquality; CustomComparison>]
 type Node =
     | Element of name:Tag * attributes:Attribute list * children:Node list
     | Text of content:Content
     | EmptyNode
+    override this.Equals(obj) = Object.ReferenceEquals(this, obj)
+    override this.GetHashCode() = this.GetHashCode()
+    interface System.IComparable with
+        member this.CompareTo obj = if this.Equals(obj) then 0 else 1
 
 // Variability
 type Id = Id of string
 type Ids = IDictionary<Node, Id>
 
-type Cluster = Cluster of HashSet<Node>
+type Cluster = Cluster of Set<Node>
 
 type IntraPageVariability = {
     Clusters: Cluster seq
-    ClusterData: IDictionary<Node,Cluster>
-    BoxData: IDictionary<Node, HashSet<Cluster>>
+    ClusterData: Map<Node, Cluster>
+    BoxData: Map<Node, Set<Cluster>>
     OptionalData: HashSet<Node>
 }
