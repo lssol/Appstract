@@ -1,60 +1,38 @@
-module Appstract.Tests
+module Appstract.Tests.DOM
 
 open Appstract.Types
 open Appstract.DOM
 open NUnit.Framework
-open AutoOpenModule
+open Appstract.Tests.Common
+open Appstract.Tests.Common.AutoOpenModule
 open Appstract.IntraPageAbstraction
 open System.Linq
 open System.Collections.Generic
 
-let areEqual a b = Assert.AreEqual(a, b)
-let fail () = Assert.Fail()
+[<Test>]
+let htmlParsing () =
+    root.Nodes() |> List.length |> areEqual 8
 
-let htmlString = """
-    <!DOCTYPE html>
-    <html>
-        <head></head>
-        <body>
-            <!-- A comment -->
-            <h1>A title</h1>
-            <div>
-                <p>p1</p>
-                <p>p2</p>
-            </div>
-        </body>
-    </html>
-"""
+[<Test>]
+let rootFromLeaf () =
+    let getPath = computeRootFromLeafPath (root.ParentDict())
+    let paths = 
+        root.Nodes() 
+        |> List.filter isLeaf
+        |> List.map getPath
+        |> List.iter (printfn "%s")
+    Assert.Pass()
 
-[<TestFixture>]
-type TestClass () =
-    [<Test>]
-    member __.HtmlParsing () =
-        let root = Node.FromString(htmlString).Value
-        root.Nodes() |> List.length |> areEqual 8
-
-    [<Test>]
-    member __.RootFromLeaf () =
-        let root = Node.FromString(htmlString).Value
-        let getPath = computeRootFromLeafPath (root.ParentDict())
-        let paths = 
-            root.Nodes() 
-            |> List.filter isLeaf
-            |> List.map getPath
-            |> List.iter (printfn "%s")
-        Assert.Pass()
-
-    [<Test>]
-    member __.Clusters () =
-        let root = Node.FromString(htmlString).Value
-        let getPath = computeRootFromLeafPath (root.ParentDict())
-        let clusterDict = computeClusters root
-        let displayCluster (Cluster(nodes)) =
-            printfn "----"
-            nodes.ToList() |> Seq.map getPath |> Seq.iter (printfn "%s")
-        clusterDict 
-        |> Map.toSeq 
-        |> Seq.map snd 
-        |> Seq.iter displayCluster
-        Assert.Pass()
+[<Test>]
+let clusters () =
+    let getPath = computeRootFromLeafPath (root.ParentDict())
+    let clusterDict = computeClusters root
+    let displayCluster (Cluster(nodes)) =
+        printfn "----"
+        nodes.ToList() |> Seq.map getPath |> Seq.iter (printfn "%s")
+    clusterDict 
+    |> Map.toSeq 
+    |> Seq.map snd 
+    |> Seq.iter displayCluster
+    Assert.Pass()
     

@@ -6,10 +6,9 @@
     <ProjectReference Include="..\Appstract\Appstract.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IntraPageAbstractionTests.fs" />
-    <Compile Include="debug.fs" />
+    <Compile Include="Common.fs" />
     <Compile Include="DOM.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="IntraPageAbstractionTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.12.0" />

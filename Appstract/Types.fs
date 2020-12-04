@@ -2,6 +2,7 @@
 
 open System.Collections.Generic
 open System
+open System.Runtime.CompilerServices
 
 (*
     The objective of these types is to define the abstract model that will be inferred by Appstract.
@@ -47,9 +48,9 @@ type Node =
     | Text of content:Content
     | EmptyNode
     override this.Equals(obj) = Object.ReferenceEquals(this, obj)
-    override this.GetHashCode() = this.GetHashCode()
+    override this.GetHashCode() = RuntimeHelpers.GetHashCode(this)
     interface System.IComparable with
-        member this.CompareTo obj = if this.Equals(obj) then 0 else 1
+        member this.CompareTo obj = this.GetHashCode() - obj.GetHashCode()
 
 // Variability
 type Id = Id of string

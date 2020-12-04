@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Appstract", "Appstract\Appstract.fsproj", "{1A4C116A-459A-448A-9AFB-DCA9B25E7F56}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RecordExtraction", "RecordExtraction\RecordExtraction.fsproj", "{5A7818E8-2405-4137-B76F-18C76BB8B23E}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Appstract.Tests", "Appstract.Tests\Appstract.Tests.fsproj", "{A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F}"
 EndProject
 Global

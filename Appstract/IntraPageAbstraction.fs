@@ -4,26 +4,28 @@ open Appstract.DOM
 open Appstract.Types
 open System.Collections.Generic
 open FSharp.Collections
+open System.Runtime.CompilerServices
 
 type Tag = {
-    Cluster: Cluster
-    Depth: int
-}
+        Cluster: Cluster
+        Depth: int
+    } 
 
-let computeTags (parentDict: Dictionary<Node, Node>) (leaves: Node list) (cluster: Cluster) : Map<Node, Map<Tag, int>> =
-    let rec createTagsForBranch depth (map: Map<Node, Map<Tag, int>>) node =
+let computeTags (parentDict: Dictionary<Node, Node>) (clusterMap: Map<Node, Cluster>) (leaves: Node seq)  : Map<Node, Map<Tag, int>> =
+    let rec createTagsForBranch depth cluster (map: Map<Node, Map<Tag, int>>) node =
         let parent = parentDict.[node]
-        let tag = {Cluster = cluster; Depth = depth}
+        let tag = {Cluster = cluster; Depth = depth;}
         let newTagCount = function
             | None -> Map([(tag, 1)])
             | Some tagCount -> tagCount |> Map.change tag (function None -> Some 1 | Some i -> Some (i+1))
         let newMap = map |> Map.change node (function tagCount -> Some (newTagCount tagCount))
         match (node, parent) with
         | (_, EmptyNode) -> newMap
-        | _ -> createTagsForBranch (depth + 1) newMap node
+        | _ -> createTagsForBranch (depth + 1) cluster newMap parent
 
-    leaves |> List.fold (createTagsForBranch 0) Map.empty
-
+    leaves 
+    |> Seq.filter (fun leaf -> Map.containsKey leaf clusterMap)
+    |> Seq.fold (fun m leaf -> createTagsForBranch 0 clusterMap.[leaf] m leaf) Map.empty
 
 let computeClusters (root: Node): Map<Node, Cluster> =
     let nodes = root.Nodes()
@@ -41,7 +43,9 @@ let computeClusters (root: Node): Map<Node, Cluster> =
         let (Cluster(nodes)) = cluster
         nodes |> Set.fold createDictForOneNode dict
 
-    clusters |> List.fold createDictForOneCluster Map.empty
+    clusters 
+    |> List.fold createDictForOneCluster Map.empty
+    |> Map.filter (fun _ (Cluster(nodes)) -> not nodes.IsEmpty)
         
 
          
