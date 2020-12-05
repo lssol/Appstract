@@ -1,21 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp5.0</TargetFramework>
-        <LangVersion>5.0</LangVersion>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <Compile Include="Types.fs" />
-        <Compile Include="DOM.fs" />
-        <Compile Include="IntraPageAbstraction.fs" />
-        <Compile Include="Program.fs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="FSharp.Data" Version="3.3.3" />
-      <PackageReference Include="FSharpPlus" Version="1.1.4" />
-    </ItemGroup>
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Utils.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="DOM.fs" />
+    <Compile Include="IntraPageAbstraction.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Data" Version="3.3.3" />
+    <PackageReference Include="FSharpPlus" Version="1.1.4" />
+  </ItemGroup>
 </Project>
