@@ -9,7 +9,7 @@ open Appstract.Utils
 
 type Tag = { Cluster: Cluster; Depth: int } 
 
-let computeTags (parentDict: Dictionary<Node, Node>) (clusterMap: Map<Node, Cluster>) (leaves: Node seq)  : Map<Node, Map<Tag, int>> =
+let computeTags (parentDict: Dictionary<Node, Node>) (clusterMap: Map<Node, Cluster>) (leaves: Node seq) : Map<Node, Map<Tag, int>> =
     let rec createTagsForBranch depth cluster (map: Map<Node, Map<Tag, int>>) node =
         let parent = parentDict.[node]
         let tag = {Cluster = cluster; Depth = depth;}
@@ -63,10 +63,6 @@ let computeClusters (root: Node): Map<Node, Cluster> =
        [A, B, C] -> [t1, t2, t3]
        [D, E] -> [t4]
 *)
-type GroupState = {
-    TagToGroup: Map<Tag, Set<Tag>>
-    GroupToNode: Map<Set<Tag>, Tag>
-}
 let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) =
     let createGroups tagGroups tags = 
         let addTagsToTagsGroup     = Seq.fold (fun m tag -> m |> Map.add tag tags) tagGroups
@@ -85,8 +81,20 @@ let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) =
     |> Seq.fold (fun map (node, tag) -> map |> Map.push groups.[tag] node) Map.empty
     |> Map.toSeq
 
-// To use for later before calling the groupByTagsAssociatively
-let toTagsPerNode tagMap =
+let groupPairsOfChildrenWithinTheSameCluster (tagsPerNode: Map<Node, Set<Tag>>) (nodes1:Node seq) nodes2 =
+    let getTags = (Seq.choose (fun n -> Map.tryFind n tagsPerNode)) >> Seq.concat >> Set.ofSeq
+    let commonTags = Set.intersect (getTags nodes1) (getTags nodes2)
+    let isOrphan node = commonTags |> Set.contains node
+    let orphans = nodes1 |> Seq.append nodes2 |> Seq.filter isOrphan |> Set.ofSeq
+    
+    let Seq.allPairs 
+        (nodes1 |> Seq.filter (isOrphan >> not))
+        (nodes2 |> Seq.filter (isOrphan >> not))
+    |> 
+
+
+
+let toTagsPerNode tagMap: (Node * Set<Tag>) seq =
     let getKeys = Map.toSeq >> Seq.map fst >> Set.ofSeq
     tagMap 
     |> Map.toSeq 

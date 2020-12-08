@@ -56,11 +56,20 @@ type Node =
 type Id = Id of string
 type Ids = IDictionary<Node, Id>
 
-type Cluster = Cluster of Set<Node>
+type SourceNode = Node
+type AbstractNode = Node
+
+type Cluster = Cluster of Set<SourceNode>
 
 type IntraPageVariability = {
     Clusters: Cluster seq
-    ClusterData: Map<Node, Cluster>
-    BoxData: Map<Node, Set<Cluster>>
-    OptionalData: HashSet<Node>
+    ClusterData: Map<SourceNode, Cluster>
+
+    AbstractTree: AbstractNode
+    BoxData: Map<AbstractNode, Set<Cluster>>
+    OptionalData: Set<AbstractNode>
+    AbstractedSourceNodes: Map<AbstractNode, SourceNode seq>
 }
+
+//we want
+type TreeAbstractor = Node -> IntraPageVariability

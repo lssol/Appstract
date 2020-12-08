@@ -55,7 +55,15 @@ let computeRootFromLeafPath (parentDict: IDictionary<Node, Node>) leaf =
         
     compute leaf
 
+let rec cloneNode node = 
+    let cloneAttr (Attribute(AttributeName(name), AttributeValue(value))) = Attribute(AttributeName(name), AttributeValue(value))
+    match node with
+    | EmptyNode -> EmptyNode
+    | Text text -> Text text
+    | Element(Tag(name), attrs, children) -> Element(Tag(name), List.map cloneAttr attrs, List.map cloneNode children)
+
 type Node with
     static member FromString(s) = fromString s
     member this.ParentDict() = computeParentsDict this
     member this.Nodes() = getNodes this
+    member this.Clone() = cloneNode this
