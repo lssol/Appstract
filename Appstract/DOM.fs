@@ -11,7 +11,7 @@ let fromString html =
     let fromAttrs = List.map fromAttr
     let rec fromNode = function
         | HtmlElement (name, attributes, children) -> Element(Tag(name), fromAttrs attributes, fromNodes children)
-        | HtmlText content -> Text(Content(content))
+        | HtmlText content -> Text(content)
         | _ -> EmptyNode
     and fromNodes =
         List.map fromNode
@@ -33,6 +33,7 @@ let getNodes root =
             
     traverse [] [root]
 
+
 let computeParentsDict root =
     let parentDict = Dictionary<Node, Node>()
     let rec traverse parent node =
@@ -50,8 +51,8 @@ let computeRootFromLeafPath (parentDict: IDictionary<Node, Node>) leaf =
     let rec compute node = 
         match node with 
         | EmptyNode -> ""
-        | Element(Tag(name), _, _) -> $"{compute parentDict.[node]}/{name}"
-        | Text(_) -> $"{compute parentDict.[node]}/TEXT"
+        | Element(Tag(name), _, _) -> sprintf "{%s}/{%s}" (compute parentDict.[node]) name
+        | Text(_) -> sprintf "{%s}/TEXT" (compute parentDict.[node])
         
     compute leaf
 
@@ -67,3 +68,12 @@ type Node with
     member this.ParentDict() = computeParentsDict this
     member this.Nodes() = getNodes this
     member this.Clone() = cloneNode this
+
+module Attribute =
+    let toMap attrs =
+        let attributeToTuple (Attribute(AttributeName(name), AttributeValue(value))) = (name, value)
+        attrs |> Seq.map attributeToTuple |> Map.ofSeq
+        
+    let ofMap map =
+        let tupleToAttr (name, value) = (Attribute(AttributeName(name), AttributeValue(value)))
+        map |> Map.toSeq |> Seq.map tupleToAttr

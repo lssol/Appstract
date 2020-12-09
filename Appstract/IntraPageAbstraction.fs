@@ -1,5 +1,6 @@
 ﻿module Appstract.IntraPageAbstraction
 
+open System.Threading.Tasks
 open Appstract.DOM
 open Appstract.Types
 open System.Collections.Generic
@@ -82,18 +83,75 @@ let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) =
     |> Map.toSeq
 
 let groupPairsOfChildrenWithinTheSameCluster (tagsPerNode: Map<Node, Set<Tag>>) (nodes1:Node seq) nodes2 =
-    let getTags = (Seq.choose (fun n -> Map.tryFind n tagsPerNode)) >> Seq.concat >> Set.ofSeq
-    let commonTags = Set.intersect (getTags nodes1) (getTags nodes2)
-    let isOrphan node = commonTags |> Set.contains node
+    let getTags node = tagsPerNode |> Map.tryFind node |> Option.defaultValue Set.empty
+    let concatTags = (Seq.collect getTags) >> Set.ofSeq
+    let commonTags = Set.intersect (concatTags nodes1) (concatTags nodes2)
+    let isOrphan = getTags >> Set.intersect commonTags >> Set.isEmpty
+        
     let orphans = nodes1 |> Seq.append nodes2 |> Seq.filter isOrphan |> Set.ofSeq
+    let getCommonTags node1 node2 = Set.intersect (getTags node1) (getTags node2)
+    let pairs =
+        Seq.allPairs
+            (nodes1 |> Seq.filter (isOrphan >> not))
+            (nodes2 |> Seq.filter (isOrphan >> not))
+        |> Seq.fold (fun map (n1, n2) -> map |> Map.add (n1, n2) (getCommonTags n1 n2)) Map.empty
+        |> Map.filter (fun nodesPair commonTags -> not commonTags.IsEmpty)
+    (pairs, orphans)
     
-    let Seq.allPairs 
-        (nodes1 |> Seq.filter (isOrphan >> not))
-        (nodes2 |> Seq.filter (isOrphan >> not))
-    |> 
+let abstractString (abstractValue: string) (concreteValue: string) =
+    if abstractValue = concreteValue then concreteValue
+    elif max abstractValue.Length concreteValue.Length > Settings.MAX_LCS then ""
+    else String.LCS abstractValue concreteValue
+    
+let abstractAttributes (attrs1: Attribute seq) (attrs2: Attribute seq) =
+    let m1 = Attribute.toMap attrs1
+    let m2 = Attribute.toMap attrs2
+    let commonAttributes = Set.intersect (Map.keys m1) (Map.keys m2)
+    commonAttributes
+    |> Set.toSeq
+    |> Seq.map (fun attrName -> (attrName, (m1.[attrName], m2.[attrName])))
+    |> Map.ofSeq
+    |> Map.map (fun attrName (m1Value, m2Value) -> abstractString m1Value m2Value)
+    |> Attribute.ofMap
 
+type AbstractionType = Normal | Optional | ZeroToMany | OneToMany
+type AbstractionData = {
+    AbstractionType: AbstractionType
+    Source: Node seq
+} with static member Default = {AbstractionType = Normal; Source = Seq.empty}
 
-
+let computeAbstractionType type1 type2 =
+    let rec computeType typePair =
+        match typePair with
+        | (t1, t2) when t1 = t2 -> t1
+        | (t1, Normal) -> t1
+        | (Optional, ZeroToMany) -> ZeroToMany
+        | (Optional, OneToMany) -> ZeroToMany
+        | (OneToMany, ZeroToMany) -> ZeroToMany
+        | (t1, t2) -> computeType (t2, t1)
+    computeType (type1.AbstractionType, type2.AbstractionType)
+    
+let rec mergeAbstractTrees (data: Map<Node, AbstractionData>) node1 node2 =
+    let getData node = data |> Map.findOrDefault AbstractionData.Default node
+    let newNode =
+        match (node1, node2) with
+        | (Text t1, Text t2) -> Text(abstractString t1 t2)
+        | (Element(tag1, attrs1, _), Element(tag2, attrs2, _)) when tag1 = tag2 ->
+            Element(tag1, abstractAttributes attrs1 attrs2, Seq.empty)
+        | _ -> EmptyNode
+    let newData =
+        data
+        |> Map.change
+    
+    let (pairs, orphans) = groupPairsOfChildrenWithinTheSameCluster tree1 tree2
+    
+    let (newChildrenFromPairs, abstractionData) =
+        let folder (children, data) (node1, node2) =
+            let newType = computeAbstractionType node1 node2
+            let data
+            let (newData, newNode) = mergeAbstractTrees abstractionData node1 node2
+        Seq.fold
+    
 let toTagsPerNode tagMap: (Node * Set<Tag>) seq =
     let getKeys = Map.toSeq >> Seq.map fst >> Set.ofSeq
     tagMap 

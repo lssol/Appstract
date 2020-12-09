@@ -36,7 +36,6 @@ open System.Runtime.CompilerServices
 
 
 // DOM
-type Content = Content of string
 type Tag = Tag of string
 type AttributeValue = AttributeValue of string
 type AttributeName = AttributeName of string
@@ -45,7 +44,7 @@ type Attribute = Attribute of AttributeName * AttributeValue
 [<CustomEquality; CustomComparison>]
 type Node =
     | Element of name:Tag * attributes:Attribute list * children:Node list
-    | Text of content:Content
+    | Text of string
     | EmptyNode
     override this.Equals(obj) = Object.ReferenceEquals(this, obj)
     override this.GetHashCode() = RuntimeHelpers.GetHashCode(this)
