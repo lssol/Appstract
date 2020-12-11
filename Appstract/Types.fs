@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open System
 open System.Runtime.CompilerServices
+open Appstract.Types
 
 (*
     The objective of these types is to define the abstract model that will be inferred by Appstract.
@@ -41,6 +42,8 @@ type AttributeValue = AttributeValue of string
 type AttributeName = AttributeName of string
 type Attribute = Attribute of AttributeName * AttributeValue
     
+type AbstractionType = Normal | Optional | ZeroToMany | OneToMany
+    
 [<CustomEquality; CustomComparison>]
 type Node =
     | Element of name:Tag * attributes:Attribute list * children:Node list
@@ -50,6 +53,10 @@ type Node =
     override this.GetHashCode() = RuntimeHelpers.GetHashCode(this)
     interface System.IComparable with
         member this.CompareTo obj = this.GetHashCode() - obj.GetHashCode()
+        
+type AbstractionData = { AbstractionType: AbstractionType; Source: Set<Node> } with
+    static member Default = {AbstractionType = Normal; Source = Set.empty}
+type AbstractNode = AbstractNode of Node * AbstractionData
 
 // Variability
 type Id = Id of string

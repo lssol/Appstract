@@ -82,7 +82,7 @@ let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) =
     |> Seq.fold (fun map (node, tag) -> map |> Map.push groups.[tag] node) Map.empty
     |> Map.toSeq
 
-let groupPairsOfChildrenWithinTheSameCluster (tagsPerNode: Map<Node, Set<Tag>>) (nodes1:Node seq) nodes2 =
+let groupPairsOfChildrenWithinTheSameCluster (tagsPerNode: Map<Node, Set<Tag>>) (nodes1:Node seq) (nodes2: seq<Node>): Map<(Node * Node),Set<Tag>> * Set<Node> =
     let getTags node = tagsPerNode |> Map.tryFind node |> Option.defaultValue Set.empty
     let concatTags = (Seq.collect getTags) >> Set.ofSeq
     let commonTags = Set.intersect (concatTags nodes1) (concatTags nodes2)
@@ -114,13 +114,22 @@ let abstractAttributes (attrs1: Attribute seq) (attrs2: Attribute seq) =
     |> Map.map (fun attrName (m1Value, m2Value) -> abstractString m1Value m2Value)
     |> Attribute.ofMap
 
-type AbstractionType = Normal | Optional | ZeroToMany | OneToMany
-type AbstractionData = {
-    AbstractionType: AbstractionType
-    Source: Node seq
-} with static member Default = {AbstractionType = Normal; Source = Seq.empty}
+//    
+//type Abstraction = Abstraction of Map<Node, AbstractionData> with
+//    member this.GetOrDef node =
+//        let (Abstraction table) = this
+//        table |> Map.findOrDefault (AbstractionData.Default node) node
+//    member this.Source node = (this.GetOrDef node).Source
+//    member this.Type node = (this.GetOrDef node).AbstractionType
+//    member this.UpdateType node t =
+//        let (Abstraction table) = this
+//        table |> Map.add node {this.GetOrDef node with AbstractionType = t} |> Abstraction
+//    member this.UpdateSource node source =
+//        let (Abstraction table) = this
+//        table |> Map.add node {this.GetOrDef node with Source = source} |> Abstraction
+//        
 
-let computeAbstractionType type1 type2 =
+let mergeAbstractionType type1 type2 =
     let rec computeType typePair =
         match typePair with
         | (t1, t2) when t1 = t2 -> t1
@@ -131,8 +140,16 @@ let computeAbstractionType type1 type2 =
         | (t1, t2) -> computeType (t2, t1)
     computeType (type1.AbstractionType, type2.AbstractionType)
     
-let rec mergeAbstractTrees (data: Map<Node, AbstractionData>) node1 node2 =
-    let getData node = data |> Map.findOrDefault AbstractionData.Default node
+let rec mergeAbstractTrees (abstraction: Abstraction) (node1: Node) node2 =
+    let (pairs, orphans) = groupPairsOfChildrenWithinTheSameCluster tree1 tree2
+    
+    let (abstraction2, newChildrenFromPairs) =
+        let folder data ((node1, node2), tags) : Abstraction * Set<Node> =
+            let (newData, newNode) = mergeAbstractTrees abstractionData node1 node2
+        pairs |> Map.toSeq |> Seq.fold folder abstraction
+        
+    let abstraction3 = orphans |> Set.map (fun node -> abstraction2.UpdateType node Optional)
+    
     let newNode =
         match (node1, node2) with
         | (Text t1, Text t2) -> Text(abstractString t1 t2)
@@ -141,17 +158,10 @@ let rec mergeAbstractTrees (data: Map<Node, AbstractionData>) node1 node2 =
         | _ -> EmptyNode
     let newData =
         data
-        |> Map.change
-    
-    let (pairs, orphans) = groupPairsOfChildrenWithinTheSameCluster tree1 tree2
-    
-    let (newChildrenFromPairs, abstractionData) =
-        let folder (children, data) (node1, node2) =
-            let newType = computeAbstractionType node1 node2
-            let data
-            let (newData, newNode) = mergeAbstractTrees abstractionData node1 node2
-        Seq.fold
-    
+        |> Map.add newNode {
+            AbstractionType = mergeAbstractionType (data.GetType) (getType node2)
+            Source = 
+        }
 let toTagsPerNode tagMap: (Node * Set<Tag>) seq =
     let getKeys = Map.toSeq >> Seq.map fst >> Set.ofSeq
     tagMap 
