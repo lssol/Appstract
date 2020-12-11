@@ -3,11 +3,11 @@
 open System.Collections.Generic
 open System
 open System.Runtime.CompilerServices
-open Appstract.Types
+open FSharp.Data
 
 (*
     The objective of these types is to define the abstract model that will be inferred by Appstract.
-    
+
     This abstraction must be able to model the following situations:
     - Intra-Page
         - An element is part of a record
@@ -24,58 +24,61 @@ open Appstract.Types
     - Inter-page abstraction
       - An element has a different content / tags / attributes between pages
       - An element does not appear in all pages
-            
-    
+
+
     My biggest enemy: the free text. Free text is a problem by essence because it breaks our first assumption which is:
     Content variations induce very few structural variations.
     Indeed, free text allows the users to create content containing several tags like span, a, strong, p...
     This greatly confuse our algorithms that essentially rely on structure invariance to abstract a page.
-    
+
     One possible solution to this problem could be to just ignore these tags (common inline tags) and cut the tree when
     they are the last descendants.
 *)
 
 
 // DOM
-type Tag = Tag of string
-type AttributeValue = AttributeValue of string
-type AttributeName = AttributeName of string
-type Attribute = Attribute of AttributeName * AttributeValue
-    
-type AbstractionType = Normal | Optional | ZeroToMany | OneToMany
-    
+type AbstractionType =
+    | Normal
+    | Optional
+    | ZeroToMany
+    | OneToMany
+
+and AbstractionData =
+    { AbstractionType: AbstractionType
+      Source: Set<HtmlNode> }
+
+    static member Default node =
+        { AbstractionType = Normal
+          Source = Set.singleton node }
+
+type Attributes = Map<string, string>
+
 [<CustomEquality; CustomComparison>]
 type Node =
-    | Element of name:Tag * attributes:Attribute list * children:Node list
-    | Text of string
+    | Element of name:string * Attributes * AbstractionData * children: Node list
+    | Text of content: string * AbstractionData
     | EmptyNode
     override this.Equals(obj) = Object.ReferenceEquals(this, obj)
     override this.GetHashCode() = RuntimeHelpers.GetHashCode(this)
+
+    member this.AbstractionData() =
+        match this with
+        | Element(_, _, data, _) -> data
+        | Text(_, data) -> data
+        | EmptyNode -> failwith "asked for the abstraction data of an empty node, it should never happen"
+    
+    member this.UpdateData f =
+        match this with
+        | Element(a, b, data, c) -> Element(a, b, f data, c)
+        | Text(a, data) -> Text(a, f data)
+        | EmptyNode -> failwith "asked to modify the abstraction data of an empty node, it should never happen"
+
+    member this.UpdateAbstractionType f = 
+        let updateAbstractionData data = {data with AbstractionType = (f data.AbstractionType)}
+        this.UpdateData updateAbstractionData
+
+
     interface System.IComparable with
         member this.CompareTo obj = this.GetHashCode() - obj.GetHashCode()
-        
-type AbstractionData = { AbstractionType: AbstractionType; Source: Set<Node> } with
-    static member Default = {AbstractionType = Normal; Source = Set.empty}
-type AbstractNode = AbstractNode of Node * AbstractionData
 
-// Variability
-type Id = Id of string
-type Ids = IDictionary<Node, Id>
-
-type SourceNode = Node
-type AbstractNode = Node
-
-type Cluster = Cluster of Set<SourceNode>
-
-type IntraPageVariability = {
-    Clusters: Cluster seq
-    ClusterData: Map<SourceNode, Cluster>
-
-    AbstractTree: AbstractNode
-    BoxData: Map<AbstractNode, Set<Cluster>>
-    OptionalData: Set<AbstractNode>
-    AbstractedSourceNodes: Map<AbstractNode, SourceNode seq>
-}
-
-//we want
-type TreeAbstractor = Node -> IntraPageVariability
+type Cluster = Cluster of Set<Node>

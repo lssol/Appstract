@@ -11,8 +11,8 @@ module String =
 module Map =
     let push key value = 
         let addToSeq = function
-        | None -> [value] |> Set.ofSeq |> Some
-        | Some l -> [value] |> Set.ofSeq |> Set.union l |> Some
+        | None -> value |> Some
+        | Some l -> value |> Set.union l |> Some
         Map.change key addToSeq
         
     let findOrDefault def key table =

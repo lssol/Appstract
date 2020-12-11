@@ -6,74 +6,72 @@ open Appstract.Types
 open System.Collections.Generic
 
 let fromString html =
-    let fromAttr = function
-        | HtmlAttribute (name, value) -> Attribute(AttributeName(name), AttributeValue(value))
-    let fromAttrs = List.map fromAttr
-    let rec fromNode = function
-        | HtmlElement (name, attributes, children) -> Element(Tag(name), fromAttrs attributes, fromNodes children)
-        | HtmlText content -> Text(content)
+    let fromAttr =
+        function
+        | HtmlAttribute (name, value) -> (name, value)
+
+    let fromAttrs = List.map fromAttr >> Map.ofSeq
+
+    let rec fromNode node =
+        match node with
+        | HtmlElement (name, attributes, children) ->
+            Element(name, fromAttrs attributes, AbstractionData.Default node, fromNodes children)
+        | HtmlText content -> Text(content, AbstractionData.Default node)
         | _ -> EmptyNode
+
     and fromNodes =
         List.map fromNode
-        >> List.filter (function EmptyNode -> false | _ -> true)
-    
-    (HtmlDocument.Parse html)
-        .TryGetBody()
-        |> Option.map fromNode
+        >> List.filter (function
+            | EmptyNode -> false
+            | _ -> true)
+
+    (HtmlDocument.Parse html).TryGetBody()
+    |> Option.map fromNode
 
 let getNodes root =
     let rec traverse (nodes: Node list) (nodesList: Node list) =
         match nodesList with
         | [] -> nodes
-        | e::rest ->
+        | e :: rest ->
             match e with
-            | Element(_, _, children) ->
-                traverse (e :: nodes) (children @ rest)
+            | Element (_, _, _, children) -> traverse (e :: nodes) (children @ rest)
             | _ -> traverse (e :: nodes) (rest)
-            
-    traverse [] [root]
+
+    traverse [] [ root ]
 
 
 let computeParentsDict root =
     let parentDict = Dictionary<Node, Node>()
+
     let rec traverse parent node =
         match node with
-        | Element(_, _, children) ->
+        | Element (_, _, _, children) ->
             parentDict.Add(node, parent)
-            children |> List.iter (traverse node) 
+            children |> List.iter (traverse node)
         | _ -> parentDict.Add(node, parent)
+
     traverse EmptyNode root
     parentDict
-   
-let isLeaf = function Element(_, _, children) when not children.IsEmpty -> false | _ -> true
-    
-let computeRootFromLeafPath (parentDict: IDictionary<Node, Node>) leaf =
-    let rec compute node = 
-        match node with 
-        | EmptyNode -> ""
-        | Element(Tag(name), _, _) -> sprintf "{%s}/{%s}" (compute parentDict.[node]) name
-        | Text(_) -> sprintf "{%s}/TEXT" (compute parentDict.[node])
-        
-    compute leaf
 
-let rec cloneNode node = 
-    let cloneAttr (Attribute(AttributeName(name), AttributeValue(value))) = Attribute(AttributeName(name), AttributeValue(value))
-    match node with
-    | EmptyNode -> EmptyNode
-    | Text text -> Text text
-    | Element(Tag(name), attrs, children) -> Element(Tag(name), List.map cloneAttr attrs, List.map cloneNode children)
+let isLeaf =
+    function
+    | Element (_, _, _, children) when not children.IsEmpty -> false
+    | _ -> true
+
+let computeRootFromLeafPath (parentDict: IDictionary<Node, Node>) leaf =
+    let rec compute node =
+        match node with
+        | EmptyNode -> ""
+        | Element (name, _, _, _) -> sprintf "{%s}/{%s}" (compute parentDict.[node]) name
+        | Text (_) -> sprintf "{%s}/TEXT" (compute parentDict.[node])
+
+    compute leaf
 
 type Node with
     static member FromString(s) = fromString s
     member this.ParentDict() = computeParentsDict this
     member this.Nodes() = getNodes this
-    member this.Clone() = cloneNode this
-
-module Attribute =
-    let toMap attrs =
-        let attributeToTuple (Attribute(AttributeName(name), AttributeValue(value))) = (name, value)
-        attrs |> Seq.map attributeToTuple |> Map.ofSeq
-        
-    let ofMap map =
-        let tupleToAttr (name, value) = (Attribute(AttributeName(name), AttributeValue(value)))
-        map |> Map.toSeq |> Seq.map tupleToAttr
+    member this.Children() = 
+        match this with
+        | Element(_, _, _, children) -> children
+        | _ -> List.empty
