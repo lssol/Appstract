@@ -24,6 +24,11 @@ module Map =
         |> Map.toSeq
         |> Seq.map fst
         |> Set.ofSeq
+
+    let values m =
+        m
+        |> Map.toSeq
+        |> Seq.map snd
     
 
 module Settings =

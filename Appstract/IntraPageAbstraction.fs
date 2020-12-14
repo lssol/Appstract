@@ -7,6 +7,7 @@ open System.Collections.Generic
 open FSharp.Collections
 open System.Runtime.CompilerServices
 open Appstract.Utils
+open FSharpPlus.Operators
 
 type Tag = { Cluster: Cluster; Depth: int }
 type TagMap = Map<Node, Map<Tag, int>>
@@ -214,4 +215,13 @@ let rec mergeAbstractTrees (tagMap: Map<Node, Set<Tag>>)
 
     newNode, tagMap
 
-let rec abstractTree
+let isAbstract (tagMap: TagMap) node =
+    match tagMap |> Map.tryFind node with
+    | None -> true
+    | Some tags -> 
+        tags 
+        |> Map.exists (fun _ nbOccurenceOfTag -> nbOccurenceOfTag > 1) 
+        |> not
+
+let rec abstractTree tagMap node = 
+    let nodeIsNull = function EmptyNode -> true | _ -> false
