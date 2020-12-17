@@ -82,7 +82,11 @@ let computeClusters (root: Node): Map<Node, Cluster> =
        [D, E] -> [t4]
 *)
 
-let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) =
+let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) nodes =
+    let filteredTagMap = 
+        tagsPerNode 
+        |> Seq.filter (fun (n, _) -> nodes |> Seq.contains n)
+
     let createGroups tagGroups tags =
         let addTagsToTagsGroup =
             Seq.fold (fun m tag -> m |> Map.add tag tags) tagGroups
@@ -98,13 +102,13 @@ let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) =
             |> addTagsToTagsGroup
 
     let groups =
-        tagsPerNode
+        filteredTagMap
         |> Seq.map snd
         |> Seq.fold createGroups Map.empty
 
-    tagsPerNode
+    filteredTagMap
     |> Seq.map (fun (node, group) -> (node, Seq.head group))
-    |> Seq.fold (fun map (node, tag) -> map |> Map.push groups.[tag] node) Map.empty
+    |> Seq.fold (fun map (node, tag) -> map |> Map.push groups.[tag] (Set.singleton node)) Map.empty
     |> Map.toSeq
 
 let groupPairsOfChildrenWithinTheSameCluster (tagsPerNode: Map<Node, Set<Tag>>) (nodes1: Node seq) (nodes2: seq<Node>) =
@@ -145,8 +149,7 @@ let abstractString (abstractValue: string) (concreteValue: string) =
     else String.LCS abstractValue concreteValue
 
 let abstractAttributes (attrs1: Attributes) (attrs2: Attributes) =
-    let commonAttributes =
-        Set.intersect (Map.keys attrs1) (Map.keys attrs2)
+    let commonAttributes = Set.intersect (Map.keys attrs1) (Map.keys attrs2)
 
     commonAttributes
     |> Seq.map (fun attrName -> (attrName, (attrs1.[attrName], attrs1.[attrName])))
@@ -223,5 +226,17 @@ let isAbstract (tagMap: TagMap) node =
         |> Map.exists (fun _ nbOccurenceOfTag -> nbOccurenceOfTag > 1) 
         |> not
 
-let rec abstractTree tagMap node = 
-    let nodeIsNull = function EmptyNode -> true | _ -> false
+let rec abstractTree tagMap node : Node * TagMap = 
+    let abstr tagMap children =
+        children
+        |> Seq.mapFold abstractTree tagMap
+        |> groupByTagAssociatively tagMap 
+        |> 
+
+    match node with
+    | EmptyNode -> EmptyNode * tagMap
+    | _ when isAbstract(node) -> node * tagMap
+    | Element(name, attrs, data, children) -> 
+        let abstractChildren, tagMap = abstr tagMap children
+        Element(name, attrs, data, abstractChildren) * tagMap
+
