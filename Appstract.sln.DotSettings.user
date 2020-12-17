@@ -1,7 +1,16 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=15822d4f_002Df16f_002D48d9_002D8f73_002De79c1c20dbc9/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=15822d4f_002Df16f_002D48d9_002D8f73_002De79c1c20dbc9/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.HtmlParsing&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.DOM.clusters&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d4737cbf_002Dca18_002D4a3f_002Dba1d_002Db00369ab60a4/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="rootFromLeaf" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.DOM.rootFromLeaf&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.DOM.clusters&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.tagsTest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.abstractionTest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.testShadowing&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	

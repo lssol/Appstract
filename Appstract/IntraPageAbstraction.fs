@@ -12,9 +12,9 @@ open FSharpPlus.Operators
 type Tag = { Cluster: Cluster; Depth: int }
 type TagMap = Map<Node, Map<Tag, int>>
 
-let computeTags parentDict clusterMap leaves =
+let computeTags (parentDict: IDictionary<Node, Node>) clusterMap leaves =
     let rec createTagsForBranch depth cluster (map: TagMap) node =
-        let parent = parentDict |> Map.find node
+        let parent = parentDict.[node]
         let tag = { Cluster = cluster; Depth = depth }
 
         let newTagCount =
@@ -39,17 +39,13 @@ let computeTags parentDict clusterMap leaves =
     |> Seq.filter (fun leaf -> Map.containsKey leaf clusterMap)
     |> Seq.fold (fun m leaf -> createTagsForBranch 0 clusterMap.[leaf] m leaf) Map.empty
 
-let computeClusters (root: Node): Map<Node, Cluster> =
-    let nodes = root.Nodes()
-
-    let getNodePath =
-        computeRootFromLeafPath (root.ParentDict())
+let computeClusters parentDict (leaves: Node list): Map<Node, Cluster> =
+    let getNodePath = computeRootFromLeafPath parentDict
 
     let toCluster nodes = Cluster(Set(nodes))
 
     let clusters =
-        nodes
-        |> List.filter isLeaf
+        leaves
         |> List.map (fun n -> (n, getNodePath n))
         |> List.groupBy snd
         |> List.map (snd >> List.map fst >> toCluster)
@@ -82,9 +78,11 @@ let computeClusters (root: Node): Map<Node, Cluster> =
        [D, E] -> [t4]
 *)
 
-let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) nodes =
-    let filteredTagMap = 
-        tagsPerNode 
+let groupByTagAssociatively (tagMap: TagMap) nodes =
+    let filteredTagMap =
+        tagMap
+        |> Map.toSeq
+        |> Seq.map (fun (node, tags) -> (node, tags |> Map.keys))
         |> Seq.filter (fun (n, _) -> nodes |> Seq.contains n)
 
     let createGroups tagGroups tags =
@@ -111,9 +109,10 @@ let groupByTagAssociatively (tagsPerNode: (Node * Set<Tag>) seq) nodes =
     |> Seq.fold (fun map (node, tag) -> map |> Map.push groups.[tag] (Set.singleton node)) Map.empty
     |> Map.toSeq
 
-let groupPairsOfChildrenWithinTheSameCluster (tagsPerNode: Map<Node, Set<Tag>>) (nodes1: Node seq) (nodes2: seq<Node>) =
+let groupPairsOfChildrenWithinTheSameCluster (tagMap: TagMap) (nodes1: Node seq) (nodes2: seq<Node>) =
     let getTags node =
-        tagsPerNode
+        tagMap
+        |> Map.map (fun _ tags -> tags |> Map.keys)
         |> Map.tryFind node
         |> Option.defaultValue Set.empty
 
@@ -149,18 +148,14 @@ let abstractString (abstractValue: string) (concreteValue: string) =
     else String.LCS abstractValue concreteValue
 
 let abstractAttributes (attrs1: Attributes) (attrs2: Attributes) =
-    let commonAttributes = Set.intersect (Map.keys attrs1) (Map.keys attrs2)
+    let commonAttributes =
+        Set.intersect (Map.keys attrs1) (Map.keys attrs2)
 
     commonAttributes
     |> Seq.map (fun attrName -> (attrName, (attrs1.[attrName], attrs1.[attrName])))
     |> Map.ofSeq
     |> Map.map (fun attrName (m1Value, m2Value) -> abstractString m1Value m2Value)
 
-let toTagsPerNode tagMap: (Node * Set<Tag>) seq =
-    let getKeys = Map.toSeq >> Seq.map fst >> Set.ofSeq
-    tagMap
-    |> Map.toSeq
-    |> Seq.map (fun (node, tags) -> (node, tags |> getKeys))
 
 let mergeAbstractionType type1 type2 =
     let rec computeType typePair =
@@ -191,9 +186,7 @@ let updateOrphanNode map node =
     let newTagMap = map |> copyTags node newNode
     (newNode, newTagMap)
 
-let rec mergeAbstractTrees (tagMap: Map<Node, Set<Tag>>)
-                           (node1: Node, node2: Node, commonTags: Set<Tag>)
-                           : Node * Map<Node, Set<Tag>> =
+let rec mergeAbstractTrees (tagMap: TagMap) (node1: Node, node2: Node, commonTags: Set<Tag>): Node * TagMap =
     let (pairs, orphans) =
         groupPairsOfChildrenWithinTheSameCluster tagMap (node1.Children()) (node2.Children())
 
@@ -203,7 +196,8 @@ let rec mergeAbstractTrees (tagMap: Map<Node, Set<Tag>>)
     let orphans, tagMap =
         orphans |> Seq.mapFold updateOrphanNode tagMap
 
-    let children = orphans |> Seq.append mergedChildren |> List.ofSeq
+    let children =
+        orphans |> Seq.append mergedChildren |> List.ofSeq
 
     let newNode =
         match (node1, node2) with
@@ -214,29 +208,67 @@ let rec mergeAbstractTrees (tagMap: Map<Node, Set<Tag>>)
 
         | _ -> EmptyNode
 
-    let tagMap = tagMap |> Map.push newNode commonTags
+    let commonTagsWithOccurenceCount =
+        commonTags
+        |> Set.toSeq
+        |> Seq.map (fun tag -> (tag, 1))
+        |> Map.ofSeq
+
+    let tagMap =
+        tagMap
+        |> Map.add newNode commonTagsWithOccurenceCount
 
     newNode, tagMap
+
+let MIN_SIZE_ABSTRACT = 2
 
 let isAbstract (tagMap: TagMap) node =
     match tagMap |> Map.tryFind node with
     | None -> true
-    | Some tags -> 
-        tags 
-        |> Map.exists (fun _ nbOccurenceOfTag -> nbOccurenceOfTag > 1) 
+    | Some tags ->
+        tags
+        |> Map.exists (fun _ nbOccurenceOfTag -> nbOccurenceOfTag >= MIN_SIZE_ABSTRACT)
         |> not
 
-let rec abstractTree tagMap node : Node * TagMap = 
-    let abstr tagMap children =
-        children
-        |> Seq.mapFold abstractTree tagMap
-        |> groupByTagAssociatively tagMap 
-        |> 
+let mergeGroup tagMap (commonTags, nodes) =
+    let rec reduce tagMap reducedNode =
+        function
+        | first :: rest ->
+            let reducedNode, tagMap =
+                mergeAbstractTrees tagMap (reducedNode, first, commonTags)
 
+            reduce tagMap reducedNode rest
+        | [] -> reducedNode, tagMap
+
+    let nodes = nodes |> Set.toList
+    match nodes with
+    | first::rest -> reduce tagMap first rest
+    | [] -> failwith "Cannot merge empty groups"
+
+let rec abstractTree tagMap node: Node * TagMap =
     match node with
-    | EmptyNode -> EmptyNode * tagMap
-    | _ when isAbstract(node) -> node * tagMap
-    | Element(name, attrs, data, children) -> 
-        let abstractChildren, tagMap = abstr tagMap children
-        Element(name, attrs, data, abstractChildren) * tagMap
+    | EmptyNode
+    | Text (_)
+    | Element (_) when node |> (isAbstract tagMap) -> node, tagMap
 
+    | Element (name, attrs, data, children) ->
+        let children, tagMap =
+            children |> Seq.mapFold abstractTree tagMap
+
+        let children, tagMap =
+            groupByTagAssociatively tagMap children
+            |> Seq.mapFold mergeGroup tagMap
+            
+        let newElement = Element(name, attrs, data, children |> Seq.toList)
+        let tagMap = tagMap |> copyTags node newElement
+        newElement, tagMap
+
+let intraPageAbstraction (tree: Node): Node =
+    let parentDict = tree.ParentDict()
+    let leaves = tree.Nodes() |> List.filter isLeaf
+
+    let clusterMap = computeClusters parentDict leaves
+    let tagMap = computeTags parentDict clusterMap leaves
+
+    let result, _ = abstractTree tagMap tree
+    result

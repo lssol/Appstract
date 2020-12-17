@@ -12,10 +12,27 @@ open System.Collections.Generic
 [<Test>]
 let tagsTest () = 
     let parentDict = computeParentsDict root
-    let leaves = root.Nodes() |> Seq.filter isLeaf
-    let clustersMap = computeClusters root
+    let leaves = root.Nodes() |> List.filter isLeaf
+    let clustersMap = computeClusters parentDict leaves
 
     let tags = computeTags parentDict clustersMap leaves
     areEqual 2 (tags.[root] |> Map.count)
     Assert.Pass()
 
+[<Test>]
+let abstractionTest () =
+    let result = intraPageAbstraction root
+    Assert.Pass()
+
+[<Test>]
+let testShadowing() =
+    let f number =
+        let number = 2 * number
+        number * 2
+    
+    let n = 5 
+    printfn "%i" n
+    
+    let n = f n
+    printfn "%i" n
+    
