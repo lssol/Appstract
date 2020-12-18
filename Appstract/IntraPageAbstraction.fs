@@ -242,7 +242,11 @@ let mergeGroup tagMap (commonTags, nodes) =
 
     let nodes = nodes |> Set.toList
     match nodes with
-    | first::rest -> reduce tagMap first rest
+    | first::[] -> reduce tagMap first []
+    | first::rest ->
+        let node, tagMap = reduce tagMap first rest
+        let node = node.UpdateAbstractionType (mergeAbstractionType OneToMany)
+        node, tagMap
     | [] -> failwith "Cannot merge empty groups"
 
 let rec abstractTree tagMap node: Node * TagMap =
@@ -258,7 +262,7 @@ let rec abstractTree tagMap node: Node * TagMap =
         let children, tagMap =
             groupByTagAssociatively tagMap children
             |> Seq.mapFold mergeGroup tagMap
-            
+        
         let newElement = Element(name, attrs, data, children |> Seq.toList)
         let tagMap = tagMap |> copyTags node newElement
         newElement, tagMap

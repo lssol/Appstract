@@ -22,7 +22,7 @@ let tagsTest () =
 [<Test>]
 let abstractionTest () =
     let result = intraPageAbstraction root
-    Assert.Pass()
+    areEqual 6 (result.Nodes().Length)
 
 [<Test>]
 let testShadowing() =
