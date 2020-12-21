@@ -16,13 +16,13 @@ let tagsTest () =
     let clustersMap = computeClusters parentDict leaves
 
     let tags = computeTags parentDict clustersMap leaves
-    areEqual 2 (tags.[root] |> Map.count)
+    assertEqual 2 (tags.[root] |> Map.count)
     Assert.Pass()
 
 [<Test>]
 let abstractionTest () =
     let result = intraPageAbstraction root
-    areEqual 6 (result.Nodes().Length)
+    assertEqual 6 (result.Nodes().Length)
 
 [<Test>]
 let testShadowing() =

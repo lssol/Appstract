@@ -42,6 +42,13 @@ type AbstractionType =
     | Optional
     | ZeroToMany
     | OneToMany
+    with
+    override this.ToString() =
+        match this with
+        | Normal -> "Normal"
+        | Optional -> "Optional"
+        | ZeroToMany -> "ZeroToMany"
+        | OneToMany -> "OneToMany"
 
 and AbstractionData =
     { AbstractionType: AbstractionType

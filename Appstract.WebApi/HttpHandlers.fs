@@ -1,17 +1,11 @@
-namespace Appstract.WebApi
+module Appstract.WebApi.HttpHandlers
 
-module HttpHandlers =
+open Microsoft.AspNetCore.Http
+open FSharp.Control.Tasks
+open Giraffe
+open Appstract.WebApi.Models
 
-    open Microsoft.AspNetCore.Http
-    open FSharp.Control.Tasks
-    open Giraffe
-    open Appstract.WebApi.Models
+let bind<'a> = bindModel<'a> None
 
-    let handleGetHello =
-        fun (next : HttpFunc) (ctx : HttpContext) ->
-            task {
-                let response = {
-                    Text = "Hello world, from Giraffe!"
-                }
-                return! json response next ctx
-            }
+let abstractPage page =
+    Successful.OK page

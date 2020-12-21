@@ -11,7 +11,7 @@ open System.Collections.Generic
 
 [<Test>]
 let htmlParsing () =
-    root.Nodes() |> List.length |> areEqual 8
+    root.Nodes() |> List.length |> assertEqual 8
 
 [<Test>]
 let rootFromLeaf () =

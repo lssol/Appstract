@@ -3,12 +3,14 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Appstract.WebApi\Appstract.WebApi.fsproj" />
     <ProjectReference Include="..\Appstract\Appstract.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="DOM.fs" />
     <Compile Include="IntraPageAbstractionTests.fs" />
+    <Compile Include="WebApi.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.12.0" />

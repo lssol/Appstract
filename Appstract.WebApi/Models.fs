@@ -1,7 +1,7 @@
 namespace Appstract.WebApi.Models
 
-[<CLIMutable>]
-type Message =
-    {
-        Text : string
-    }
+open Appstract.Types
+
+module Requests = 
+    type WebPage = { src:string }
+

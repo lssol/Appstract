@@ -1,6 +1,7 @@
 module Appstract.WebApi.App
 
 open System
+open Appstract.WebApi.Models
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
@@ -19,7 +20,10 @@ let webApp =
         subRoute "/api"
             (choose [
                 GET >=> choose [
-                    route "/hello" >=> handleGetHello
+                    route "/health" >=> Successful.OK "Service is up!"
+                ]
+                POST >=> choose [
+                    route "/intra" >=> bind<Requests.WebPage> abstractPage
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" ]
@@ -68,10 +72,12 @@ let main args =
         .ConfigureWebHostDefaults(
             fun webHostBuilder ->
                 webHostBuilder
+                    .UseUrls("http://0.0.0.0:14894")
                     .Configure(Action<IApplicationBuilder> configureApp)
                     .ConfigureServices(configureServices)
                     .ConfigureLogging(configureLogging)
                     |> ignore)
+                    
         .Build()
         .Run()
     0

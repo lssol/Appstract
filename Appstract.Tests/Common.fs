@@ -3,19 +3,19 @@ open Appstract.DOM
 open Appstract.Types
 open NUnit.Framework
 
-let areEqual a b = Assert.AreEqual(a, b)
+let assertEqual a b = Assert.AreEqual(a, b)
 let fail () = Assert.Fail()
 
 let htmlString = """
     <!DOCTYPE html>
     <html>
         <head></head>
-        <body>
+        <body signature="body">
             <!-- A comment -->
-            <h1>A title</h1>
-            <div>
-                <p>p1</p>
-                <p>p2</p>
+            <h1 signature="h1">A title</h1>
+            <div signature="div">
+                <p signature="p1">p1</p>
+                <p signature="p2">p2</p>
             </div>
         </body>
     </html>
