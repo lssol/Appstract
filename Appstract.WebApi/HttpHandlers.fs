@@ -15,6 +15,6 @@ let bind<'a> = bindModel<'a> None
 let abstractPage (page: Requests.WebPage)  =
     let root = Node.FromString(page.src).Value
     let abstractTree = intraPageAbstraction root
-    let edges, nodes = nodeToCyto abstractTree
+    let nodes, edges = nodeToCyto abstractTree
     
     json {| edges = edges ; nodes = nodes |}

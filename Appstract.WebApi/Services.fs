@@ -20,20 +20,20 @@ let nodeToCyto (node: Node) =
         let nodeId = nodeIds |> Map.tryFind node
         match parentId, nodeId with
         | (Some p, Some n) ->
-            Some {| data = {| source = p; target = n; abstractionType = node.AbstractionData().AbstractionType |} |}
+            Some {| data = {| source = p; target = n; abstractionType = node.AbstractionData().AbstractionType.ToString() |} |}
         | _ -> None
           
     let nodeToCyto (node: Node) =
         let sourceSignatures =
             node.AbstractionData().Source
             |> Seq.choose (fun source -> source.TryGetAttribute "signature")
-            |> Seq.map (fun attr -> attr.Value)
+            |> Seq.map (fun attr -> attr.Value())
         
         match nodeIds |> Map.tryFind node with
         | Some n -> Some {| data = {| id = n; sourceSignatures = sourceSignatures |} |}
         | None -> None
 
-    let cytoEdges = nodes |> Seq.choose nodeToEdge
+    let cytoEdges = nodes |> Seq.choose nodeToEdge 
     let cytoNodes = nodes |> Seq.choose nodeToCyto
     
     (cytoNodes, cytoEdges)
