@@ -203,7 +203,7 @@ let rec mergeAbstractTrees (tagMap: TagMap) (node1: Node, node2: Node, commonTag
         match (node1, node2) with
         | (Text (t1, data1), Text (t2, data2)) -> Text(abstractString t1 t2, mergeAbstractionData data1 data2)
 
-        | (Element (tag1, attrs1, data1, _), Element (tag2, attrs2, data2, _)) when tag1 = tag2 ->
+        | (Element (tag1, attrs1, data1, _), Element (tag2, attrs2, data2, _)) ->
             Element(tag1, abstractAttributes attrs1 attrs2, mergeAbstractionData data1 data2, children)
 
         | _ -> EmptyNode
@@ -245,8 +245,9 @@ let mergeGroup tagMap (commonTags, nodes) =
     | first::[] -> reduce tagMap first []
     | first::rest ->
         let node, tagMap = reduce tagMap first rest
-        let node = node.UpdateAbstractionType (mergeAbstractionType OneToMany)
-        node, tagMap
+        let newNode = node.UpdateAbstractionType (mergeAbstractionType OneToMany)
+        let tagMap = tagMap |> copyTags node newNode 
+        newNode, tagMap
     | [] -> failwith "Cannot merge empty groups"
 
 let rec abstractTree tagMap node: Node * TagMap =

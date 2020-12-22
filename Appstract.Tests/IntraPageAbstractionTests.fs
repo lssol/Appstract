@@ -25,14 +25,8 @@ let abstractionTest () =
     assertEqual 6 (result.Nodes().Length)
 
 [<Test>]
-let testShadowing() =
-    let f number =
-        let number = 2 * number
-        number * 2
-    
-    let n = 5 
-    printfn "%i" n
-    
-    let n = f n
-    printfn "%i" n
-    
+let abstractionOnSimpleRecursiveTree () =
+    let html = getHtml "simple_recursive"
+    let root = Node.FromString(html).Value
+    let result = intraPageAbstraction root
+    assertEqual 6 (result.Nodes().Length)

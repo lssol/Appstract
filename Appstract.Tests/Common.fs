@@ -2,6 +2,7 @@
 open Appstract.DOM
 open Appstract.Types
 open NUnit.Framework
+open System.IO
 
 let assertEqual a b = Assert.AreEqual(a, b)
 let fail () = Assert.Fail()
@@ -23,6 +24,10 @@ let htmlString = """
 
 let root = Node.FromString(htmlString).Value
 
+let getHtml name =
+    let path = sprintf "htmls/%s.html" name
+    File.ReadAllText path
+    
 [<AutoOpen>]
 module AutoOpenModule =
     #if DEBUG
