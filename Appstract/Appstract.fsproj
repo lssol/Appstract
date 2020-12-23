@@ -5,14 +5,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="RelationalDatabase.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="DOM.fs" />
+    <Compile Include="Sftm.fs" />
     <Compile Include="IntraPageAbstraction.fs" />
+    <Compile Include="InterPageAbstraction.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Data" Version="3.3.3" />
     <PackageReference Include="FSharpPlus" Version="1.1.4" />
     <PackageReference Include="FuzzyString" Version="1.0.0" />
+    <PackageReference Include="tree-matching-csharp" Version="1.0.0" />
   </ItemGroup>
 </Project>

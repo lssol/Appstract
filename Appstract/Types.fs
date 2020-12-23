@@ -3,6 +3,8 @@
 open System.Collections.Generic
 open System
 open System.Runtime.CompilerServices
+open Appstract.RelationalDatabase
+open Elasticsearch.Net
 open FSharp.Data
 
 (*
@@ -84,8 +86,28 @@ type Node =
         let updateAbstractionData data = {data with AbstractionType = (f data.AbstractionType)}
         this.UpdateData updateAbstractionData
 
+    member this.Children(): Option<Node list> =
+        match this with
+        | Element(_, _, _, children) -> Some children
+        | _ -> None
+        
+    member this.Name() =
+        match this with
+        | Element(tag, _, _, _) -> tag
+        | Text _ -> "TEXT"
+        | EmptyNode -> failwith "asked for tag of emptynode"
 
-    interface System.IComparable with
+    interface IComparable with
         member this.CompareTo obj = this.GetHashCode() - obj.GetHashCode()
 
 type Cluster = Cluster of Set<Node>
+
+// Tree Matching
+type Matcher = Node -> Node -> (Node * Node) seq
+
+// INTER
+type PageModel = (Node * Map<Node, string>)
+type AppModel = { appTemplate: PageModel; templates: PageModel seq }
+    
+type ModelCreator = Node seq -> AppModel
+type InformationExtractor = AppModel -> RelDb -> Node -> RelDb
