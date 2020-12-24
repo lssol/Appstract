@@ -10,6 +10,7 @@
     <Compile Include="Common.fs" />
     <Compile Include="DOM.fs" />
     <Compile Include="IntraPageAbstractionTests.fs" />
+    <Compile Include="InterPageAbstraction.fs" />
     <Compile Include="WebApi.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -18,6 +19,12 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="htmls\cat\templates\male.html" />
+    <Content Include="htmls\cat\templates\sandra.html" />
+    <Content Include="htmls\cat\pages\olivia.html" />
+    <Content Include="htmls\cat\pages\sandra.html" />
+    <Content Include="htmls\cat\pages\male.html" />
+    <Content Include="htmls\cat\pages\female.html" />
     <Content Include="htmls\simple_recursive.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

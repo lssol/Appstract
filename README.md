@@ -68,7 +68,16 @@ For information extraction, we check which `app-id` are "boxes" and return the d
 
 
 
+## Cohesion
 
+Problem: 
+Imagine two product pages
+
+There are many things that match (and whose content change) between two pages.
+
+Each of the elements whose different content have changed will be considered as information by the algorithm.
+
+The problem is that unlike for the records, we don't have the structure to help us understand what pieces of information should be grouped together
 
 
 
