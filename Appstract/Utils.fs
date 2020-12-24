@@ -1,5 +1,6 @@
 namespace Appstract.Utils
 
+open System
 open System.Collections.Generic
 open FSharp.Collections
 open System.Runtime.CompilerServices
@@ -8,6 +9,7 @@ open FuzzyString
 module String =
     let LCS string1 string2 =
         ComparisonMetrics.LongestCommonSubsequence(string1, string2)
+    let genId () = Guid.NewGuid().ToString()
 module Map =
     let push key value = 
         let addToSeq = function
@@ -30,7 +32,3 @@ module Map =
         |> Map.toSeq
         |> Seq.map snd
     
-
-module Settings =
-    let MAX_LCS = 100
-    let MIN_SIZE_CLUSTER = 3

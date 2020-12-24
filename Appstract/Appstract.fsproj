@@ -7,6 +7,7 @@
     <Compile Include="Utils.fs" />
     <Compile Include="RelationalDatabase.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="Settings.fs" />
     <Compile Include="DOM.fs" />
     <Compile Include="Sftm.fs" />
     <Compile Include="IntraPageAbstraction.fs" />

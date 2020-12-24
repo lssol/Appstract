@@ -4,7 +4,7 @@ open System.Collections.Generic
 open System
 open System.Runtime.CompilerServices
 open Appstract.RelationalDatabase
-open Elasticsearch.Net
+open Appstract.Utils
 open FSharp.Data
 
 (*
@@ -86,10 +86,11 @@ type Node =
         let updateAbstractionData data = {data with AbstractionType = (f data.AbstractionType)}
         this.UpdateData updateAbstractionData
 
-    member this.Children(): Option<Node list> =
+    member this.Children(): Node list =
         match this with
-        | Element(_, _, _, children) -> Some children
-        | _ -> None
+        | Element(_, _, _, children) -> children
+        | _ -> List.empty
+    static member Children (node: Node) = node.Children()
         
     member this.Name() =
         match this with
@@ -106,8 +107,11 @@ type Cluster = Cluster of Set<Node>
 type Matcher = Node -> Node -> (Node * Node) seq
 
 // INTER
-type PageModel = (Node * Map<Node, string>)
-type AppModel = { appTemplate: PageModel; templates: PageModel seq }
+type NodeId = NodeId of string with
+    static member Gen () = NodeId (String.genId())
+type Template = Template of Node * Map<Node, NodeId>
+
+type AppModel = { appTemplate: Template; templates: Template seq }
     
 type ModelCreator = Node seq -> AppModel
 type InformationExtractor = AppModel -> RelDb -> Node -> RelDb
