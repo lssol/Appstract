@@ -1,12 +1,11 @@
 ﻿module Appstract.Tests.InterPageAbstractionTests
 
+open System.IO
 open Appstract
 open Appstract.Types
-open Appstract.DOM
 open NUnit.Framework
 open Appstract.Tests.Common
 open Appstract.Tests.Common.AutoOpenModule
-open Appstract.IntraPageAbstraction
 open System.Linq
 open System.Collections.Generic
 
@@ -16,3 +15,12 @@ let Sftm () =
     matching |> Seq.iter (fun (n1, n2) -> assertEqual n1 n2)
     Assert.Pass()
     
+[<Test>]
+let createModel () =
+    let read path = File.ReadAllText path
+    let model =
+        ["htmls/cat/templates/male.html"; "htmls/cat/templates/sandra.html"]
+        |> Seq.choose (read >> DOM.fromString >> (Option.map IntraPageAbstraction.intraPageAbstraction))
+        |> InterPageAbstraction.createModel
+    
+    Assert.Pass()
