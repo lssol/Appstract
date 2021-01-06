@@ -268,7 +268,7 @@ let rec abstractTree tagMap node: Node * TagMap =
         let tagMap = tagMap |> copyTags node newElement
         newElement, tagMap
 
-let intraPageAbstraction (tree: Node): Node =
+let appstract (tree: Node): Node =
     let parentDict = tree.ParentDict()
     let leaves = tree.Nodes() |> List.filter isLeaf
 

@@ -32,3 +32,8 @@ module Map =
         |> Map.toSeq
         |> Seq.map snd
     
+module Dictionary =
+    let tryFind<'a, 'b> (key: 'a) (dict: Dictionary<'a, 'b>) =
+        match dict.ContainsKey(key) with
+        | true -> Some dict.[key]
+        | false -> None

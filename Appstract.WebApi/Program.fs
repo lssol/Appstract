@@ -23,7 +23,9 @@ let webApp =
                     route "/health" >=> Successful.OK "Service is up!"
                 ]
                 POST >=> choose [
-                    route "/intra" >=> bind<Requests.WebPage> abstractPage
+                    route "/intra"       >=> bind<Requests.WebPage>  abstractPage
+                    route "/createmodel" >=> bind<Requests.WebPages> createModel
+                    route "/identify"   >=> bind<Requests.Identify> identifyPage
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" ]

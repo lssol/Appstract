@@ -75,6 +75,7 @@ type Node =
         | Element(_, _, data, _) -> data
         | Text(_, data) -> data
         | EmptyNode -> failwith "asked for the abstraction data of an empty node, it should never happen"
+    static member AbstractionData (this: Node) = this.AbstractionData()
     
     member this.UpdateData f =
         match this with
@@ -104,7 +105,11 @@ type Node =
 type Cluster = Cluster of Set<Node>
 
 // Tree Matching
-type Matcher = Node -> Node -> (Node * Node) seq
+type MatcherResult = {
+    Edges: (Node * Node) seq
+    Cost: double
+}
+type Matcher = Node -> Node -> MatcherResult
 
 // INTER
 type NodeId = NodeId of string with

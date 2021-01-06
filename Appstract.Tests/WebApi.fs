@@ -2,10 +2,10 @@
 
 open System.Net.Mime
 open Appstract.Tests
-open Appstract.Tests
-open Appstract.Tests
 open Appstract.Tests.Common
 open Appstract.WebApi
+open Appstract.Types
+open Appstract.DOM
 open NUnit.Framework
 open System.Text.Json
 open System.Text.Json.Serialization
@@ -29,3 +29,17 @@ let getAbstractCytoTree () =
                            body = TextRequest queryJson,
                            headers = [ContentType HttpContentTypes.Json])
     assertEqual 200 res.StatusCode
+    
+//[<Test>]
+//let createModel () =
+//    let templatesRequest =
+//        templates
+//        |> Seq.choose Node.FromString
+//        |> Seq.map (fun f -> {| src = f |})
+//    let query = {| src = htmlString |}
+//    let queryJson = JsonSerializer.Serialize(query)
+//    
+//    let res = Http.Request(host + "intra",
+//                           body = TextRequest queryJson,
+//                           headers = [ContentType HttpContentTypes.Json])
+//    assertEqual 200 res.StatusCode

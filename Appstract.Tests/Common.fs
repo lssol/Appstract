@@ -28,6 +28,15 @@ let getHtml name =
     let path = sprintf "htmls/%s.html" name
     File.ReadAllText path
     
+let read path = File.ReadAllText path
+let templates = ["htmls/cat/templates/male.html"; "htmls/cat/templates/sandra.html"]
+let pages = [
+    "htmls/cat/pages/olivia.html"
+    "htmls/cat/pages/sandra.html"
+    "htmls/cat/pages/male.html"
+    "htmls/cat/pages/female.html"
+]
+
 [<AutoOpen>]
 module AutoOpenModule =
     #if DEBUG
