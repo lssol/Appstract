@@ -5,23 +5,12 @@
     &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.InterPageAbstractionTests.Sftm&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.InterPageAbstractionTests.createModel&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.InterPageAbstractionTests.appstract&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d4737cbf_002Dca18_002D4a3f_002Dba1d_002Db00369ab60a4/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="rootFromLeaf" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.DOM.rootFromLeaf&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.DOM.clusters&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.tagsTest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.abstractionTest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.testShadowing&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.WebApi.isUp&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.WebApi.getAbstractCytoTree&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.abstractionOnHeavyWebsite&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.abstractionOnSimpleRecursiveTree&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.InterPageAbstractionTests.Sftm&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.InterPageAbstractionTests.createModel&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.InterPageAbstractionTests.appstract&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.abstractionTest&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
 	
 	
 	

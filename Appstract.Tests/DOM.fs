@@ -25,10 +25,11 @@ let rootFromLeaf () =
 
 [<Test>]
 let clusters () =
+    let appstracter = Appstracter()
     let parentDict = root.ParentDict()
     let leaves = root.Nodes() |> List.filter isLeaf
     let getPath = computeRootFromLeafPath parentDict 
-    let clusterDict = computeClusters parentDict leaves
+    let clusterDict =  appstracter.ComputeClusters parentDict leaves
     let displayCluster (Cluster(nodes)) =
         printfn "----"
         nodes.ToList() |> Seq.map getPath |> Seq.iter (printfn "%s")

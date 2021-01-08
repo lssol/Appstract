@@ -1,32 +1,53 @@
 ﻿module Appstract.Tests.IntraPageAbstractionTests
 
-open Appstract.Types
-open Appstract.DOM
-open NUnit.Framework
-open Appstract.Tests.Common
-open Appstract.Tests.Common.AutoOpenModule
-open Appstract.IntraPageAbstraction
+open System.Diagnostics
 open System.Linq
 open System.Collections.Generic
 
+open NUnit.Framework
+open FSharpPlus
+
+open Appstract
+open Appstract.Types
+open Appstract.DOM
+open Appstract.Tests.Common
+open Appstract.Utils
+open Appstract.Tests.Common.AutoOpenModule
+open Appstract.IntraPageAbstraction
+
 [<Test>]
-let tagsTest () = 
+let tagsTest () =
+    let appstracter = Appstracter()
     let parentDict = computeParentsDict root
     let leaves = root.Nodes() |> List.filter isLeaf
-    let clustersMap = computeClusters parentDict leaves
+    let clustersMap = appstracter.ComputeClusters parentDict leaves
 
-    let tags = computeTags parentDict clustersMap leaves
-    assertEqual 2 (tags.[root] |> Map.count)
+    appstracter.ComputeTags parentDict clustersMap leaves
+    assertEqual 2 (appstracter.TagMap.[root] |> Dict.count)
     Assert.Pass()
 
 [<Test>]
 let abstractionTest () =
-    let result = intraPageAbstraction root
+    let result = appstract root
     assertEqual 6 (result.Nodes().Length)
 
 [<Test>]
 let abstractionOnSimpleRecursiveTree () =
     let html = getHtml "simple_recursive"
     let root = Node.FromString(html).Value
-    let result = intraPageAbstraction root
-    assertEqual 6 (result.Nodes().Length)
+    let result = appstract root
+    assertEqual 4 (result.Nodes().Length)
+
+// 770s -> with the content.
+// 640 without the content
+[<Test>]
+let abstractionOnHeavyWebsite () =
+    let html = getHtml "amazon"
+    let root = Node.FromString(html).Value
+    let watch = Stopwatch()
+    watch.Start()
+    let result = appstract root
+    watch.Stop()
+    printf "ellapsed time: %d" watch.ElapsedMilliseconds
+    
+    

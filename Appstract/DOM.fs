@@ -5,18 +5,20 @@ open FSharp.Data.HtmlActivePatterns
 open Appstract.Types
 open System.Collections.Generic
 
+let ignoredTags = Set.ofList ["script"]
 let fromString html =
     let fromAttr =
         function
         | HtmlAttribute (name, value) -> (name, value)
 
-    let fromAttrs = List.map fromAttr >> Map.ofSeq
+    let fromAttrs = List.map fromAttr >> Map.ofList
 
     let rec fromNode node =
         match node with
+        | HtmlElement (name, _, _) when ignoredTags.Contains(name) -> EmptyNode
         | HtmlElement (name, attributes, children) ->
             Element(name, fromAttrs attributes, AbstractionData.Default node, fromNodes children)
-        | HtmlText content -> Text(content, AbstractionData.Default node)
+        | HtmlText content -> Text("", AbstractionData.Default node)
         | _ -> EmptyNode
 
     and fromNodes =

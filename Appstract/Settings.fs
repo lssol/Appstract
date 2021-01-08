@@ -27,4 +27,4 @@ let sftmParameters =
     )
     
 let MAX_LCS = 100
-let MIN_SIZE_CLUSTER = 3
+let MIN_SIZE_CLUSTER = 2
