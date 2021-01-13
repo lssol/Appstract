@@ -2,6 +2,7 @@ module Appstract.WebApi.HttpHandlers
 
 open Appstract
 open FSharpPlus
+open FSharpPlus.Control
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks
 open Giraffe
@@ -20,9 +21,14 @@ let mutable models = Dictionary<string, AppModel>()
 let abstractPage (page: Requests.WebPage)  =
     let root = Node.FromString(page.src).Value
     let abstractTree = IntraPageAbstraction.appstract root
-    let nodes, edges = nodeToCyto abstractTree
     
-    json {| edges = edges ; nodes = nodes |}
+    let consistencies =
+        VariabilityAnalysis.computeVariabilityPerNode abstractTree
+        |> Map.map (fun _ v -> v.ToString())
+        
+    let nodes, edges = nodeToCyto abstractTree [("consistency", consistencies)]
+    
+    json {| edges = edges ; nodes = nodes; |}
 
 let createModel (requestPages: Requests.WebPages) =
     let model =

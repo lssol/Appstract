@@ -11,6 +11,7 @@
     <Compile Include="DOM.fs" />
     <Compile Include="Sftm.fs" />
     <Compile Include="IntraPageAbstraction.fs" />
+    <Compile Include="VariabilityAnalysis.fs" />
     <Compile Include="InterPageAbstraction.fs" />
     <Compile Include="Appstraction.fs" />
     <Compile Include="Program.fs" />
