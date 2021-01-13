@@ -62,7 +62,7 @@ type Appstracter() =
             Set.intersect (Map.keys attrs1 |> Set.ofSeq) (Map.keys attrs2 |> Set.ofSeq)
 
         commonAttributes
-        |> Set.map (fun attrName -> (attrName, (attrs1.[attrName], attrs1.[attrName])))
+        |> Set.map (fun attrName -> (attrName, (attrs1.[attrName], attrs2.[attrName])))
         |> Map.ofSeq
         |> Map.map (fun attrName (m1Value, m2Value) -> abstractString m1Value m2Value)
 

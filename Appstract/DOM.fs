@@ -6,6 +6,7 @@ open Appstract.Types
 open System.Collections.Generic
 
 let ignoredTags = Set.ofList ["script"]
+let ignoredAttributes = Set.ofList ["signature"]
 let fromString html =
     let fromAttr =
         function

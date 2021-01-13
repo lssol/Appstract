@@ -45,12 +45,14 @@ let Match : Matcher = fun node1 node2 ->
     let tm_node2, mapping2 = NodeToTM_Node node2
 
     let result = matcher.MatchTrees(tm_node1, tm_node2).Result
+    let isNoMatch (e: Edge) = e.Source = null || e.Target = null
+    let numberOfNoMatch = result.Edges |> Seq.filter isNoMatch |> Seq.length
     let edges =
         result.Edges
-        |> Seq.filter (fun e -> e.Source <> null && e.Target <> null)
+        |> Seq.filter (isNoMatch >> not)
         |> Seq.map (fun e -> (mapping1.[e.Source], mapping2.[e.Target]))
     
-    {Edges = edges; Cost = result.Cost}
+    {Edges = edges; Cost = result.Cost; NoMatch = numberOfNoMatch}
         
 
     

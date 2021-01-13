@@ -8,6 +8,7 @@
     &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.abstractionOnHeavyWebsite&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.abstractionOnSimpleRecursiveTree&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.IntraPageAbstractionTests.abstractionTest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F::.NETCoreApp,Version=v5.0::Appstract.Tests.InterPageAbstractionTests.toTM_Node&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	

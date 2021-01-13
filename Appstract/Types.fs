@@ -108,6 +108,7 @@ type Cluster = Cluster of Set<Node>
 type MatcherResult = {
     Edges: (Node * Node) seq
     Cost: double
+    NoMatch: int
 }
 type Matcher = Node -> Node -> MatcherResult
 
@@ -116,7 +117,7 @@ type NodeId = NodeId of string with
     static member Gen () = NodeId (String.genId())
 type Template = Template of Node * Map<Node, NodeId>
 
-type AppModel = { appTemplate: Template; templates: Template seq }
+type AppModel = { appTemplate: Template; templates: Template list }
     
-type ModelCreator = Node seq -> AppModel
+type ModelCreator = Node list -> AppModel
 type InformationExtractor = AppModel -> RelDb -> Node -> RelDb

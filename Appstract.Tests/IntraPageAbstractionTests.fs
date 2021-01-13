@@ -38,8 +38,6 @@ let abstractionOnSimpleRecursiveTree () =
     let result = appstract root
     assertEqual 4 (result.Nodes().Length)
 
-// 770s -> with the content.
-// 640 without the content
 [<Test>]
 let abstractionOnHeavyWebsite () =
     let html = getHtml "amazon"

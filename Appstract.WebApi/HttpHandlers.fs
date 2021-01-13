@@ -27,8 +27,8 @@ let abstractPage (page: Requests.WebPage)  =
 let createModel (requestPages: Requests.WebPages) =
     let model =
         requestPages.webpages
-        |> Seq.choose (fun w -> Node.FromString(w.src))
-        |> Seq.map (IntraPageAbstraction.appstract)
+        |> List.choose (fun w -> Node.FromString(w.src))
+        |> List.map (IntraPageAbstraction.appstract)
         |> InterPageAbstraction.createModel
         
     let modelId = String.genId()

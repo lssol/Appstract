@@ -55,9 +55,9 @@ let matchToClosestTemplate (model:AppModel) (Template(page, mapping)) =
     Template(page, newMapping)
     
 let createModel : ModelCreator = fun pages ->
-    let templates = pages |> Seq.map pageToTemplate
+    let templates = pages |> List.map pageToTemplate
     let appTemplate = getTemplateFromTemplates templates
-    let templates = templates |> Seq.map (identify appTemplate)
+    let templates = templates |> List.map (identify appTemplate)
     
     {appTemplate = appTemplate; templates = templates}
     

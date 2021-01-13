@@ -17,6 +17,11 @@ let htmlString = """
             <div signature="div">
                 <p signature="p1">p1</p>
                 <p signature="p2">p2</p>
+                <p signature="p3">p3</p>
+            </div>
+            <div signature="div">
+                <p signature="p21">p21</p>
+                <p signature="p22">p22</p>
             </div>
         </body>
     </html>
