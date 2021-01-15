@@ -4,7 +4,7 @@ open Appstract
 open Appstract.Types
 open Appstract.DOM
 
-let computeVariabilityPerNode (node: Node) =
+let computeConsistency (node: Node) =
     let nodes = node.Nodes()
     let computeConsistency (n: Node) =
         let children = n.Children() |> List.map (fun child -> child.AbstractionData().Source.Count)

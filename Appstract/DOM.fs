@@ -4,6 +4,7 @@ open FSharp.Data
 open FSharp.Data.HtmlActivePatterns
 open Appstract.Types
 open System.Collections.Generic
+open Appstract.Utils
 
 let ignoredTags = Set.ofList ["script"]
 let ignoredAttributes = Set.ofList ["signature"]
@@ -70,10 +71,20 @@ let computeRootFromLeafPath (parentDict: IDictionary<Node, Node>) leaf =
 
     compute leaf
 
+let actOnBranch (parentDict: Dictionary<Node, Node>) f node = 
+    let rec act f node prev depth = 
+        match node with
+        | EmptyNode -> ()
+        | node -> 
+            f node prev depth 
+            act f parentDict.[node] prev (depth + 1)
+    act f node EmptyNode 0
+
 type Node with
     static member FromString(s) = fromString s
     member this.ParentDict() = computeParentsDict this
     member this.Nodes() = getNodes this
+    member this.ActOnBranch parentDict f = actOnBranch parentDict f this
     member this.Children() = 
         match this with
         | Element(_, _, _, children) -> children

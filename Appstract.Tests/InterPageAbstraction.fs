@@ -23,7 +23,7 @@ let sftm () =
     
 let model () =
     templates
-    |> Seq.choose (read >> DOM.fromString >> (Option.map IntraPageAbstraction.appstract))
+    |> List.choose (read >> DOM.fromString >> (Option.map IntraPageAbstraction.appstract))
     |> InterPageAbstraction.createModel
         
 [<Test>]

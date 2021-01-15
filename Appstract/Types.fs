@@ -99,6 +99,12 @@ type Node =
         | Text _ -> "TEXT"
         | EmptyNode -> failwith "asked for tag of emptynode"
 
+    member this.Attributes() =
+        match this with
+        | Element(_, attributes, _, _) -> attributes
+        | _ -> Map.empty
+        
+
     interface IComparable with
         member this.CompareTo obj = this.GetHashCode() - obj.GetHashCode()
 

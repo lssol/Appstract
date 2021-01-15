@@ -23,7 +23,7 @@ let abstractPage (page: Requests.WebPage)  =
     let abstractTree = IntraPageAbstraction.appstract root
     
     let consistencies =
-        VariabilityAnalysis.computeVariabilityPerNode abstractTree
+        VariabilityAnalysis.computeConsistency abstractTree
         |> Map.map (fun _ v -> v.ToString())
         
     let nodes, edges = nodeToCyto abstractTree [("consistency", consistencies)]

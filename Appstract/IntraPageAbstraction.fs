@@ -52,6 +52,31 @@ type Appstracter() =
         |> List.fold createDictForOneCluster Map.empty
         |> Map.filter (fun _ (Cluster (nodes)) -> not nodes.IsEmpty)
 
+    let extractBoxes (parentDict: Dictionary<Node, Node>) (cluster: Cluster) = 
+        let extractBoxesFromLeaf (leaf: Node) =
+            let boxes = Dictionary<Node, int>()
+            let mutable currentCount = 1
+            let addIfBox n prev depth =
+                let tag = {Cluster = cluster; Depth = depth}
+                tagMap 
+                |> Dict.tryFind n 
+                |> Option.iter (fun tags -> 
+                        tags 
+                        |> Dict.tryFind tag
+                        |> Option.defaultValue 0
+                        |> (fun i -> 
+                            let diff = i - currentCount
+                            if diff > 0 then
+                                boxes.Add(prev, diff)))
+                
+            leaf.ActOnBranch parentDict addIfBox
+            boxes
+        
+        let (Cluster nodesInCluster) = cluster
+        nodesInCluster
+        |> Seq.map (fun node -> (node, extractBoxesFromLeaf node))
+        |> Dict.ofSeq
+        
     let abstractString (abstractValue: string) (concreteValue: string) =
         if abstractValue = concreteValue then concreteValue
         elif max abstractValue.Length concreteValue.Length > Settings.MAX_LCS then ""
@@ -264,6 +289,7 @@ type Appstracter() =
     member this.ComputeTags = computeTags
     member this.TagMap = tagMap
     member this.AbstractTree = abstractTree
+    member this.ExtractBoxes = extractBoxes
     
 let appstract (tree: Node): Node =
     let parentDict = tree.ParentDict()

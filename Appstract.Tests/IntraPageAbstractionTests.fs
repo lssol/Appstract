@@ -27,6 +27,19 @@ let tagsTest () =
     Assert.Pass()
 
 [<Test>]
+let boxExtractionTest () =
+    let appstracter = Appstracter()
+    let parentDict = computeParentsDict root
+    let leaves = root.Nodes() |> List.filter isLeaf
+    let clusterMap = appstracter.ComputeClusters parentDict leaves
+    appstracter.ComputeTags parentDict clusterMap leaves
+    
+    let clusters = clusterMap |> Map.toList |> List.map snd |> Set.ofList |> Set.toList
+    let boxDict = clusters |> List.map (appstracter.ExtractBoxes parentDict)
+        
+    Assert.Pass()
+
+[<Test>]
 let abstractionTest () =
     let result = appstract root
     assertEqual 6 (result.Nodes().Length)
