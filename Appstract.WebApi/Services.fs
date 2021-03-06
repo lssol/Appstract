@@ -17,11 +17,11 @@ let nodeToCyto (node: Node) (additionalInfo: AdditionalInfo list) =
     let nodeIds = nodes |> Seq.fold (fun map n -> map |> Map.add n (Guid.NewGuid())) Map.empty
         
     let nodeToEdge node =
-        let parentId = nodeIds |> Map.tryFind parentDict.[node]
+        let parentId = parentDict.[node] >>= (fun p -> Map.tryFind p nodeIds)
         let nodeId = nodeIds |> Map.tryFind node
         match parentId, nodeId with
         | (Some p, Some n) ->
-            Some {| data = {| source = p; target = n; abstractionType = node.AbstractionData().AbstractionType.ToString() |} |}
+            Some {| data = {| source = p; target = n; abstractionType = node.abstractionData.abstractionType.ToString() |} |}
         | _ -> None
           
     let additionalInfoTuple node (label, map) =
@@ -31,7 +31,7 @@ let nodeToCyto (node: Node) (additionalInfo: AdditionalInfo list) =
         
     let nodeToCyto (node: Node) =
         let sourceSignatures =
-            node.AbstractionData().Source
+            node.abstractionData.source
             |> Seq.choose (fun source -> source.TryGetAttribute "signature")
             |> Seq.map (fun attr -> attr.Value())
         

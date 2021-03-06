@@ -1,6 +1,7 @@
 ﻿module Appstract.IntraPageAbstraction
 
 open System.Collections.Generic
+open System.Linq
 open FSharp.Collections
 open FSharpPlus
 
@@ -12,82 +13,87 @@ open FSharpPlus
 type Tag = { Cluster: Cluster; Depth: int }
 type TagMap = Dictionary<Node, Dictionary<Tag, int>>
 type MList<'T> = System.Collections.Generic.List<'T>
+type NSet = HashSet<Node>
 
 type Appstracter() =
     let mutable tagMap = TagMap()
-    let computeTags (parentDict: Dictionary<Node, Node>) clusterMap leaves =
+
+    let computeTags (parentDict: ParentDict) clusterMap leaves =
         let rec createTagsForBranch depth cluster node =
             let parent = parentDict.[node]
             let tag = { Cluster = cluster; Depth = depth }
-            
+
             match tagMap.ContainsKey(node) with
             | true -> tagMap.[node] |> Dict.incrementAt tag
-            | false -> tagMap.Add(node, Dictionary(dict [(tag, 1)]))
-            
-            match (node, parent) with
-            | (_, EmptyNode) -> ()
-            | _ -> createTagsForBranch (depth + 1) cluster parent
+            | false -> tagMap.Add(node, Dictionary(dict [ (tag, 1) ]))
+
+            match parent with
+            | Some p -> createTagsForBranch (depth + 1) cluster p
+            | None -> ()
 
         leaves
-        |> List.filter (fun leaf -> Map.containsKey leaf clusterMap)
-        |> List.iter (fun leaf -> createTagsForBranch 0 clusterMap.[leaf] leaf)
+        |> Array.filter (fun leaf -> Map.containsKey leaf clusterMap)
+        |> Array.iter (fun leaf -> createTagsForBranch 0 clusterMap.[leaf] leaf)
 
-    let computeClusters (parentDict: Dictionary<Node, Node>) (leaves: Node list): Map<Node, Cluster> =
+    let computeClusters (parentDict: ParentDict) (leaves: Node array): Map<Node, Cluster> =
         let getNodePath = computeRootFromLeafPath parentDict
 
-        let toCluster nodes = Cluster(Set(nodes))
+        let toCluster (nodes: Node array) = Cluster(NSet(nodes))
 
         let clusters =
             leaves
-            |> List.map (fun n -> (n, getNodePath n))
-            |> List.groupBy snd
-            |> List.map (snd >> List.map fst >> toCluster)
+            |> Array.map (fun n -> (n, getNodePath n))
+            |> Array.groupBy snd
+            |> Array.map (snd >> Array.map fst >> toCluster)
 
         let createDictForOneCluster dict cluster =
             let createDictForOneNode d node = d |> Map.add node cluster
             let (Cluster (nodes)) = cluster
-            nodes |> Set.fold createDictForOneNode dict
+            nodes |> Seq.fold createDictForOneNode dict
 
         clusters
-        |> List.fold createDictForOneCluster Map.empty
-        |> Map.filter (fun _ (Cluster (nodes)) -> not nodes.IsEmpty)
+        |> Array.fold createDictForOneCluster Map.empty
+        |> Map.filter (fun _ (Cluster (nodes)) -> not (nodes.Count = 0))
 
-    let extractBoxes (parentDict: Dictionary<Node, Node>) (cluster: Cluster) = 
+    let extractBoxes (parentDict: ParentDict) (cluster: Cluster) =
         let extractBoxesFromLeaf (leaf: Node) =
             let boxes = Dictionary<Node, int>()
             let mutable currentCount = 1
+
             let addIfBox n prev depth =
-                let tag = {Cluster = cluster; Depth = depth}
-                tagMap 
-                |> Dict.tryFind n 
-                |> Option.iter (fun tags -> 
-                        tags 
+                match prev with
+                | None -> ()
+                | Some prev ->
+                    let tag = { Cluster = cluster; Depth = depth }
+                    tagMap
+                    |> Dict.tryFind n
+                    |> Option.iter (fun tags ->
+                        tags
                         |> Dict.tryFind tag
                         |> Option.defaultValue 0
-                        |> (fun i -> 
+                        |> (fun i ->
                             let diff = i - currentCount
-                            if diff > 0 then
-                                boxes.Add(prev, diff)))
-                
+                            if diff > 0 then boxes.Add(prev, diff)))
+
             leaf.ActOnBranch parentDict addIfBox
             boxes
-        
+
         let (Cluster nodesInCluster) = cluster
         nodesInCluster
         |> Seq.map (fun node -> (node, extractBoxesFromLeaf node))
         |> Dict.ofSeq
-        
+
     let abstractString (abstractValue: string) (concreteValue: string) =
         if abstractValue = concreteValue then concreteValue
         elif max abstractValue.Length concreteValue.Length > Settings.MAX_LCS then ""
         else String.LCS abstractValue concreteValue
 
-    let abstractAttributes (attrs1: Attributes) (attrs2: Attributes) =
+    let mergeAttributes (attrs1: Attributes) (attrs2: Attributes) =
         let commonAttributes =
             Set.intersect (Map.keys attrs1 |> Set.ofSeq) (Map.keys attrs2 |> Set.ofSeq)
 
         commonAttributes
-        |> Set.map (fun attrName -> (attrName, (attrs1.[attrName], attrs2.[attrName])))
+        |> Seq.map (fun attrName -> (attrName, (attrs1.[attrName], attrs2.[attrName])))
         |> Map.ofSeq
         |> Map.map (fun attrName (m1Value, m2Value) -> abstractString m1Value m2Value)
 
@@ -104,11 +110,8 @@ type Appstracter() =
         computeType (type1, type2)
 
     let mergeAbstractionData data1 data2 =
-        { AbstractionType = mergeAbstractionType data1.AbstractionType data2.AbstractionType
-          Source = Set.union data1.Source data2.Source }
-
-    let updateType abstractionType (node: Node) =
-        node.UpdateAbstractionType(mergeAbstractionType abstractionType)
+        { abstractionType = mergeAbstractionType data1.abstractionType data2.abstractionType
+          source = Set.union data1.source data2.source }
 
     (*
            Allows to put all children of anode within DISJOINT tag groups.
@@ -128,114 +131,115 @@ type Appstracter() =
            [A, B, C] -> [t1, t2, t3]
            [D, E] -> [t4]
     *)
-    let groupByTagAssociatively nodes =
+
+    let groupByTagAssociatively (nodes: NSet) =
         let filteredTagMap =
             tagMap
-            |> Dict.toList
-            |> List.map (fun (node, tags) -> (node, tags |> Dict.keys |> Set.ofSeq))
-            |> List.filter (fun (n, _) -> nodes |> List.contains n)
+            |> Dict.toSeq
+            |> Seq.filter (fun (n, _) -> nodes.Contains n)
+            |> Seq.map (fun (node, tags) -> (node, tags.Keys.ToHashSet()))
+            |> Seq.toArray
 
-        let mutable tagGroups = Dictionary<Tag, Set<Tag>>()
-        let createGroups (tags: Set<Tag>) =
-            let addTagsToTagsGroup tags =
-                tags |> Set.iter (fun tag -> tagGroups.[tag] <- tags)
+        let mutable tagGroups = Dictionary<Tag, HashSet<Tag>>()
 
-            let findFirstTagInTagGroup tags =
-                tags |> Set.toList |> List.tryFind (fun tag -> tagGroups.ContainsKey(tag))
+        let createGroups (tags: HashSet<Tag>) =
+            let addTagsToTagsGroup (tags: HashSet<Tag>) =
+                tags
+                |> Seq.iter (fun tag -> tagGroups.[tag] <- tags)
+
+            let findFirstTagInTagGroup (tags: HashSet<Tag>) =
+                tags
+                |> Seq.tryFind (fun tag -> tagGroups.ContainsKey(tag))
 
             match tags |> findFirstTagInTagGroup with
             | None -> addTagsToTagsGroup tags
             | Some key ->
-                tagGroups.[key]
-                |> Set.union tags
+                tagGroups.[key].Union(tags).ToHashSet()
                 |> addTagsToTagsGroup
 
         filteredTagMap
-        |> List.map snd
-        |> List.iter createGroups 
+        |> Array.iter (snd >> createGroups)
 
-        let mutable tagsToNodes = Dictionary<Set<Tag>, MList<Node>>()
+        let mutable tagsToNodes = Dictionary<HashSet<Tag>, MList<Node>>()
         filteredTagMap
-        |> List.map (fun (node, group) -> (node, group |> Set.toList |> List.head))
-        |> List.iter (fun (node, tag) ->
-            let key = tagGroups.[tag] 
+        |> Array.map (fun (node, group) -> (node, group |> Seq.head))
+        |> Array.iter (fun (node, tag) ->
+            let key = tagGroups.[tag]
             match tagsToNodes |> Dict.tryFind key with
             | None -> tagsToNodes.Add(key, MList<Node>(Seq.singleton node))
-            | Some nodeList -> nodeList.Add(node)
-            )
-        
+            | Some nodeList -> nodeList.Add(node))
+
         let res =
             tagsToNodes
-            |> Dict.toList
-            |> List.map (fun (tags, nodes) -> (tags, nodes |> Set.ofSeq))
-        
+            |> Dict.toArray
+            |> Array.map (fun (tags, nodes) -> (tags, nodes |> Set.ofSeq))
+
         res
 
-    let groupPairsOfChildrenWithinTheSameCluster (nodes1: Node List) (nodes2: List<Node>) =
+    let groupPairsOfChildrenWithinTheSameCluster (nodes1: Node array) (nodes2: Node array) =
         let getTags node =
             tagMap
             |> Dict.tryFind node
-            |> Option.map (Dict.keys >> Set.ofSeq)
-            |> Option.defaultValue Set.empty
+            |> Option.map (fun dict -> dict.Keys.ToHashSet())
+            |> Option.defaultValue (HashSet<Tag>())
 
-        let concatTags = (Seq.collect getTags) >> Set.ofSeq
+        let concatTags (nodes: Node array) = (Seq.collect getTags nodes).ToHashSet()
 
         let commonTags =
-            Set.intersect (concatTags nodes1) (concatTags nodes2)
+            let mutable t = (concatTags nodes1)
+            t.UnionWith(concatTags nodes2)
+            t
 
-        let isOrphan =
-            getTags >> Set.intersect commonTags >> Set.isEmpty
+        let isOrphan (node: Node) =
+            let mutable t = getTags node
+            t.UnionWith(commonTags)
+            not (t.Any())
 
         let orphans =
             nodes1
-            |> List.append nodes2
-            |> List.filter isOrphan
-            |> Set.ofList
+            |> Array.append nodes2
+            |> Array.filter isOrphan
+            |> Set.ofArray
 
         let getCommonTags node1 node2 =
-            Set.intersect (getTags node1) (getTags node2)
+            let mutable t = (getTags node1)
+            t.UnionWith(getTags node2)
+            t
 
         let pairs =
-            List.allPairs (nodes1 |> List.filter (isOrphan >> not)) (nodes2 |> List.filter (isOrphan >> not))
-            |> List.fold (fun map (n1, n2) -> map |> Map.add (n1, n2) (getCommonTags n1 n2)) Map.empty
-            |> Map.filter (fun nodesPair commonTags -> not commonTags.IsEmpty)
-            |> Map.toList
-            |> List.map (fun ((n1, n2), tags) -> (n1, n2, tags))
+            Array.allPairs (nodes1 |> Array.filter (isOrphan >> not)) (nodes2 |> Array.filter (isOrphan >> not))
+            |> Array.fold (fun map (n1, n2) -> map |> Map.add (n1, n2) (getCommonTags n1 n2)) Map.empty
+            |> Map.filter (fun nodesPair commonTags -> commonTags.Any())
+            |> Map.toArray
+            |> Array.map (fun ((n1, n2), tags) -> (n1, n2, tags))
 
         (pairs, orphans)
 
     let copyTags source destination =
-        if tagMap |> Dict.containsKey source
-        then tagMap.[destination] <- tagMap.[source]
+        if tagMap |> Dict.containsKey source then tagMap.[destination] <- tagMap.[source]
 
-    let updateOrphanNode node =
-        let newNode = updateType Optional node
-        copyTags node newNode
-        newNode
-
-    let rec mergeAbstractTrees (node1: Node, node2: Node, commonTags: Set<Tag>): Node =
+    let rec mergeAbstractTrees (node1: Node, node2: Node, commonTags: HashSet<Tag>): Node =
         let (pairs, orphans) =
-            groupPairsOfChildrenWithinTheSameCluster (node1.Children()) (node2.Children())
+            groupPairsOfChildrenWithinTheSameCluster (node1.children) (node2.children)
 
-        let mergedChildren = pairs |> List.map mergeAbstractTrees 
+        let mergedChildren = pairs |> Array.map mergeAbstractTrees
 
-        let orphans = orphans |> Seq.map updateOrphanNode |> Seq.toList
+        orphans
+        |> Seq.iter (fun n -> n.abstractionData.abstractionType <- AbstractionType.Optional)
 
-        let children = orphans |> Seq.append mergedChildren |> Seq.toList
+        let children =
+            mergedChildren
+            |> Array.append (orphans |> Seq.toArray)
 
         let newNode =
-            match (node1, node2) with
-            | (Text (t1, data1), Text (t2, data2)) -> Text(abstractString t1 t2, mergeAbstractionData data1 data2)
-
-            | (Element (tag1, attrs1, data1, _), Element (tag2, attrs2, data2, _)) ->
-                Element(tag1, abstractAttributes attrs1 attrs2, mergeAbstractionData data1 data2, children)
-
-            | _ -> EmptyNode
+            { name = node1.name
+              attributes = mergeAttributes node1.attributes node2.attributes
+              abstractionData = mergeAbstractionData node1.abstractionData node2.abstractionData
+              children = children }
 
         let commonTagsWithOccurenceCount =
             commonTags
-            |> Set.toList
-            |> List.map (fun tag -> (tag, 1))
+            |> Seq.map (fun tag -> (tag, 1))
             |> Dict.ofSeq
 
         tagMap.[newNode] <- commonTagsWithOccurenceCount
@@ -254,34 +258,33 @@ type Appstracter() =
         let rec reduce reducedNode =
             function
             | first :: rest ->
-                let reducedNode = mergeAbstractTrees (reducedNode, first, commonTags)
+                let reducedNode =
+                    mergeAbstractTrees (reducedNode, first, commonTags)
+
                 reduce reducedNode rest
             | [] -> reducedNode
 
         let nodes = nodes |> Set.toList
         match nodes with
-        | first::[] -> reduce first []
-        | first::rest ->
+        | first :: [] -> reduce first []
+        | first :: rest ->
             let node = reduce first rest
-            let newNode = node.UpdateAbstractionType (mergeAbstractionType OneToMany)
-            copyTags node newNode 
-            newNode
+            node.abstractionData.abstractionType <-
+                mergeAbstractionType node.abstractionData.abstractionType OneToMany
+
+            node
         | [] -> failwith "Cannot merge empty groups"
 
     let rec abstractTree node: Node =
-        match node with
-        | EmptyNode
-        | Text (_)
-        | Element (_) when node |> isAbstract -> node
-
-        | Element (name, attrs, data, children) ->
-            let children = children |> List.map abstractTree 
-
+        if node |> isAbstract then
+            node
+        else
+            let children = node.children |> Array.map abstractTree
             let children =
-                groupByTagAssociatively children
-                |> List.map mergeGroup
-                
-            let newElement = Element(name, attrs, data, children)
+                groupByTagAssociatively (children.ToHashSet())
+                |> Array.map mergeGroup
+
+            let newElement = { node with children = children }
             copyTags node newElement
             newElement
 
@@ -290,13 +293,17 @@ type Appstracter() =
     member this.TagMap = tagMap
     member this.AbstractTree = abstractTree
     member this.ExtractBoxes = extractBoxes
-    
+
 let appstract (tree: Node): Node =
     let parentDict = tree.ParentDict()
-    let leaves = tree.Nodes() |> List.filter isLeaf
+    let nodes = tree.Nodes()
+    let leaves = nodes |> Array.filter isLeaf
 
     let appstracter = Appstracter()
-    let clusterMap = appstracter.ComputeClusters parentDict leaves
+
+    let clusterMap =
+        appstracter.ComputeClusters parentDict leaves
+
     appstracter.ComputeTags parentDict clusterMap leaves
 
     let result = appstracter.AbstractTree tree

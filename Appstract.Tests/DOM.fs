@@ -11,23 +11,23 @@ open System.Collections.Generic
 
 [<Test>]
 let htmlParsing () =
-    root.Nodes() |> List.length |> assertEqual 8
+    root.Nodes() |> Array.length |> assertEqual 8
 
 [<Test>]
 let rootFromLeaf () =
     let getPath = computeRootFromLeafPath (root.ParentDict())
     let paths = 
         root.Nodes() 
-        |> List.filter isLeaf
-        |> List.map getPath
-        |> List.iter (printfn "%s")
+        |> Array.filter isLeaf
+        |> Array.map getPath
+        |> Array.iter (printfn "%s")
     Assert.Pass()
 
 [<Test>]
 let clusters () =
     let appstracter = Appstracter()
     let parentDict = root.ParentDict()
-    let leaves = root.Nodes() |> List.filter isLeaf
+    let leaves = root.Nodes() |> Array.filter isLeaf
     let getPath = computeRootFromLeafPath parentDict 
     let clusterDict =  appstracter.ComputeClusters parentDict leaves
     let displayCluster (Cluster(nodes)) =

@@ -12,29 +12,29 @@ type TM_Node = tree_matching_csharp.Node
 let tokenizeAttributes (attrs: Attributes) : string list =
     attrs |> Map.toList |> List.collect (fun (key, value) -> [key; value])
     
-let rec xPath (el: Node) (parent: Node Option) (partialXPath: string) =
-    let findIndexAmongChildren =
-        Node.Children
-        >> List.filter (fun n -> n.Name() = el.Name())
-        >> Seq.tryFindIndex (fun n -> n = el)
+let rec xPath (node: Node) (parent: Node Option) (partialXPath: string) =
+    let findIndexAmongSiblings parent =
+        parent.children
+        |> Array.filter (fun n -> n.name = node.name)
+        |> Array.tryFindIndex (fun n -> n = node)
         
-    let index = parent >>= findIndexAmongChildren
+    let index =
+        parent
+        >>= findIndexAmongSiblings
+        |> function Some i -> sprintf "[%d]" i | None -> ""
     
-    partialXPath + "/" + el.Name() + (match index with | Some i -> sprintf "[%d]" i | None -> "")
+    partialXPath + "/" + node.name + index
 
 let NodeToTM_Node node =
     let mapping = Dictionary<TM_Node, Node>()
     let nodes = List<TM_Node>()
     let rec copy node parent tm_parent partialXPath =
-        match node with
-        | Element (name, attributes, _, children) ->
-            let newXPath = xPath node parent partialXPath
-            let tokens = newXPath :: name :: (tokenizeAttributes attributes)
-            let newNode = TM_Node(Value = List(tokens), Parent = tm_parent)
-            nodes.Add(newNode)
-            mapping.Add(newNode, node)
-            children |> List.iter (fun child -> copy child (Some node) newNode newXPath)
-        | _ -> ()
+        let newXPath = xPath node parent partialXPath
+        let tokens = newXPath :: node.name :: (tokenizeAttributes node.attributes)
+        let newNode = TM_Node(Value = List(tokens), Parent = tm_parent)
+        nodes.Add(newNode)
+        mapping.Add(newNode, node)
+        node.children |> Array.iter (fun child -> copy child (Some node) newNode newXPath)
 
     copy node None null ""
     (nodes, mapping)

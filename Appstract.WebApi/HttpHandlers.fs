@@ -48,20 +48,21 @@ let sourceToSignatureCouple (NodeId(id)) (source: HtmlNode) : (string * string) 
     
 let nodeToSignatureCouples mapping (node: Node) =
     let id = mapping |> Map.tryFind node
-    let ids = id |> Option.map (fun id -> (Seq.choose (sourceToSignatureCouple id) (node.AbstractionData().Source)) |> Seq.toList)
+    let ids = id |> Option.map (fun id -> (Seq.choose (sourceToSignatureCouple id) (node.abstractionData.source)) |> Seq.toList)
     let result = ids |> Option.defaultValue List.empty
     
     result
 
 let identifyPage (request: Requests.Identify) =
     let model = models.[request.modelId] ///TODO handle the case when model is null
+    
     let (Template(page, mapping)) =
         request.src
         |> Node.FromString
-        |> Option.defaultValue (Node.EmptyNode)
+        |> Option.get
         |> IntraPageAbstraction.appstract
         |> InterPageAbstraction.appstract model
-    
+        
     let ids =
         page.Nodes()
         |> Seq.collect (nodeToSignatureCouples mapping)

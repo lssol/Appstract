@@ -67,6 +67,9 @@ module Dict =
     let toList<'a, 'b> (dict: Dictionary<'a, 'b>) =
         dict |> toSeq |> Seq.toList
         
+    let toArray<'a, 'b> (dict: Dictionary<'a, 'b>) =
+        dict |> toSeq |> Seq.toArray
+        
     let ofSeq<'a, 'b> (sequence: ('a * 'b) seq) =
         sequence.ToDictionary(fst, snd)
     
@@ -75,3 +78,4 @@ module Dict =
     
     let count<'a, 'b> (dict: Dictionary<'a, 'b>) =
         dict.Count
+

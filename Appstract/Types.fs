@@ -53,62 +53,73 @@ type AbstractionType =
         | OneToMany -> "OneToMany"
 
 and AbstractionData =
-    { AbstractionType: AbstractionType
-      Source: Set<HtmlNode> }
+    { mutable abstractionType: AbstractionType
+      mutable source: Set<HtmlNode> }
 
     static member Default node =
-        { AbstractionType = Normal
-          Source = Set.singleton node }
+        { abstractionType = Normal
+          source = Set.singleton node }
 
 type Attributes = Map<string, string>
 
 [<CustomEquality; CustomComparison>]
 type Node =
-    | Element of name:string * Attributes * AbstractionData * children: Node list
-    | Text of content: string * AbstractionData
-    | EmptyNode
+    { name: string
+      mutable attributes: Attributes
+      abstractionData: AbstractionData
+      mutable children: Node array }
     override this.Equals(obj) = Object.ReferenceEquals(this, obj)
     override this.GetHashCode() = RuntimeHelpers.GetHashCode(this)
-
-    member this.AbstractionData() =
-        match this with
-        | Element(_, _, data, _) -> data
-        | Text(_, data) -> data
-        | EmptyNode -> failwith "asked for the abstraction data of an empty node, it should never happen"
-    static member AbstractionData (this: Node) = this.AbstractionData()
-    
-    member this.UpdateData f =
-        match this with
-        | Element(a, b, data, c) -> Element(a, b, f data, c)
-        | Text(a, data) -> Text(a, f data)
-        | EmptyNode -> failwith "asked to modify the abstraction data of an empty node, it should never happen"
-
-    member this.UpdateAbstractionType f = 
-        let updateAbstractionData data = {data with AbstractionType = (f data.AbstractionType)}
-        this.UpdateData updateAbstractionData
-
-    member this.Children(): Node list =
-        match this with
-        | Element(_, _, _, children) -> children
-        | _ -> List.empty
-    static member Children (node: Node) = node.Children()
-        
-    member this.Name() =
-        match this with
-        | Element(tag, _, _, _) -> tag
-        | Text _ -> "TEXT"
-        | EmptyNode -> failwith "asked for tag of emptynode"
-
-    member this.Attributes() =
-        match this with
-        | Element(_, attributes, _, _) -> attributes
-        | _ -> Map.empty
-        
-
     interface IComparable with
         member this.CompareTo obj = this.GetHashCode() - obj.GetHashCode()
+//
+//[<CustomEquality; CustomComparison>]
+//type Nodie =
+//    | Element of name:string * Attributes * AbstractionData * children: Node list
+//    | Text of content: string * AbstractionData
+//    | EmptyNode
+//    override this.Equals(obj) = Object.ReferenceEquals(this, obj)
+//    override this.GetHashCode() = RuntimeHelpers.GetHashCode(this)
+//
+//    member this.AbstractionData() =
+//        match this with
+//        | Element(_, _, data, _) -> data
+//        | Text(_, data) -> data
+//        | EmptyNode -> failwith "asked for the abstraction data of an empty node, it should never happen"
+//    static member AbstractionData (this: Node) = this.AbstractionData()
+//    
+//    member this.UpdateData f =
+//        match this with
+//        | Element(a, b, data, c) -> Element(a, b, f data, c)
+//        | Text(a, data) -> Text(a, f data)
+//        | EmptyNode -> failwith "asked to modify the abstraction data of an empty node, it should never happen"
+//
+//    member this.UpdateAbstractionType f = 
+//        let updateAbstractionData data = {data with AbstractionType = (f data.AbstractionType)}
+//        this.UpdateData updateAbstractionData
+//
+//    member this.Children(): Node list =
+//        match this with
+//        | Element(_, _, _, children) -> children
+//        | _ -> List.empty
+//    static member Children (node: Node) = node.Children()
+//        
+//    member this.Name() =
+//        match this with
+//        | Element(tag, _, _, _) -> tag
+//        | Text _ -> "TEXT"
+//        | EmptyNode -> failwith "asked for tag of emptynode"
+//
+//    member this.Attributes() =
+//        match this with
+//        | Element(_, attributes, _, _) -> attributes
+//        | _ -> Map.empty
+//        
+//
+//    interface IComparable with
+//        member this.CompareTo obj = this.GetHashCode() - obj.GetHashCode()
 
-type Cluster = Cluster of Set<Node>
+type Cluster = Cluster of HashSet<Node>
 
 // Tree Matching
 type MatcherResult = {

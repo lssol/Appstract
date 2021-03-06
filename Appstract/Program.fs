@@ -9,8 +9,9 @@ open Appstract.Types
 open Appstract.DOM
 
 let abstractionOnHeavyWebsite () =
-    let html = File.ReadAllText "htmls/amazon.html"
+    let html = File.ReadAllText "htmls/cdiscount.html"
     let root = Node.FromString(html).Value
+    printf "number of nodes: %d" (root.Nodes().Length)
     let watch = Stopwatch()
     watch.Start()
     let result = IntraPageAbstraction.appstract root
@@ -22,12 +23,12 @@ let generateClusterData () =
     let root = Node.FromString(html).Value
     let appstracter = Appstracter()
     let parentDict = computeParentsDict root
-    let leaves = root.Nodes() |> List.filter isLeaf
+    let leaves = root.Nodes() |> Array.filter isLeaf
     let clusterMap = appstracter.ComputeClusters parentDict leaves
     appstracter.ComputeTags parentDict clusterMap leaves
     
-    let clusters = clusterMap |> Map.toList |> List.map snd |> Set.ofList |> Set.toList
-    let boxDict = clusters |> List.map (appstracter.ExtractBoxes parentDict)
+//    let clusters = clusterMap |> Map.toList |> List.map snd |> Set.ofList |> Set.toList
+//    let boxDict = clusters |> List.map (appstracter.ExtractBoxes parentDict)
     ()
 
 [<EntryPoint>]

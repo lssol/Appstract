@@ -19,7 +19,7 @@ open Appstract.IntraPageAbstraction
 let tagsTest () =
     let appstracter = Appstracter()
     let parentDict = computeParentsDict root
-    let leaves = root.Nodes() |> List.filter isLeaf
+    let leaves = root.Nodes() |> Array.filter isLeaf
     let clustersMap = appstracter.ComputeClusters parentDict leaves
 
     appstracter.ComputeTags parentDict clustersMap leaves
@@ -30,12 +30,12 @@ let tagsTest () =
 let boxExtractionTest () =
     let appstracter = Appstracter()
     let parentDict = computeParentsDict root
-    let leaves = root.Nodes() |> List.filter isLeaf
+    let leaves = root.Nodes() |> Array.filter isLeaf
     let clusterMap = appstracter.ComputeClusters parentDict leaves
     appstracter.ComputeTags parentDict clusterMap leaves
     
-    let clusters = clusterMap |> Map.toList |> List.map snd |> Set.ofList |> Set.toList
-    let boxDict = clusters |> List.map (appstracter.ExtractBoxes parentDict)
+    let clusters = clusterMap |> Map.toArray |> Array.map snd |> Set.ofArray |> Set.toArray
+    let boxDict = clusters |> Array.map (appstracter.ExtractBoxes parentDict)
         
     Assert.Pass()
 

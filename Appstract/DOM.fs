@@ -6,86 +6,66 @@ open Appstract.Types
 open System.Collections.Generic
 open Appstract.Utils
 
+type ParentDict = Dictionary<Node, Node option>
+
 let ignoredTags = Set.ofList ["script"]
 let ignoredAttributes = Set.ofList ["signature"]
 let fromString html =
-    let fromAttr =
-        function
-        | HtmlAttribute (name, value) -> (name, value)
-
+    let fromAttr = function | HtmlAttribute (name, value) -> (name, value)
     let fromAttrs = List.map fromAttr >> Map.ofList
 
     let rec fromNode node =
         match node with
-        | HtmlElement (name, _, _) when ignoredTags.Contains(name) -> EmptyNode
-        | HtmlElement (name, attributes, children) ->
-            Element(name, fromAttrs attributes, AbstractionData.Default node, fromNodes children)
-        | HtmlText content -> Text("", AbstractionData.Default node)
-        | _ -> EmptyNode
-
-    and fromNodes =
-        List.map fromNode
-        >> List.filter (function
-            | EmptyNode -> false
-            | _ -> true)
+        | HtmlElement (name, attributes, children) when not (ignoredTags.Contains(name)) ->
+            Some { name = name
+                   attributes = fromAttrs attributes
+                   abstractionData = AbstractionData.Default node
+                   children = children |> Array.ofList |> Array.choose fromNode}
+        | _ -> None
 
     (HtmlDocument.Parse html).TryGetBody()
-    |> Option.map fromNode
+    |> Option.bind fromNode
 
 let getNodes root =
-    let rec traverse (nodes: Node list) (nodesList: Node list) =
-        match nodesList with
-        | [] -> nodes
-        | e :: rest ->
-            match e with
-            | Element (_, _, _, children) -> traverse (e :: nodes) (children @ rest)
-            | _ -> traverse (e :: nodes) (rest)
+    let result = List<Node>()
+    let rec traverse (n: Node) =
+        result.Add n
+        n.children |> Array.iter traverse 
 
-    traverse [] [ root ]
-
+    traverse root
+    result |> Seq.toArray
 
 let computeParentsDict root =
-    let parentDict = Dictionary<Node, Node>()
+    let parentDict = ParentDict()
 
     let rec traverse parent node =
-        match node with
-        | Element (_, _, _, children) ->
-            parentDict.Add(node, parent)
-            children |> List.iter (traverse node)
-        | _ -> parentDict.Add(node, parent)
+        parentDict.Add(node, parent)
+        node.children |> Array.iter (traverse (Some node))
 
-    traverse EmptyNode root
+    traverse None root
     parentDict
 
-let isLeaf =
-    function
-    | Element (_, _, _, children) when not children.IsEmpty -> false
-    | _ -> true
+let isLeaf node = Array.isEmpty node.children
 
-let computeRootFromLeafPath (parentDict: IDictionary<Node, Node>) leaf =
+let computeRootFromLeafPath (parentDict: ParentDict) leaf =
     let rec compute node =
         match node with
-        | EmptyNode -> ""
-        | Element (name, _, _, _) -> sprintf "{%s}/{%s}" (compute parentDict.[node]) name
-        | Text (_) -> sprintf "{%s}/TEXT" (compute parentDict.[node])
+        | None -> ""
+        | Some n -> sprintf "{%s}/{%s}" (compute parentDict.[n]) n.name
 
-    compute leaf
+    compute (Some leaf)
 
-let actOnBranch (parentDict: Dictionary<Node, Node>) f node = 
+let actOnBranch (parentDict: ParentDict) (f: Node -> Node option -> int -> unit) node = 
     let rec act f node prev depth = 
         match node with
-        | EmptyNode -> ()
-        | node -> 
-            f node prev depth 
-            act f parentDict.[node] prev (depth + 1)
-    act f node EmptyNode 0
+        | None -> ()
+        | Some n -> 
+            f n prev depth 
+            act f parentDict.[n] prev (depth + 1)
+    act f (Some node) None 0
 
 type Node with
     static member FromString(s) = fromString s
     member this.ParentDict() = computeParentsDict this
     member this.Nodes() = getNodes this
     member this.ActOnBranch parentDict f = actOnBranch parentDict f this
-    member this.Children() = 
-        match this with
-        | Element(_, _, _, children) -> children
-        | _ -> List.empty
