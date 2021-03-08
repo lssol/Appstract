@@ -2,6 +2,7 @@ namespace Appstract.Utils
 
 open System
 open System.Collections.Generic
+open System.Linq
 open FSharp.Collections
 open System.Runtime.CompilerServices
 open FuzzyString
@@ -79,3 +80,17 @@ module Dict =
     let count<'a, 'b> (dict: Dictionary<'a, 'b>) =
         dict.Count
 
+
+module HashSet =
+    let Union s1 s2 =
+        let result = HashSet()
+        s1 |> Seq.iter (fun s -> result.Add(s) |> ignore)
+        s2 |> Seq.iter (fun s -> result.Add(s) |> ignore)
+        result
+        
+    let intersect<'a> (s1:'a seq) s2 =
+        let result = HashSet()
+        s2
+        |> Seq.filter (fun s -> s1.Contains(s))
+        |> Seq.iter (fun s -> result.Add(s) |> ignore)
+        result

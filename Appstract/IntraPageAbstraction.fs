@@ -9,6 +9,7 @@ open Appstract.DOM
 open Appstract.Types
 open Appstract.Utils
 open FSharpPlus
+open Nest
 
 type Tag = { Cluster: Cluster; Depth: int }
 type TagMap = Dictionary<Node, Dictionary<Tag, int>>
@@ -49,7 +50,7 @@ type Appstracter() =
         let createDictForOneCluster dict cluster =
             let createDictForOneNode d node = d |> Map.add node cluster
             let (Cluster (nodes)) = cluster
-            nodes |> Seq.fold createDictForOneNode dict
+            nodes.ToArray() |> Array.fold createDictForOneNode dict
 
         clusters
         |> Array.fold createDictForOneCluster Map.empty
@@ -79,8 +80,8 @@ type Appstracter() =
             boxes
 
         let (Cluster nodesInCluster) = cluster
-        nodesInCluster
-        |> Seq.map (fun node -> (node, extractBoxesFromLeaf node))
+        nodesInCluster.ToArray()
+        |> Array.map (fun node -> (node, extractBoxesFromLeaf node))
         |> Dict.ofSeq
 
     let abstractString (abstractValue: string) (concreteValue: string) =
@@ -144,12 +145,12 @@ type Appstracter() =
 
         let createGroups (tags: HashSet<Tag>) =
             let addTagsToTagsGroup (tags: HashSet<Tag>) =
-                tags
-                |> Seq.iter (fun tag -> tagGroups.[tag] <- tags)
+                tags.ToArray()
+                |> Array.iter (fun tag -> tagGroups.[tag] <- tags)
 
             let findFirstTagInTagGroup (tags: HashSet<Tag>) =
-                tags
-                |> Seq.tryFind (fun tag -> tagGroups.ContainsKey(tag))
+                tags.ToArray()
+                |> Array.tryFind (fun tag -> tagGroups.ContainsKey(tag))
 
             match tags |> findFirstTagInTagGroup with
             | None -> addTagsToTagsGroup tags
@@ -185,15 +186,9 @@ type Appstracter() =
 
         let concatTags (nodes: Node array) = (Seq.collect getTags nodes).ToHashSet()
 
-        let commonTags =
-            let mutable t = (concatTags nodes1)
-            t.UnionWith(concatTags nodes2)
-            t
+        let commonTags = HashSet.intersect (concatTags nodes1) (concatTags nodes2)
+        let isOrphan = getTags >> HashSet.intersect commonTags >> Seq.isEmpty
 
-        let isOrphan (node: Node) =
-            let mutable t = getTags node
-            t.UnionWith(commonTags)
-            not (t.Any())
 
         let orphans =
             nodes1
@@ -201,11 +196,8 @@ type Appstracter() =
             |> Array.filter isOrphan
             |> Set.ofArray
 
-        let getCommonTags node1 node2 =
-            let mutable t = (getTags node1)
-            t.UnionWith(getTags node2)
-            t
-
+        let getCommonTags node1 node2 = HashSet.intersect (getTags node1) (getTags node2)
+        
         let pairs =
             Array.allPairs (nodes1 |> Array.filter (isOrphan >> not)) (nodes2 |> Array.filter (isOrphan >> not))
             |> Array.fold (fun map (n1, n2) -> map |> Map.add (n1, n2) (getCommonTags n1 n2)) Map.empty
@@ -225,7 +217,7 @@ type Appstracter() =
         let mergedChildren = pairs |> Array.map mergeAbstractTrees
 
         orphans
-        |> Seq.iter (fun n -> n.abstractionData.abstractionType <- AbstractionType.Optional)
+        |> Set.iter (fun n -> n.abstractionData.abstractionType <- AbstractionType.Optional)
 
         let children =
             mergedChildren

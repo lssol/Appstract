@@ -34,8 +34,8 @@ let boxExtractionTest () =
     let clusterMap = appstracter.ComputeClusters parentDict leaves
     appstracter.ComputeTags parentDict clusterMap leaves
     
-    let clusters = clusterMap |> Map.toArray |> Array.map snd |> Set.ofArray |> Set.toArray
-    let boxDict = clusters |> Array.map (appstracter.ExtractBoxes parentDict)
+//    let clusters = clusterMap |> Map.toArray |> Array.map snd |> Set.ofArray |> Set.toArray
+//    let boxDict = clusters |> Array.map (appstracter.ExtractBoxes parentDict)
         
     Assert.Pass()
 
@@ -49,7 +49,17 @@ let abstractionOnSimpleRecursiveTree () =
     let html = getHtml "simple_recursive"
     let root = Node.FromString(html).Value
     let result = appstract root
-    assertEqual 4 (result.Nodes().Length)
+    assertEqual 3 (result.Nodes().Length)
+
+[<Test>]
+let abstractionOnCats () =
+    let html = getHtml "cat/pages/male"
+    let root = Node.FromString(html).Value
+    let watch = Stopwatch()
+    watch.Start()
+    let result = appstract root
+    watch.Stop()
+    printf "ellapsed time: %d" watch.ElapsedMilliseconds
 
 [<Test>]
 let abstractionOnHeavyWebsite () =

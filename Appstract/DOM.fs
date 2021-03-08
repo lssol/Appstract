@@ -51,7 +51,7 @@ let computeRootFromLeafPath (parentDict: ParentDict) leaf =
     let rec compute node =
         match node with
         | None -> ""
-        | Some n -> sprintf "{%s}/{%s}" (compute parentDict.[n]) n.name
+        | Some n -> sprintf "%s/%s" (compute parentDict.[n]) n.name
 
     compute (Some leaf)
 
