@@ -28,7 +28,8 @@ let webApp =
                     route "/identify"   >=> bind<Requests.Identify> identifyPage
                 ]
             ])
-        setStatusCode 404 >=> text "Not Found" ]
+        setStatusCode 404 >=> text "Not Found"
+    ]
 
 // ---------------------------------
 // Error handler

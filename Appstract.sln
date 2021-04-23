@@ -7,6 +7,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Appstract.Tests", "Appstrac
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Appstract.WebApi", "Appstract.WebApi\Appstract.WebApi.fsproj", "{429E7B55-6515-4702-B478-362FE2B92759}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "appcrawl", "appcrawl\appcrawl.csproj", "{6947222B-A455-4135-A524-48D3CF9F2E99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +31,9 @@ Global
 		{429E7B55-6515-4702-B478-362FE2B92759}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{429E7B55-6515-4702-B478-362FE2B92759}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{429E7B55-6515-4702-B478-362FE2B92759}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6947222B-A455-4135-A524-48D3CF9F2E99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6947222B-A455-4135-A524-48D3CF9F2E99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6947222B-A455-4135-A524-48D3CF9F2E99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6947222B-A455-4135-A524-48D3CF9F2E99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
