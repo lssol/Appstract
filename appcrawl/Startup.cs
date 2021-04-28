@@ -29,7 +29,7 @@ namespace appcrawl
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllers();
             
             services.AddSingleton<MongoRepository>();
             
@@ -64,9 +64,7 @@ namespace appcrawl
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllers();
             });
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using appcrawl.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using appcrawl.Models;
@@ -10,6 +11,7 @@ using appcrawl.Repositories;
 
 namespace appcrawl.Controllers
 {
+    [ApiController]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -21,20 +23,32 @@ namespace appcrawl.Controllers
             _repo = repo;
         }
 
-        public IActionResult Index()
+        [Route("application")]
+        [HttpPost]
+        public ActionResult<Application> CreateApplication()
         {
-            return View();
+            return new Application();
+        }
+        
+        [Route("application")]
+        [HttpPatch]
+        public ActionResult<Application> RenameApplication(string idApplication, string newName)
+        {
+            return new Application();
         }
 
-        public IActionResult Privacy()
+        [Route("template")]
+        [HttpPost]
+        public ActionResult<Template> CreateTemplate(string idApplication)
         {
-            return View();
+            return new Template();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [Route("template")]
+        [HttpPatch]
+        public ActionResult<Template> RenameTemplate(string idTemplate)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return new Template();
         }
     }
 }

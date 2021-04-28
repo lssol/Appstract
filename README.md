@@ -82,7 +82,31 @@ The problem is that unlike for the records, we don't have the structure to help 
 
 
 
+## AppCrawl
 
+There are several parts to the crawler:
+
+### UI
+
+### API
+- CRUD operations on apps/templates/elements
+- Create Model
+  - Call appstract to create model from the set of templates
+- Create Elements (only if the model has been created)
+
+### Robot
+For each command, there is a specific file describing what to do.
+
+Sync
+```
+    GetHTML(Starting Point, Elem[])
+```
+
+Async
+
+```
+    Crawl(Starting Point, Elem[])
+```
 
 
 

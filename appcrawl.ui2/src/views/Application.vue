@@ -6,7 +6,7 @@
     </div>
 
     <div class="flex two full-height">
-      <div class="fifth full-height"><template-selector/></div>
+      <div class="fifth full-height"><template-selector :templates="templates"/></div>
       <div class="full-height four-fifth"><template-view/></div>
     </div>
 
@@ -33,7 +33,8 @@ import LabelEdit from 'label-edit'
 export default {
   name: 'Application',
   data () { return {
-    text: 'Cats'
+    text: 'Cats',
+    templates: ['Product', 'List', 'Blog Post']
   }},
   components: {
     TemplateSelector,

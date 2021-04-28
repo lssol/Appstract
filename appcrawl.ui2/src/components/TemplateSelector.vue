@@ -1,6 +1,8 @@
 <template>
   <div class="full-height" id="templateSelector">
-    <p>selector</p>
+    <span class="pseudo button stack" v-for="template in templates" :key="template">
+      {{template}}
+    </span>
   </div>
 </template>
 
@@ -13,9 +15,10 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   #templateSelector {
-    background-color: lightgray
+    background-color: rgba(211, 211, 211, 0.205);
+    padding: 10px;
   }
+
 </style>
