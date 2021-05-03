@@ -1,9 +1,9 @@
 <template>
-  <div class="full-height" id="templateSelector">
-    <span class="pseudo button stack" v-for="template in templates" :key="template">
+  <nav class="full-height panel" id="templateSelector">
+    <a class="panel-block" v-for="template in templates" :key="template">
       {{template}}
-    </span>
-  </div>
+    </a>
+  </nav>
 </template>
 
 <script>

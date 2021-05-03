@@ -15,7 +15,8 @@ namespace appcrawl.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly MongoRepository _repo;
+        private readonly MongoRepository         _repo;
+        private const    string                  DefaultName = "Undefined";
 
         public HomeController(ILogger<HomeController> logger, MongoRepository repo)
         {
@@ -25,30 +26,39 @@ namespace appcrawl.Controllers
 
         [Route("application")]
         [HttpPost]
-        public ActionResult<Application> CreateApplication()
+        public async Task<ActionResult<Application>> CreateApplication()
         {
-            return new Application();
+            return await _repo.CreateApplication(new Application(DefaultName));
+        }
+        
+        [Route("application")]
+        [HttpGet]
+        public async Task<ActionResult<Application>> GetApplication()
+        {
+            return await _repo.CreateApplication(new Application(DefaultName));
         }
         
         [Route("application")]
         [HttpPatch]
-        public ActionResult<Application> RenameApplication(string idApplication, string newName)
+        public async Task<IActionResult> RenameApplication(string applicationId, string newName)
         {
-            return new Application();
+            await _repo.RenameApplication(applicationId, newName);
+            return Ok();
         }
 
         [Route("template")]
         [HttpPost]
-        public ActionResult<Template> CreateTemplate(string idApplication)
+        public async Task<ActionResult<Template>> CreateTemplate(string applicationId)
         {
-            return new Template();
+            return await _repo.CreateTemplate(new Template(applicationId));
         }
 
         [Route("template")]
         [HttpPatch]
-        public ActionResult<Template> RenameTemplate(string idTemplate)
+        public async Task<IActionResult> RenameTemplate(string templateId, string newName)
         {
-            return new Template();
+            await _repo.RenameTemplate(templateId, newName);
+            return Ok();
         }
     }
 }
