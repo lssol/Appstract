@@ -1,6 +1,6 @@
 <template>
-  <div class="full-height">
-    
+  <div class="full-height full-width">
+    <iframe class="full-height full-width" v-bind:src="url"/>
   </div>
 </template>
 

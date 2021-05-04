@@ -1,6 +1,6 @@
 const baseUrl = 'http://localhost:5000'
 
-const checkForErrors = (response) => {
+const checkForErrors = async (response) => {
     if (!response.ok)
     {
         console.log("Call to API returned an error")
@@ -8,15 +8,33 @@ const checkForErrors = (response) => {
         return null
     }
 
-    return response.json()
+    return await response.json()
 }
 
-const post = async (endpoint, data = {}) => {
+const get = async (endpoint, params = {}) => {
+    const url = new URL(`${baseUrl}/${endpoint}`)
+    for (let key in params)
+        url.searchParams.set(key, params[key])
+    let response
+    try {
+        response = await fetch(url, { method: 'GET', })
+    } catch (e) {
+        console.log("Failed to contact API")
+        console.log(e)
+        return null
+    }
+
+    return checkForErrors(response)
+}
+
+const send = async (endpoint, method, data = {}) => {
     let response
     try {
         response = await fetch(`${baseUrl}/${endpoint}`, {
-            method: 'POST',
-            mode: 'no-cors',
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: data ? JSON.stringify(data) : ""
         })
     } 
@@ -29,31 +47,16 @@ const post = async (endpoint, data = {}) => {
     return checkForErrors(response)
 }
 
-const get = async (endpoint, params = {}) => {
-    const url = new URL(`${baseUrl}/${endpoint}`)
-    for(let key in params)
-        url.searchParams.set(key, params[key])
-    let response
-    try {
-        response = await fetch(url, { 
-            method: 'GET',
-            mode: 'no-cors',
-        })
-    } catch(e) {
-        console.log("Failed to contact API")
-        console.log(e)
-        return null
-    }
-
-    return checkForErrors(response)
-}
-
 export default {
-    createApplication: function() {
-        return post('application')
+    createApplication: async function() {
+        return await send('application', 'POST')
     },
 
-    getApplication: function(id) {
-        return get('application', { applicationId: id })
-    }    
+    getApplication: async function(id) {
+        return await get('application', { applicationId: id })
+    },
+    
+    renameApplication: async function(id, name) {
+        return await send('application/rename', 'POST', {applicationId: id, newName: name})
+    }
 } 

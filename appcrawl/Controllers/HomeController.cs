@@ -12,11 +12,12 @@ using appcrawl.Repositories;
 namespace appcrawl.Controllers
 {
     [ApiController]
+    [Route("/")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly MongoRepository         _repo;
-        private const    string                  DefaultName = "Undefined";
+        private const    string                  DefaultName = "New Application";
 
         public HomeController(ILogger<HomeController> logger, MongoRepository repo)
         {
@@ -33,16 +34,16 @@ namespace appcrawl.Controllers
         
         [Route("application")]
         [HttpGet]
-        public async Task<ActionResult<Application>> GetApplication()
+        public async Task<ActionResult<Application>> GetApplication(string applicationId)
         {
-            return await _repo.CreateApplication(new Application(DefaultName));
+            return await _repo.GetApplication(applicationId);
         }
         
-        [Route("application")]
-        [HttpPatch]
-        public async Task<IActionResult> RenameApplication(string applicationId, string newName)
+        [Route("application/rename")]
+        [HttpPost]
+        public async Task<IActionResult> RenameApplication(RenameApplicationViewModel model)
         {
-            await _repo.RenameApplication(applicationId, newName);
+            await _repo.RenameApplication(model.ApplicationId, model.NewName);
             return Ok();
         }
 

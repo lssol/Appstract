@@ -28,4 +28,7 @@ export default {
   .full-height {
     height: 100%;
   }
+  .full-width {
+    width: 100%
+  }
 </style>
