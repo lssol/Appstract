@@ -1,12 +1,19 @@
 <template>
   <nav class="full-height panel" id="templateSelector">
-    <a v-bind:class="{'is-active': template === vSelectedTemplate}"
+    <div v-bind:class="{'is-active': selected && template.id === selected.id}"
        class = "panel-block"
-       v-on:click="select(template)"
        v-for="template in templates"
-       :key="template">
-      {{template}}
-    </a>
+       :key="template.id">
+      <span v-on:click="select(template)">
+        {{template.name}}
+      </span>
+      <span v-on:click="remove">
+        delete
+      </span>
+    </div>
+    <button class="button" v-on:click="createTemplate">
+      New Template
+    </button>
   </nav>
 </template>
 
@@ -15,17 +22,21 @@ export default {
   name: 'TemplateSelector',
   props: {
     templates: Array,
-    selectedTemplate: String
+    selected: Object
   },
   data: function () {
     return {
-      vSelectedTemplate: this.selectedTemplate
     }
   },
   methods: {
     select: function(template) {
-      this.vSelectedTemplate = template
-      this.$emit('input', template)
+      this.$emit('select', template)
+    },
+    createTemplate: function () {
+      this.$emit('create')
+    },
+    remove(template) {
+      this.$emit('remove')
     }
   }
 

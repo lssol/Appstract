@@ -1,3 +1,4 @@
+using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -6,9 +7,10 @@ namespace appcrawl.Entities
 {
     public class Template
     {
-        public Template(string applicationId)
+        public Template(string applicationId, string name)
         {
             ApplicationId = applicationId;
+            Name          = name;
         }
 
         [BsonId(IdGenerator = typeof(StringObjectIdGenerator))] 
@@ -16,7 +18,7 @@ namespace appcrawl.Entities
         public string? Id            { get; set; }
         public string? Url           { get; set; }
         public string? Html          { get; set; }
-        public string? Name          { get; set; }
+        public string Name          { get; set; }
         public string  ApplicationId { get; set; }
     }
 }

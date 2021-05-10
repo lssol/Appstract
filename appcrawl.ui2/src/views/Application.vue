@@ -3,18 +3,24 @@
 
     <div id="title" :style="{height: '60px'}">
       <h4>
-        <label-edit v-bind:text="application.name" v-on:text-updated-blur="updateName" v-on:text-updated-enter="updateName"></label-edit>
+        <label-edit v-bind:text="application.name" v-on:update="renameApplication"></label-edit>
       </h4>
     </div>
 
     <div class="columns full-height">
       <div class="full-height column is-one-fifth">
-        <template-selector v-model:template="template" :templates="application.templates"/>
+        <template-selector
+                v-bind:selected="template"
+                v-bind:templates="application.templates"
+                v-on:create="createTemplate"
+                v-on:select="redirectToTemplate"
+                v-on:remove="removeTemplate"
+        />
       </div>
-      <div class="full-height full-width">
-        <span>{{template}}</span>
-        <label-edit v-bind:text="url" v-on:text-updated-blur="updateUrl" v-on:text-updated-enter="updateUrl"></label-edit>
-        <template-view v-bind:url="url"/>
+      <div v-if="template" class="full-height full-width">
+        <h4><label-edit v-bind:text="template.name" v-on:update="renameTemplate"></label-edit></h4>
+        <label-edit v-model:text="url" placeholder="Type URL here"></label-edit>
+        <template-view  v-bind:html="html"/>
       </div>
     </div>
 
@@ -44,10 +50,11 @@ export default {
     application: {
       id: '',
       name: '',
-      templates: ['Product', 'List', 'Blog Post']
+      templates: []
     },
     url: '',
-    template: ''
+    html: '',
+    template: null
   }},
 
   components: {
@@ -56,9 +63,6 @@ export default {
     LabelEdit
   },
   methods: {
-    updateUrl: function(newUrl) {
-      this.url = newUrl
-    },
     loadApplication: async function(id) {
       const application = await api.getApplication(id)
       if (!application) {
@@ -67,32 +71,73 @@ export default {
       else {
         this.application.id = application.id
         this.application.name = application.name
+        this.application.templates = application.templates
       }
     },
-    initApplication: async function() {
-      const id = this.$route.params['id']
-      if (!id)
-        await this.createApplication()
-      else
-        await this.loadApplication(id)
+
+    removeTemplate(template) {
+      api.removeTemplate()
     },
-    updateName: async function(newName) {
-      this.name = newName
-      await api.renameApplication(this.application.id, newName)
+
+    renameApplication: function(newName) {
+      if (newName) {
+        this.application.name = newName
+        api.renameApplication(this.application.id, newName)
+      }
     },
-    createApplication: async function() {
-      console.log('No id in params, creating the application')
-      const result = await api.createApplication()
-      await this.$router.replace(`/application/${result.id}`)
+
+    renameTemplate(newName) {
+      if (newName) {
+        this.template.name = newName
+        api.renameTemplate(this.template.id, newName)
+      }
+    },
+
+    redirectToTemplate(template) {
+      this.$router.push(`/application/${this.application.id}?templateId=${template.id}`);
+    },
+
+    createTemplate: async function() {
+      console.log("Creating a new Template in application " + this.application.name)
+      const template = await api.createTemplate(this.application.id)
+      this.redirectToTemplate(template)
+    },
+
+    async init(url) {
+      const applicationId = url.params['applicationId']
+      const templateId    = url.query['templateId']
+
+      if (!applicationId) {
+        console.log('No id in params, creating a new application')
+        const newApplication = await api.createApplication()
+        await this.$router.replace(`/application/${newApplication.id}`)
+        return
+      }
+
+      // if (applicationId !== this.application.id)
+        await this.loadApplication(applicationId)
+
+      if (templateId)
+        this.template = this.application.templates.find(t => t.id === templateId)
     }
   },
+
   created: async function() {
-      await this.initApplication()
+      await this.init(this.$route)
   },
-  watch: {
-    $route(to) {
-      this.loadApplication(to.params['id'])
+
+  asyncComputed: {
+    async html() {
+      return this.url
+             ? (await api.getHtml(this.url)).html
+             : ''
     }
+  },
+
+  watch: {
+    $route: async function(to) {
+      await this.init(to)
+    },
   }
 }
 </script>

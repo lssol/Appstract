@@ -34,10 +34,14 @@
                 this.edit = false;
                 // emit text updated callback
                 this.$emit('text-updated-blur',this.label)
+                this.$emit('input', this.label)
+                this.$emit('update', this.label)
             },
             updateTextEnter: function(){
                 this.edit = false;
                 this.$emit('text-updated-enter',this.label)
+                this.$emit('input', this.label)
+                this.$emit('update', this.label)
             }
         },
         computed: {
@@ -72,11 +76,11 @@
         },
         watch: {
             text: function(value){
-                console.log('[LABEL-EDIT] changed the value', value)
                 if(value==''||value==undefined){
                     this.label = this.vplaceholder
                 }else{
                     this.label = value
+                    this.$emit('input', value)
                 }
             }
         }

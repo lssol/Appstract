@@ -29,10 +29,15 @@ namespace appcrawl.Repositories
             return application;
         }
         
-        public Task<Application> GetApplication(string id)
+        public Application GetApplication(string id)
         {
-            return _applicationCollection.AsQueryable()
-                .Where(a => a.Id == id).FirstOrDefaultAsync();
+            var applications = _applicationCollection.AsQueryable()
+                .Where(a => a.Id == id).FirstOrDefault();
+            var templates = _templateCollection.AsQueryable()
+                .Where(t => t.ApplicationId == id);
+            applications.Templates = templates;
+
+            return applications;
         }
         
         public async Task<Template> CreateTemplate(Template template)
@@ -45,6 +50,12 @@ namespace appcrawl.Repositories
         {
             var update = Builders<Application>.Update.Set(a => a.Name, newName);
             await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
+        }
+        
+        public async Task SetUrlTemplate(string templateId, string url)
+        {
+            var update = Builders<Template>.Update.Set(a => a.Url, url);
+            await _templateCollection.UpdateOneAsync(a => a.Id == templateId, update);
         }
         
         public async Task RenameTemplate(string idTemplate, string newName)

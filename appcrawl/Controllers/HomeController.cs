@@ -17,7 +17,8 @@ namespace appcrawl.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly MongoRepository         _repo;
-        private const    string                  DefaultName = "New Application";
+        private const    string                  DefaultNameApplication = "New Application";
+        private const    string                  DefaultNameTemplate = "New Template";
 
         public HomeController(ILogger<HomeController> logger, MongoRepository repo)
         {
@@ -29,19 +30,27 @@ namespace appcrawl.Controllers
         [HttpPost]
         public async Task<ActionResult<Application>> CreateApplication()
         {
-            return await _repo.CreateApplication(new Application(DefaultName));
+            return await _repo.CreateApplication(new Application(DefaultNameApplication));
         }
         
         [Route("application")]
         [HttpGet]
         public async Task<ActionResult<Application>> GetApplication(string applicationId)
         {
-            return await _repo.GetApplication(applicationId);
+            return _repo.GetApplication(applicationId);
         }
         
         [Route("application/rename")]
         [HttpPost]
-        public async Task<IActionResult> RenameApplication(RenameApplicationViewModel model)
+        public async Task<IActionResult> RenameApplication(RenameApplicationModel model)
+        {
+            await _repo.RenameApplication(model.ApplicationId, model.NewName);
+            return Ok();
+        }
+        
+        [Route("template/remove")]
+        [HttpDelete]
+        public async Task<IActionResult> RemoveTemplate(RenameApplicationModel model)
         {
             await _repo.RenameApplication(model.ApplicationId, model.NewName);
             return Ok();
@@ -49,16 +58,24 @@ namespace appcrawl.Controllers
 
         [Route("template")]
         [HttpPost]
-        public async Task<ActionResult<Template>> CreateTemplate(string applicationId)
+        public async Task<ActionResult<Template>> CreateTemplate(CreateTemplateModel model)
         {
-            return await _repo.CreateTemplate(new Template(applicationId));
+            return await _repo.CreateTemplate(new Template(model.ApplicationId, DefaultNameTemplate));
         }
 
-        [Route("template")]
-        [HttpPatch]
-        public async Task<IActionResult> RenameTemplate(string templateId, string newName)
+        [Route("template/rename")]
+        [HttpPost]
+        public async Task<IActionResult> RenameTemplate(RenameTemplateModel model)
         {
-            await _repo.RenameTemplate(templateId, newName);
+            await _repo.RenameTemplate(model.TemplateId, model.NewName);
+            return Ok();
+        }
+        
+        [Route("template/url")]
+        [HttpPost]
+        public async Task<IActionResult> SetUrlTemplate(SetUrlTemplateModel model)
+        {
+            await _repo.SetUrlTemplate(model.TemplateId, model.Url);
             return Ok();
         }
     }

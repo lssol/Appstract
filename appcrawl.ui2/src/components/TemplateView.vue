@@ -1,6 +1,6 @@
 <template>
   <div class="full-height full-width">
-    <iframe class="full-height full-width" v-bind:src="url"/>
+    <iframe class="full-height full-width" v-bind:srcdoc="html"/>
   </div>
 </template>
 
@@ -8,7 +8,7 @@
 export default {
   name: 'TemplateView',
   props: {
-    url: String
+    html: String
   }
 }
 </script>

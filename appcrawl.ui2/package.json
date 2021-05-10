@@ -9,6 +9,7 @@
   "dependencies": {
     "label-edit": "^0.1.0",
     "vue": "^2.6.11",
+    "vue-async-computed": "^3.9.0",
     "vue-multipane": "^0.9.5",
     "vue-router": "^3.2.0"
   },
