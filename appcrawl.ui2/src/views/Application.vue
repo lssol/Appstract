@@ -2,13 +2,11 @@
   <div :style="{height: '100vh'}">
 
     <div id="title" :style="{height: '60px'}">
-      <h4>
         <label-edit v-bind:text="application.name" v-on:update="renameApplication"></label-edit>
-      </h4>
     </div>
 
     <div class="columns full-height">
-      <div class="full-height column is-one-fifth">
+      <div id="template-selector-container" class="full-height column is-one-fifth">
         <template-selector
                 v-bind:selected="template"
                 v-bind:templates="application.templates"
@@ -34,6 +32,9 @@
   } 
   #title h4 {
     width: fit-content
+  }
+  #template-selector-container {
+    padding-top: 0;
   }
 </style>
 
@@ -75,8 +76,9 @@ export default {
       }
     },
 
-    removeTemplate(template) {
-      api.removeTemplate()
+    removeTemplate(id) {
+      api.removeTemplate(id)
+      this.application.templates = this.application.templates.filter(t => t.id !== id)
     },
 
     renameApplication: function(newName) {

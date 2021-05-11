@@ -50,9 +50,9 @@ namespace appcrawl.Controllers
         
         [Route("template/remove")]
         [HttpDelete]
-        public async Task<IActionResult> RemoveTemplate(RenameApplicationModel model)
+        public async Task<IActionResult> RemoveTemplate(RemoveTemplateModel model)
         {
-            await _repo.RenameApplication(model.ApplicationId, model.NewName);
+            await _repo.RemoveTemplate(model.TemplateId);
             return Ok();
         }
 

@@ -63,5 +63,10 @@ namespace appcrawl.Repositories
             var update = Builders<Template>.Update.Set(a => a.Name, newName);
             await _templateCollection.UpdateOneAsync(a => a.Id == idTemplate, update);
         }
+
+        public async Task RemoveTemplate(string id)
+        {
+            _templateCollection.DeleteOne(t => t.Id == id);
+        }
     }
 }

@@ -66,7 +66,7 @@ export default {
     },
 
     removeTemplate(templateId) {
-        return send(urlApi + 'template/remove', 'DELETE', {templateId: templateId})
+        return send(urlApi + '/template/remove', 'DELETE', {templateId: templateId})
     },
 
     createTemplate: async function(applicationId) {

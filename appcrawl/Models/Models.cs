@@ -19,7 +19,6 @@
     public class RemoveTemplateModel
     {
         public string TemplateId { get; set; }
-        public string NewName { get; set; }
     }
     
     public class SetUrlTemplateModel
