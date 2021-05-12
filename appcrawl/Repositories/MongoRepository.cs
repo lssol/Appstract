@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using appcrawl.Entities;
 using appcrawl.Options;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Driver;
@@ -67,6 +69,11 @@ namespace appcrawl.Repositories
         public async Task RemoveTemplate(string id)
         {
             _templateCollection.DeleteOne(t => t.Id == id);
+        }
+
+        public async Task<IEnumerable<Application>> GetApplications()
+        { 
+            return await _applicationCollection.Find(_ => true).ToListAsync();
         }
     }
 }
