@@ -83,10 +83,5 @@ namespace appcrawl.Repositories
         {
             _templateCollection.DeleteOne(t => t.Id == id);
         }
-
-        public async Task<IEnumerable<Application>> GetApplications()
-        { 
-            return await _applicationCollection.Find(_ => true).ToListAsync();
-        }
     }
 }
