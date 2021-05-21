@@ -88,13 +88,6 @@ namespace appcrawl.Controllers
             return await _repo.CreateTemplate(new Template(model.ApplicationId, DefaultNameTemplate));
         }
 
-        [Route("Applications")]
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Application>>> GetApplications()
-        {
-            return Ok(await _repo.GetApplications());
-        }
-        
         [Route("template/rename")]
         [HttpPost]
         public async Task<IActionResult> RenameTemplate(RenameTemplateModel model)
