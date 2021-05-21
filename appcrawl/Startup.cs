@@ -25,6 +25,7 @@ namespace appcrawl
         private void ConfigureOptions(IServiceCollection services)
         {
             services.Configure<MongoOptions>(Configuration.GetSection(MongoOptions.Key));
+            services.Configure<RobotOptions>(Configuration.GetSection(RobotOptions.Key));
         }
 
         public void ConfigureServices(IServiceCollection services)

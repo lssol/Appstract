@@ -13,9 +13,17 @@ const getBrowser = async () => {
 export const urlToHtml = async (url) => {
     const browser = await getBrowser()
     const page = await browser.newPage()
-    await page.goto(url, {waitUntil: 'networkidle2'})
+    
+    try {
+        await page.goto(url, {waitUntil: 'networkidle2'})
+    } catch (e) {
+        page.close()
+        throw "Invalid url"
+    } 
+    
     await addBase(page)
     const html = await page.evaluate(() => document.documentElement.outerHTML)
+
     page.close()
 
     return html

@@ -2,12 +2,18 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using appcrawl.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using appcrawl.Models;
+using appcrawl.Options;
 using appcrawl.Repositories;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace appcrawl.Controllers
 {
@@ -17,13 +23,16 @@ namespace appcrawl.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly MongoRepository         _repo;
+        private readonly RobotOptions _robotOptions;
         private const    string                  DefaultNameApplication = "New Application";
         private const    string                  DefaultNameTemplate = "New Template";
+        static HttpClient _client = new HttpClient();
 
-        public HomeController(ILogger<HomeController> logger, MongoRepository repo)
+        public HomeController(ILogger<HomeController> logger, MongoRepository repo, IOptionsMonitor<RobotOptions> robotOptions)
         {
             _logger = logger;
             _repo = repo;
+            _robotOptions = robotOptions.CurrentValue;
         }
 
         [Route("application")]
@@ -32,7 +41,23 @@ namespace appcrawl.Controllers
         {
             return await _repo.CreateApplication(new Application(DefaultNameApplication));
         }
+
+        [Route("applications")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Application>>> GetApplications()
+        {
+            var res = await  _repo.GetApplications();
+            return await res.ToListAsync();
+        }
         
+        [Route("application")]
+        [HttpDelete]
+        public async Task<IActionResult> RemoveApplication(RemoveApplicationModel model)
+        {
+            await _repo.RemoveApplication(model.ApplicationId);
+            return Ok();
+        }
+
         [Route("application")]
         [HttpGet]
         public async Task<ActionResult<Application>> GetApplication(string applicationId)
@@ -82,8 +107,12 @@ namespace appcrawl.Controllers
         [HttpPost]
         public async Task<IActionResult> SetUrlTemplate(SetUrlTemplateModel model)
         {
-            await _repo.SetUrlTemplate(model.TemplateId, model.Url);
-            return Ok();
+            var url = QueryHelpers.AddQueryString(_robotOptions.Url + "/urltohtml", "url", model.Url);
+            var res = await _client.GetAsync(url);
+            res.EnsureSuccessStatusCode();
+            var body = await res.Content.ReadFromJsonAsync<RobotCall>();
+            await _repo.SetUrlTemplate(model.TemplateId, model.Url, body.Html);
+            return Ok(new {Html = body.Html});
         }
     }
 }

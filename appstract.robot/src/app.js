@@ -6,23 +6,17 @@ const app = express()
 app.use(cors())
 const port = 3000
 
-app.get('/urltohtml', async (req, res, next) => {
-  const url = req.query.url
-  if (!url) {
-    console.log('No url provided')
-    res.status(400)
-    res.json({error: 'No url provided'})
-    next()
-  }
-  console.log("Retrieving html for url", url)
-
+app.get('/urltohtml', async (req, res) => {
   try {
-    const html = await urlToHtml(req.query.url)
+    const url = req.query.url
+    console.log("Attempting to retrieve HTML for url: ", url)
+    const html = await urlToHtml(url)
+    console.log("Successfully retrieved HTML for url: ", url)
     res.json({html})
   }
   catch (e) {
     console.log(e)
-    res.status(500)
+    res.status(400)
     res.json({error: e.toString()})
   }
 })

@@ -56,9 +56,13 @@ export default {
     getApplication: async function(id) {
         return await get(`${urlApi}/application`, { applicationId: id })
     },
-
-    getHtml: async function(url) {
-        return await get(`${urlRobot}/urltohtml`, { url: url })
+    
+    getApplications: async function() {
+        return await get(`${urlApi}/applications`)
+    },
+    
+    removeApplication: async function(id) {
+        return await send(`${urlApi}/application`, 'DELETE', {applicationId: id})
     },
     
     renameApplication: async function(id, name) {
@@ -76,6 +80,9 @@ export default {
         return await send(`${urlApi}/template/rename`, 'POST', {templateId: templateId, newName: name})
     },
     setUrlTemplate: async function(templateId, url) {
-        return await send(`${urlApi}/template/url`, 'POST', {templateId: id, url: url})
+        const res = await send(`${urlApi}/template/url`, 'POST', {templateId: templateId, url: url})
+        if (res == null)
+            throw "Invalid Url"
+        return res
     }
 }

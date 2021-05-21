@@ -30,13 +30,19 @@ namespace appcrawl.Repositories
             await _applicationCollection.InsertOneAsync(application);
             return application;
         }
+
+        public Task<IAsyncCursor<Application>> GetApplications()
+        {
+            return _applicationCollection
+                .FindAsync(Builders<Application>.Filter.Empty);
+        }
         
         public Application GetApplication(string id)
         {
             var applications = _applicationCollection.AsQueryable()
                 .Where(a => a.Id == id).FirstOrDefault();
             var templates = _templateCollection.AsQueryable()
-                .Where(t => t.ApplicationId == id);
+                .Where(t => t.ApplicationId == id).ToList();
             applications.Templates = templates;
 
             return applications;
@@ -47,6 +53,11 @@ namespace appcrawl.Repositories
             await _templateCollection.InsertOneAsync(template);
             return template;
         }
+        
+        public async Task RemoveApplication(string idApplication)
+        {
+            await _applicationCollection.DeleteOneAsync(a => a.Id == idApplication);
+        }
 
         public async Task RenameApplication(string idApplication, string newName)
         {
@@ -54,9 +65,11 @@ namespace appcrawl.Repositories
             await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
         }
         
-        public async Task SetUrlTemplate(string templateId, string url)
+        public async Task SetUrlTemplate(string templateId, string url, string html)
         {
-            var update = Builders<Template>.Update.Set(a => a.Url, url);
+            var update = Builders<Template>.Update
+                .Set(a => a.Url, url)
+                .Set(a => a.Html, html);
             await _templateCollection.UpdateOneAsync(a => a.Id == templateId, update);
         }
         

@@ -16,10 +16,19 @@
         />
       </div>
       <div v-if="template" class="full-height full-width">
-        <h4><label-edit v-bind:text="template.name" v-on:update="renameTemplate"></label-edit></h4>
-        <label-edit v-model:text="url" placeholder="Type URL here"></label-edit>
-        <template-view  v-bind:html="html"/>
+        <label-edit v-bind:text="template.name" v-on:update="renameTemplate"></label-edit>
+        <label-edit v-bind:text="template.url" v-on:update="setUrl" placeholder="Type URL here"></label-edit>
+        <em v-if="content_loading">Loading...</em>
+        <div v-if="error" class="notification is-danger is-light">
+          <button class="delete" v-on:click="removeError"></button>
+          {{ error }}
+        </div>
+        <iframe v-if="template.html" class="full-height full-width" v-bind:srcdoc="template.html"/>
       </div>
+    </div>
+    
+    <div id="model_creation">
+      <button class="button is-primary">Create Model</button>
     </div>
 
   </div>
@@ -35,6 +44,11 @@
   }
   #template-selector-container {
     padding-top: 0;
+  }
+  #model_creation {
+    position: absolute;
+    top: 10px;
+    right: 10px;
   }
 </style>
 
@@ -53,9 +67,9 @@ export default {
       name: '',
       templates: []
     },
-    url: '',
-    html: '',
-    template: null
+    template: null,
+    content_loading: false,
+    error: ""
   }},
 
   components: {
@@ -75,10 +89,33 @@ export default {
         this.application.templates = application.templates
       }
     },
+    
+    removeError() {
+      this.error = ''
+    },
+    
+    async setUrl(newUrl) {
+      this.error = ''
+      this.template.url = newUrl
+      this.content_loading = true
+      console.log("Attempting to retrieve Html")
+      try {
+        const {html} = await api.setUrlTemplate(this.template.id, newUrl)
+        this.template.html = html
+      }
+      catch(e) {
+        this.error = "Could not load url"
+        console.log("Problem when retrieving HTML from url", e)
+      }
+      finally {
+        this.content_loading = false
+      }
+    },
 
     removeTemplate(id) {
       api.removeTemplate(id)
       this.application.templates = this.application.templates.filter(t => t.id !== id)
+      this.template = null
     },
 
     renameApplication: function(newName) {
@@ -128,18 +165,13 @@ export default {
       await this.init(this.$route)
   },
 
-  asyncComputed: {
-    async html() {
-      return this.url
-             ? (await api.getHtml(this.url)).html
-             : ''
-    }
-  },
-
   watch: {
     $route: async function(to) {
       await this.init(to)
     },
+    template: function() {
+
+    }
   }
 }
 </script>

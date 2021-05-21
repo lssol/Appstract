@@ -20,6 +20,11 @@
     {
         public string TemplateId { get; set; }
     }
+
+    public class RemoveApplicationModel
+    {
+        public string ApplicationId { get; set; }
+    }
     
     public class SetUrlTemplateModel
     {
