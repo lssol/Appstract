@@ -15,8 +15,9 @@ namespace appcrawl.Entities
 
         [BsonId(IdGenerator = typeof(StringObjectIdGenerator))] 
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }
-        public string Name { get; set; }
+        public string? Id { get;                      set; }
+        public string                Name      { get; set; }
         public IEnumerable<Template> Templates { get; set; } = new List<Template>();
+        public byte[]?               Model     { get; set; }
     }
 }

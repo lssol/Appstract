@@ -96,6 +96,28 @@ namespace appcrawl.Controllers
             return Ok();
         }
         
+        [Route("appstract/create_model")]
+        [HttpPost]
+        public async Task<IActionResult> CreateModel(CreateModelViewModel model)
+        {
+            var appModel = Appstract.ModelCreation.createModel(model.Pages);
+            var binaryModel = Appstract.ModelCreation.serializeModel(appModel);
+            await _repo.UpdateModelApplication(model.applicationId, binaryModel);
+            
+            return Ok();
+        }
+
+        [Route("appstract/identify")]
+        [HttpGet]
+        public async Task<IActionResult> SetUrlTemplate(IdentifyPageModel m)
+        {
+            var app            = _repo.GetApplication(m.ApplicationId);
+            var model          = Appstract.ModelCreation.unserializeModel(app.Model);
+            var identification = Appstract.ModelCreation.identifyPage(model, m.Page);
+            
+            return Ok(identification);
+        }
+        
         [Route("template/url")]
         [HttpPost]
         public async Task<IActionResult> SetUrlTemplate(SetUrlTemplateModel model)

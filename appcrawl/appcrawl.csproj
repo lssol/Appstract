@@ -18,4 +18,8 @@
     <_ContentIncludedByDefault Remove="Views\_ViewStart.cshtml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Appstract\Appstract.fsproj" />
+  </ItemGroup>
+
 </Project>

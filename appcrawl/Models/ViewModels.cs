@@ -1,4 +1,6 @@
-﻿namespace appcrawl.Models
+﻿using System.Collections.Generic;
+
+namespace appcrawl.Models
 {
     public class RenameApplicationModel
     {
@@ -14,6 +16,18 @@
     {
         public string TemplateId { get; set; }
         public string NewName { get; set; }
+    }
+
+    public class IdentifyPageModel
+    {
+        public string ApplicationId { get; set; }
+        public string Page { get; set; }
+    }
+    
+    public class CreateModelViewModel
+    {
+        public string              applicationId;
+        public IEnumerable<string> Pages { get; set; }
     }
     
     public class RemoveTemplateModel

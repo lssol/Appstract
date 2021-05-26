@@ -65,6 +65,12 @@ namespace appcrawl.Repositories
             await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
         }
         
+        public async Task UpdateModelApplication(string idApplication, byte[] model)
+        {
+            var update = Builders<Application>.Update.Set(a => a.Model, model);
+            await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
+        }
+        
         public async Task SetUrlTemplate(string templateId, string url, string html)
         {
             var update = Builders<Template>.Update
