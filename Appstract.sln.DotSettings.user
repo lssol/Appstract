@@ -29,4 +29,5 @@
 	
 	
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Appstract/@EntryIndexedValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=Idable/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Idable/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=pickler/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
