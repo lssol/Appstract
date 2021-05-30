@@ -8,11 +8,11 @@
     <div class="columns full-height">
       <div id="template-selector-container" class="full-height column is-one-fifth">
         <template-selector
-                v-bind:selected="template"
-                v-bind:templates="application.templates"
-                v-on:create="createTemplate"
-                v-on:select="redirectToTemplate"
-                v-on:remove="removeTemplate"
+            v-bind:selected="template"
+            v-bind:templates="application.templates"
+            v-on:create="createTemplate"
+            v-on:select="redirectToTemplate"
+            v-on:remove="removeTemplate"
         />
       </div>
       <div v-if="template" class="full-height full-width">
@@ -23,12 +23,20 @@
           <button class="delete" v-on:click="removeError"></button>
           {{ error }}
         </div>
-        <iframe v-if="template.html" class="full-height full-width" v-bind:srcdoc="template.html"/>
+        <iframe v-if="template.html && !content_loading" class="full-height full-width" v-bind:srcdoc="template.html"/>
       </div>
     </div>
     
     <div id="model_creation">
-      <button class="button is-primary">Create Model</button>
+      
+      <button 
+          v-on:click="createModel" 
+          class="button is-primary"
+          v-bind:class="{'is-loading': (creating_model || content_loading)}"
+          v-bind:disabled="creating_model || content_loading"
+      >
+        Create Model
+      </button>
     </div>
 
   </div>
@@ -69,7 +77,8 @@ export default {
     },
     template: null,
     content_loading: false,
-    error: ""
+    error: "",
+    creating_model: false
   }},
 
   components: {
@@ -77,6 +86,7 @@ export default {
     TemplateView,
     LabelEdit
   },
+  
   methods: {
     loadApplication: async function(id) {
       const application = await api.getApplication(id)
@@ -87,6 +97,23 @@ export default {
         this.application.id = application.id
         this.application.name = application.name
         this.application.templates = application.templates
+      }
+    },
+    
+    async createModel() {
+      console.log("Creating Model")
+      this.creating_model = true
+      console.log(this.creating_model)
+      try {
+        await api.createModel(this.application.id, this.application.templates.map(t => t.html))
+        console.log("Successfully created the model")
+      }
+      catch (e) {
+        console.error("Couldn't create the model", e)
+        this.error = "Impossible to create the model"
+      }
+      finally {
+        this.creating_model = false
       }
     },
     
@@ -153,8 +180,7 @@ export default {
         return
       }
 
-      // if (applicationId !== this.application.id)
-        await this.loadApplication(applicationId)
+      await this.loadApplication(applicationId)
 
       if (templateId)
         this.template = this.application.templates.find(t => t.id === templateId)

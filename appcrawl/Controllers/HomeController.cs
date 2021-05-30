@@ -96,18 +96,18 @@ namespace appcrawl.Controllers
             return Ok();
         }
         
-        [Route("appstract/create_model")]
+        [Route("application/model")]
         [HttpPost]
         public async Task<IActionResult> CreateModel(CreateModelViewModel model)
         {
             var appModel = Appstract.ModelCreation.createModel(model.Pages);
             var binaryModel = Appstract.ModelCreation.serializeModel(appModel);
-            await _repo.UpdateModelApplication(model.applicationId, binaryModel);
+            await _repo.UpdateModelApplication(model.ApplicationId, binaryModel);
             
             return Ok();
         }
 
-        [Route("appstract/identify")]
+        [Route("application/identify")]
         [HttpGet]
         public async Task<IActionResult> SetUrlTemplate(IdentifyPageModel m)
         {
@@ -127,6 +127,7 @@ namespace appcrawl.Controllers
             res.EnsureSuccessStatusCode();
             var body = await res.Content.ReadFromJsonAsync<RobotCall>();
             await _repo.SetUrlTemplate(model.TemplateId, model.Url, body.Html);
+            
             return Ok(new {Html = body.Html});
         }
     }

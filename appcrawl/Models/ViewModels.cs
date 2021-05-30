@@ -26,8 +26,8 @@ namespace appcrawl.Models
     
     public class CreateModelViewModel
     {
-        public string              applicationId;
-        public IEnumerable<string> Pages { get; set; }
+        public string              ApplicationId { get; set; }
+        public IEnumerable<string> Pages         { get; set; }
     }
     
     public class RemoveTemplateModel

@@ -13,7 +13,6 @@
     <Compile Include="IntraPageAbstraction.fs" />
     <Compile Include="VariabilityAnalysis.fs" />
     <Compile Include="InterPageAbstraction.fs" />
-    <Compile Include="Program.fs" />
     <Content Include="htmls\amazon.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -22,6 +21,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="ModelCreation.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Data" Version="3.3.3" />

@@ -1,31 +1,30 @@
 const urlApi = 'http://localhost:5000'
 const urlRobot = 'http://localhost:3000'
 
-const checkForErrors = async (response) => {
+const checkForErrors = (response) => {
     if (!response.ok)
     {
         console.log("Call to API returned an error")
         console.log(response)
-        return null
+        throw "Error when calling API"
     }
 
-    return await response.json()
+    return response
 }
 
 const get = async (endpoint, params = {}) => {
     const url = new URL(endpoint)
     for (let key in params)
         url.searchParams.set(key, params[key])
-    let response
     try {
-        response = await fetch(url, { method: 'GET', })
+        let response = await fetch(url, { method: 'GET', })
+        response = checkForErrors(response)
+        return await response.json()
     } catch (e) {
         console.log("Failed to contact API")
         console.log(e)
         return null
     }
-
-    return checkForErrors(response)
 }
 
 const send = async (endpoint, method, data = {}) => {
@@ -50,7 +49,8 @@ const send = async (endpoint, method, data = {}) => {
 
 export default {
     createApplication: async function() {
-        return await send(`${urlApi}/application`, 'POST')
+        const res = await send(`${urlApi}/application`, 'POST')
+        return await res.json()
     },
 
     getApplication: async function(id) {
@@ -74,15 +74,22 @@ export default {
     },
 
     createTemplate: async function(applicationId) {
-        return await send(`${urlApi}/template`, 'POST', {applicationId: applicationId})
+        const res = await send(`${urlApi}/template`, 'POST', {applicationId: applicationId})
+        return await res.json()
     },
+    
     renameTemplate: async function(templateId, name) {
         return await send(`${urlApi}/template/rename`, 'POST', {templateId: templateId, newName: name})
     },
+    
+    async createModel(applicationId, pages) {
+        return await send(`${urlApi}/application/model`, 'POST', {applicationId, pages})
+    },
+    
     setUrlTemplate: async function(templateId, url) {
         const res = await send(`${urlApi}/template/url`, 'POST', {templateId: templateId, url: url})
         if (res == null)
             throw "Invalid Url"
-        return res
+        return await res.json()
     }
 }
