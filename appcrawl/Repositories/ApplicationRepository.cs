@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using appcrawl.Controllers;
 using appcrawl.Entities;
 using appcrawl.Options;
 using Microsoft.AspNetCore.Mvc;
@@ -8,21 +9,24 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+// ReSharper disable ReplaceWithSingleCallToFirstOrDefault
 
 namespace appcrawl.Repositories
 {
-    public class MongoRepository
+    public class ApplicationRepository
     {
+        private readonly TemplateRepository _templateRepository;
         private readonly MongoOptions _options;
         private readonly IMongoCollection<Application> _applicationCollection;
-        private readonly IMongoCollection<Template> _templateCollection;
 
-        public MongoRepository(IOptionsMonitor<MongoOptions> options)
+        public ApplicationRepository(IOptionsMonitor<MongoOptions> options, TemplateRepository templateRepository)
         {
+            _templateRepository = templateRepository;
             _options = options.CurrentValue;
-            var db = new MongoClient(_options.ConnectionString).GetDatabase(_options.Database);
-            _applicationCollection = db.GetCollection<Application>(nameof(Application));
-            _templateCollection = db.GetCollection<Template>(nameof(Template));
+            
+            _applicationCollection = new MongoClient(_options.ConnectionString)
+                .GetDatabase(_options.Database)
+                .GetCollection<Application>(nameof(Application));
         }
 
         public async Task<Application> CreateApplication(Application application)
@@ -39,19 +43,16 @@ namespace appcrawl.Repositories
         
         public Application GetApplication(string id)
         {
-            var applications = _applicationCollection.AsQueryable()
-                .Where(a => a.Id == id).FirstOrDefault();
-            var templates = _templateCollection.AsQueryable()
-                .Where(t => t.ApplicationId == id).ToList();
+            var applications = _applicationCollection
+                .AsQueryable()
+                .Where(a => a.Id == id)
+                .FirstOrDefault();
+
+            var templates = _templateRepository.GetTemplates(id);
+                
             applications.Templates = templates;
 
             return applications;
-        }
-        
-        public async Task<Template> CreateTemplate(Template template)
-        {
-            await _templateCollection.InsertOneAsync(template);
-            return template;
         }
         
         public async Task RemoveApplication(string idApplication)
@@ -69,25 +70,6 @@ namespace appcrawl.Repositories
         {
             var update = Builders<Application>.Update.Set(a => a.Model, model);
             await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
-        }
-        
-        public async Task SetUrlTemplate(string templateId, string url, string html)
-        {
-            var update = Builders<Template>.Update
-                .Set(a => a.Url, url)
-                .Set(a => a.Html, html);
-            await _templateCollection.UpdateOneAsync(a => a.Id == templateId, update);
-        }
-        
-        public async Task RenameTemplate(string idTemplate, string newName)
-        {
-            var update = Builders<Template>.Update.Set(a => a.Name, newName);
-            await _templateCollection.UpdateOneAsync(a => a.Id == idTemplate, update);
-        }
-
-        public async Task RemoveTemplate(string id)
-        {
-            _templateCollection.DeleteOne(t => t.Id == id);
         }
     }
 }

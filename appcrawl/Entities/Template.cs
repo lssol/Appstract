@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -20,5 +21,7 @@ namespace appcrawl.Entities
         public string? Html          { get; set; }
         public string Name          { get; set; }
         public string  ApplicationId { get; set; }
+        
+        public IEnumerable<Element> Elements { get; set; } = new List<Element>();
     }
 }

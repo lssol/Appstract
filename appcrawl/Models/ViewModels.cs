@@ -45,4 +45,21 @@ namespace appcrawl.Models
         public string TemplateId { get; set; }
         public string Url { get; set; }
     }
+    
+    public class RemoveElementModel
+    {
+        public string ElementId { get; set; }
+    }
+
+    public class CreateElementModel
+    {
+        public string ApplicationId { get; set; }
+        public string TemplateId { get; set; }
+    }
+    
+    public class RenameElementModel
+    {
+        public string ElementId { get; set; }
+        public string Name { get; set; }
+    }
 }

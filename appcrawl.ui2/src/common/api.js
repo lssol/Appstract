@@ -91,5 +91,15 @@ export default {
         if (res == null)
             throw "Invalid Url"
         return await res.json()
-    }
+    },
+    
+    async createElement(applicationId, templateId) {
+        const res = await send(`${urlApi}/element`, 'POST', {applicationId, templateId})
+        return await res.json()
+    },
+
+    removeElement(elementId) {
+        return send(urlApi + '/element/remove', 'DELETE', {elementId})
+    },
+    
 }

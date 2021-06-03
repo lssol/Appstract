@@ -6,14 +6,25 @@
     </div>
 
     <div class="columns full-height">
-      <div id="template-selector-container" class="full-height column is-one-fifth">
-        <template-selector
+      <div id="left-pane-container" class="column is-one-fifth">
+        <selector-pane
             v-bind:selected="template"
-            v-bind:templates="application.templates"
+            v-bind:items="application.templates"
+            title="Templates"
             v-on:create="createTemplate"
             v-on:select="redirectToTemplate"
             v-on:remove="removeTemplate"
         />
+        <div class="elementContainer" v-if="application.model && template">
+          <selector-pane
+              v-bind:selected="element"
+              v-bind:items="template.elements"
+              title="Named Elements"
+              v-on:create="createElement"
+              v-on:select="highlightElement"
+              v-on:remove="removeElement"
+          />
+        </div>
       </div>
       <div v-if="template" class="full-height full-width">
         <label-edit v-bind:text="template.name" v-on:update="renameTemplate"></label-edit>
@@ -28,8 +39,19 @@
     </div>
     
     <div id="model_creation">
+
+      <button
+          v-on:click="createModel"
+          class="button is-light"
+          v-bind:class="{'is-loading': (creating_model || content_loading)}"
+          v-bind:disabled="creating_model || content_loading"
+          v-if="application.model"
+      >
+        Update Model
+      </button>
       
       <button 
+          v-else
           v-on:click="createModel" 
           class="button is-primary"
           v-bind:class="{'is-loading': (creating_model || content_loading)}"
@@ -50,7 +72,7 @@
   #title h4 {
     width: fit-content
   }
-  #template-selector-container {
+  #left-pane-container {
     padding-top: 0;
   }
   #model_creation {
@@ -58,10 +80,13 @@
     top: 10px;
     right: 10px;
   }
+  .elementContainer {
+    margin-top: 30px;  
+  }
 </style>
 
 <script>
-import TemplateSelector from '@/components/TemplateSelector.vue'
+import SelectorPane from '@/components/SelectorPane.vue'
 import TemplateView from '@/components/TemplateView.vue'
 import LabelEdit from '@/components/LabelEdit.vue'
 import api from '@/common/api'
@@ -73,16 +98,18 @@ export default {
     application: {
       id: '',
       name: '',
-      templates: []
+      templates: [],
+      model: false,
     },
     template: null,
+    element: null,
     content_loading: false,
     error: "",
     creating_model: false
   }},
 
   components: {
-    TemplateSelector,
+    SelectorPane,
     TemplateView,
     LabelEdit
   },
@@ -97,9 +124,24 @@ export default {
         this.application.id = application.id
         this.application.name = application.name
         this.application.templates = application.templates
+        this.application.model = !!application.model
       }
     },
     
+    async createElement() {
+      const newElement = await api.createElement(this.application.id, this.template.id)
+      this.template.elements.push(newElement)
+    },
+    
+    async removeElement(id) {
+      await api.removeElement(id)
+      this.template.elements = this.template.elements.filter(e => e.id === id)
+    },
+    
+    async highlightElement() {
+        
+    },
+
     async createModel() {
       console.log("Creating Model")
       this.creating_model = true
@@ -159,14 +201,14 @@ export default {
       }
     },
 
-    redirectToTemplate(template) {
-      this.$router.push(`/application/${this.application.id}?templateId=${template.id}`);
+    redirectToTemplate(id) {
+      this.$router.push(`/application/${this.application.id}?templateId=${id}`);
     },
 
     createTemplate: async function() {
       console.log("Creating a new Template in application " + this.application.name)
       const template = await api.createTemplate(this.application.id)
-      this.redirectToTemplate(template)
+      this.redirectToTemplate(template.id)
     },
 
     async init(url) {

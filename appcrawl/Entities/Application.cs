@@ -17,6 +17,7 @@ namespace appcrawl.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get;                      set; }
         public string                Name      { get; set; }
+        [BsonIgnore]
         public IEnumerable<Template> Templates { get; set; } = new List<Template>();
         public byte[]?               Model     { get; set; }
     }

@@ -32,7 +32,9 @@ namespace appcrawl
         {
             services.AddControllers();
             
-            services.AddSingleton<MongoRepository>();
+            services.AddSingleton<ApplicationRepository>();
+            services.AddSingleton<TemplateRepository>();
+            services.AddSingleton<ElementRepository>();
             
             ConfigureOptions(services);
         }
