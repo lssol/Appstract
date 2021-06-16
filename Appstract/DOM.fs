@@ -11,14 +11,19 @@ type ParentDict = Dictionary<Node, Node option>
 let ignoredTags = Set.ofList ["script"]
 let ignoredAttributes = Set.ofList ["signature"]
 let fromString html =
-    let fromAttr = function | HtmlAttribute (name, value) -> (name, value)
-    let fromAttrs = List.map fromAttr >> Map.ofList
+    let fromAttrs =
+        List.map (fun (HtmlAttribute(name, value)) -> (name, value))
+        >> Map.ofList
+        
+    let getSignature attrs = attrs |> Map.tryFind "signature" |> Option.defaultValue ""
 
     let rec fromNode node =
         match node with
         | HtmlElement (name, attributes, children) when not (ignoredTags.Contains(name)) ->
-            Some { name = name
-                   attributes = fromAttrs attributes
+            let attrs = fromAttrs attributes
+            Some { signature = getSignature attrs
+                   name = name
+                   attributes = attrs
                    abstractionData = AbstractionData.Default node
                    children = children |> Array.ofList |> Array.choose fromNode}
         | _ -> None
@@ -69,3 +74,4 @@ type Node with
     member this.ParentDict() = computeParentsDict this
     member this.Nodes() = getNodes this
     member this.ActOnBranch parentDict f = actOnBranch parentDict f this
+    member this.ToHtml = 0

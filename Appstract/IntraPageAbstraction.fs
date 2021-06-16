@@ -224,7 +224,8 @@ type Appstracter() =
             |> Array.append (orphans |> Seq.toArray)
 
         let newNode =
-            { name = node1.name
+            { signature = NodeId.Gen().ToString()
+              name = node1.name
               attributes = mergeAttributes node1.attributes node2.attributes
               abstractionData = mergeAbstractionData node1.abstractionData node2.abstractionData
               children = children }

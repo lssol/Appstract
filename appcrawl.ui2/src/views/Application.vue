@@ -138,6 +138,19 @@ export default {
       this.template.elements = this.template.elements.filter(e => e.id === id)
     },
     
+    startSelectMode() {
+      let unselect = () => {}
+      document.body.querySelectorAll('*').forEach(e => e.addEventListener("mouseenter", (evt) => {
+        if (!evt.altKey)
+          return
+
+        unselect()
+        let signature = e.getAttribute('signature')
+        if (signatureToColor.has(signature))
+          unselect = DOM.selectElements([e], signatureToColor.get(signature)).unselect
+      }))
+    },
+    
     async highlightElement() {
         
     },
@@ -149,6 +162,7 @@ export default {
       try {
         await api.createModel(this.application.id, this.application.templates.map(t => t.html))
         console.log("Successfully created the model")
+        this.application.model = true
       }
       catch (e) {
         console.error("Couldn't create the model", e)

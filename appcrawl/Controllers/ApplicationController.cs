@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using appcrawl.Entities;
@@ -6,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using appcrawl.Models;
 using appcrawl.Options;
 using appcrawl.Repositories;
+using Appstract.Types;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -15,15 +19,15 @@ namespace appcrawl.Controllers
     [Route("/")]
     public class ApplicationController : Controller
     {
-        private readonly ApplicationRepository _repo;
-        private readonly RobotOptions _robotOptions;
-        private const    string                  DefaultNameApplication = "New Application";
-        static HttpClient _client = new HttpClient();
+        private readonly ApplicationRepository        _repo;
+        private readonly IMemoryCache                 _cache;
+        private const    string                       DefaultNameApplication = "New Application";
+        static           HttpClient                   _client                = new();
 
-        public ApplicationController(ApplicationRepository repo, IOptionsMonitor<RobotOptions> robotOptions)
+        public ApplicationController(ApplicationRepository repo, IMemoryCache cache)
         {
-            _repo = repo;
-            _robotOptions = robotOptions.CurrentValue;
+            _repo       = repo;
+            _cache = cache;
         }
 
         [Route("application")]
@@ -77,10 +81,16 @@ namespace appcrawl.Controllers
 
         [Route("application/identify")]
         [HttpGet]
-        public async Task<IActionResult> SetUrlTemplate(IdentifyPageModel m)
+        public async Task<IActionResult> Identify(IdentifyPageModel m)
         {
-            var app            = _repo.GetApplication(m.ApplicationId);
-            var model          = Appstract.ModelCreation.unserializeModel(app.Model);
+            var app   = _repo.GetApplication(m.ApplicationId);
+
+            var model = _cache.GetOrCreate(m.ApplicationId, entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(3);
+                return Appstract.ModelCreation.createModel(app.Templates.Select(t => t.Html));
+            });
+            
             var identification = Appstract.ModelCreation.identifyPage(model, m.Page);
             
             return Ok(identification);
