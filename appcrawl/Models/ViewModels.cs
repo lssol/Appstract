@@ -62,4 +62,10 @@ namespace appcrawl.Models
         public string ElementId { get; set; }
         public string Name { get; set; }
     }
+    
+    public class UpdateSignatureElementModel
+    {
+        public string ElementId { get; set; }
+        public string Signature { get; set; }
+    }
 }

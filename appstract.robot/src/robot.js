@@ -274,7 +274,6 @@ const addSignature = async (page) => {
     await page.exposeFunction("genString", genString)
     return page.evaluate(async () => {
         const elements = document.querySelectorAll("*")
-        const guid = await genString();
-        elements.forEach(e => e.setAttribute('signature', guid))
+        elements.forEach(async (e) => e.setAttribute('signature', await genString()))
     })
 }

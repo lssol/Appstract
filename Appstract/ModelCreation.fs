@@ -1,5 +1,6 @@
 module Appstract.ModelCreation
 
+open System
 open System.Collections.Generic
 open Appstract.Types
 open Appstract.DOM
@@ -17,19 +18,32 @@ let createModel (requestPages: string seq) =
     |> Seq.toList
     |> InterPageAbstraction.createModel
 
-let sourceToSignatureCouple (NodeId (id)) (source: HtmlNode): (string * string) option =
+let sourceToSignatureCouple (NodeId id) (source: HtmlNode) : (string * string) option =
     source.TryGetAttribute "signature"
     |> Option.map (fun attr -> (attr.Value(), id))
 
 let nodeToSignatureCouples mapping (node: Node) =
     mapping
     |> Map.tryFind node
-    |> Option.map (fun id ->
-        node.abstractionData.source
-        |> Seq.choose (sourceToSignatureCouple id)
-        |> Seq.toList)
+    |> Option.map
+        (fun id ->
+            node.abstractionData.source
+            |> Seq.choose (sourceToSignatureCouple id)
+            |> Seq.toList)
     |> Option.defaultValue List.empty
 
+//let getDoubles (seq: (string * string) seq) =
+//    let mutable set = HashSet()
+//    let mutable doubles = HashSet()
+//
+//    seq |> Seq.iter (fun s ->
+//            if set.Contains(fst s)
+//            then doubles.Add(fst s)
+//            else set.Add(fst s)
+//            |> ignore)
+//    
+//    doubles
+    
 let identifyPage (model: AppModel) (src: string) =
     let model = model
 
@@ -42,10 +56,10 @@ let identifyPage (model: AppModel) (src: string) =
 
     page.Nodes()
     |> Seq.collect (nodeToSignatureCouples mapping)
-    |> Seq.map (fun (signature, id) -> { signature = signature; id = id })
-    |> Seq.toList
+    |> Set.ofSeq
+    |> Dict.ofSeq
 
-let toSerializableTemplate (Template (node, mapping)): TemplateSerializable =
+let toSerializableTemplate (Template (node, mapping)) : TemplateSerializable =
     let newMapping =
         mapping
         |> Map.toList
@@ -53,7 +67,7 @@ let toSerializableTemplate (Template (node, mapping)): TemplateSerializable =
         |> Map.ofList
 
     TemplateSerializable(node, newMapping)
-    
+
 let fromSerializableTemplate (TemplateSerializable (node, mapping)) : Template =
     let signatureToNode =
         node.Nodes()
@@ -62,32 +76,39 @@ let fromSerializableTemplate (TemplateSerializable (node, mapping)) : Template =
 
     let newMapping =
         mapping
-        |> Seq.map(|KeyValue|) // To convert a C# Dictionary
+        |> Seq.map (|KeyValue|) // To convert a C# Dictionary
         |> Seq.map (fun (signature, nodeId) -> (signatureToNode.[signature], NodeId nodeId))
         |> Map.ofSeq
 
     Template(node, newMapping)
 
 let toSerializableModel (model: AppModel) =
-    let appTemplate = model.appTemplate |> toSerializableTemplate
-    let templates = model.templates |> List.map toSerializableTemplate
+    let appTemplate =
+        model.appTemplate |> toSerializableTemplate
+
+    let templates =
+        model.templates |> List.map toSerializableTemplate
 
     { appTemplate = appTemplate
       templates = templates }
-    
+
 let fromSerializableModel (model: AppModelSerializable) : AppModel =
-    let appTemplate = model.appTemplate |> fromSerializableTemplate
-    let templates = model.templates |> List.map fromSerializableTemplate
+    let appTemplate =
+        model.appTemplate |> fromSerializableTemplate
+
+    let templates =
+        model.templates
+        |> List.map fromSerializableTemplate
 
     { appTemplate = appTemplate
       templates = templates }
-    
+
 let serializeModel (model: AppModel) =
     let pickler = FsPickler.CreateBinarySerializer()
-    pickler.Pickle (toSerializableModel model)
+    pickler.Pickle(toSerializableModel model)
 
 let unserializeModel (binaryModel: byte []) =
     let pickler = FsPickler.CreateBinarySerializer()
+
     pickler.UnPickle<AppModelSerializable>(binaryModel)
     |> fromSerializableModel
-    

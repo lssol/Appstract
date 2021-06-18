@@ -27,12 +27,18 @@ namespace appcrawl.Repositories
                 .GetCollection<Element>(nameof(Element));
         }
 
-        public async Task RenameElement(string idTemplate, string newName)
+        public async Task RenameElement(string elementId, string newName)
         {
             var update = Builders<Element>.Update.Set(a => a.Name, newName);
-            await _elementCollection.UpdateOneAsync(a => a.Id == idTemplate, update);
+            await _elementCollection.UpdateOneAsync(a => a.Id == elementId, update);
         }
 
+        public async Task UpdateSignature(string elementId, string signature)
+        {
+            var update = Builders<Element>.Update.Set(a => a.ModelSignature, signature);
+            await _elementCollection.UpdateOneAsync(a => a.Id == elementId, update);
+        }
+        
         public void RemoveElement(string id)
         {
             _elementCollection.DeleteOne(t => t.Id == id);

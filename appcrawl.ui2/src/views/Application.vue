@@ -34,7 +34,10 @@
           <button class="delete" v-on:click="removeError"></button>
           {{ error }}
         </div>
-        <iframe v-if="template.html && !content_loading" class="full-height full-width" v-bind:srcdoc="template.html"/>
+        <iframe v-if="template.html && !content_loading" class="full-height full-width" 
+                v-bind:srcdoc="template.html"
+                v-on:load="initSelectMode"                
+        />
       </div>
     </div>
     
@@ -90,7 +93,7 @@ import SelectorPane from '@/components/SelectorPane.vue'
 import TemplateView from '@/components/TemplateView.vue'
 import LabelEdit from '@/components/LabelEdit.vue'
 import api from '@/common/api'
-
+import utils from '@/common/utils'
 
 export default {
   name: 'Application',
@@ -101,6 +104,7 @@ export default {
       templates: [],
       model: false,
     },
+    iframe: null,
     template: null,
     element: null,
     content_loading: false,
@@ -133,26 +137,40 @@ export default {
       this.template.elements.push(newElement)
     },
     
-    async removeElement(id) {
-      await api.removeElement(id)
-      this.template.elements = this.template.elements.filter(e => e.id === id)
+    async removeElement(item) {
+      await api.removeElement(item.id)
+      this.template.elements = this.template.elements.filter(e => e.id === item.id)
     },
     
-    startSelectMode() {
+    initSelectMode() {
       let unselect = () => {}
-      document.body.querySelectorAll('*').forEach(e => e.addEventListener("mouseenter", (evt) => {
-        if (!evt.altKey)
-          return
+      this.iframe = document.querySelector('iframe').contentWindow.document
+      this.iframe
+          .querySelectorAll('*')
+          .forEach(e => e.addEventListener("mouseenter", (evt) => {
+            if (!evt.altKey)
+              return
 
-        unselect()
-        let signature = e.getAttribute('signature')
-        if (signatureToColor.has(signature))
-          unselect = DOM.selectElements([e], signatureToColor.get(signature)).unselect
-      }))
+            unselect()
+            let signature = e.getAttribute('signature')
+            if (!signature)
+              return 
+            
+            this.element.modelSignature = signature
+            unselect = utils.selectElements([e]).unselect
+          }))
     },
     
-    async highlightElement() {
-        
+    async saveModelSignature(signature) {
+      
+    },
+    
+    async highlightElement(element) {
+      this.element = element
+      if (element.modelSignature == null || this.iframe == null)
+        return
+      
+      this.iframe.querySelector(`[signature=${element.modelSignature}]`)
     },
 
     async createModel() {
@@ -195,9 +213,9 @@ export default {
       }
     },
 
-    removeTemplate(id) {
-      api.removeTemplate(id)
-      this.application.templates = this.application.templates.filter(t => t.id !== id)
+    removeTemplate(template) {
+      api.removeTemplate(template.id)
+      this.application.templates = this.application.templates.filter(t => t.id !== template.id)
       this.template = null
     },
 
@@ -215,8 +233,8 @@ export default {
       }
     },
 
-    redirectToTemplate(id) {
-      this.$router.push(`/application/${this.application.id}?templateId=${id}`);
+    redirectToTemplate(template) {
+      this.$router.push(`/application/${this.application.id}?templateId=${template.id}`);
     },
 
     createTemplate: async function() {

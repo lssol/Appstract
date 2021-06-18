@@ -53,5 +53,13 @@ namespace appcrawl.Controllers
             await _repo.RenameElement(model.ElementId, model.Name);
             return Ok();
         }
+        
+        [Route("signature")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateSignature(UpdateSignatureElementModel model)
+        {
+            await _repo.UpdateSignature(model.ElementId, model.Signature);
+            return Ok();
+        }
     }
 }

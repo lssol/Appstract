@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Appstract;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -23,5 +24,8 @@ namespace appcrawl.Entities
         public string  ApplicationId { get; set; }
         
         public IEnumerable<Element> Elements { get; set; } = new List<Element>();
+        
+        [BsonIgnore]
+        public IDictionary<string, string> TemplateModel { get; set; }
     }
 }

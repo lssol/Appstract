@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using appcrawl.Controllers;
 using appcrawl.Entities;
 using appcrawl.Options;
+using Appstract;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -43,16 +44,23 @@ namespace appcrawl.Repositories
         
         public Application GetApplication(string id)
         {
-            var applications = _applicationCollection
+            var application = _applicationCollection
                 .AsQueryable()
                 .Where(a => a.Id == id)
                 .FirstOrDefault();
 
             var templates = _templateRepository.GetTemplates(id);
-                
-            applications.Templates = templates;
+            application.Templates = templates;
 
-            return applications;
+            if (application.Model != null)
+            {
+                var model = ModelCreation.unserializeModel(application.Model);
+                foreach (var template in templates)
+                    template.TemplateModel = ModelCreation.identifyPage(model, template.Html);
+            }
+                
+
+            return application;
         }
         
         public async Task RemoveApplication(string idApplication)

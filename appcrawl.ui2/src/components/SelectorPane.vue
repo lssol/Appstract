@@ -20,10 +20,10 @@ The component emits:
           v-bind:class="{'is-active': selected && item.id === selected.id}">
         
         <div class="column is-four-fifth">
-          <a class="label" v-on:click="select(item.id)">{{item.name}}</a>
+          <a class="label" v-on:click="select(item)">{{item.name}}</a>
         </div>
         <div class="column has-text-right is-one-fifth">
-          <span class="delete" v-on:click="remove(item.id)">delete</span>
+          <span class="delete" v-on:click="remove(item)">delete</span>
         </div>
       </div>
     </div>
@@ -45,14 +45,14 @@ export default {
     return { }
   },
   methods: {
-    select: function(id) {
-      this.$emit('select', id)
+    select: function(item) {
+      this.$emit('select', item)
     },
     create: function () {
       this.$emit('create')
     },
-    remove(id) {
-      this.$emit('remove', id)
+    remove(item) {
+      this.$emit('remove', item)
     }
   }
 

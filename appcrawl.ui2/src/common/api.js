@@ -102,4 +102,10 @@ export default {
         return send(urlApi + '/element/remove', 'DELETE', {elementId})
     },
     
+    async updateModelSignature(elementId, signature) {
+        const res = await send(`${urlApi}/element/signature`, 'PUT', {elementId, signature})
+        if (res == null)
+            throw "An error occured when attempting to save element"
+    }
+    
 }
