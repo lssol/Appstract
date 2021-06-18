@@ -7,6 +7,13 @@ namespace appcrawl.Models
         public string ApplicationId { get; set; }
         public string NewName { get; set; }
     }
+    
+    public class SetHostApplicationModel
+    {
+        public string ApplicationId { get; set; } 
+        public string Host          { get; set; }
+    }
+        
     public class CreateTemplateModel
     {
         public string ApplicationId { get; set; }

@@ -102,10 +102,19 @@ export default {
         return send(urlApi + '/element/remove', 'DELETE', {elementId})
     },
     
+    async renameElement(elementId, name) {
+        return await send(`${urlApi}/element/rename`, 'PUT', {elementId, name})
+    },
+    
     async updateModelSignature(elementId, signature) {
         const res = await send(`${urlApi}/element/signature`, 'PUT', {elementId, signature})
         if (res == null)
             throw "An error occured when attempting to save element"
-    }
+    },
     
+    async setHostApplication(applicationId, host) {
+        const res = await send(`${urlApi}/application/host`, 'PUT', {applicationId, host})
+        if (res == null)
+            throw "An error occured when attempting to save the Host"
+    }
 }

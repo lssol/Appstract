@@ -68,6 +68,14 @@ namespace appcrawl.Controllers
             return Ok();
         }
         
+        [Route("application/host")]
+        [HttpPut]
+        public async Task<IActionResult> SetHost(SetHostApplicationModel model)
+        {
+            await _repo.UpdateHost(model.ApplicationId, model.Host);
+            return Ok();
+        }
+        
         [Route("application/model")]
         [HttpPost]
         public async Task<IActionResult> CreateModel(CreateModelViewModel model)

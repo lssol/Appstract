@@ -47,7 +47,7 @@ namespace appcrawl.Controllers
         }
 
         [Route("rename")]
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> RenameElement(RenameElementModel model)
         {
             await _repo.RenameElement(model.ElementId, model.Name);
@@ -55,7 +55,7 @@ namespace appcrawl.Controllers
         }
         
         [Route("signature")]
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> UpdateSignature(UpdateSignatureElementModel model)
         {
             await _repo.UpdateSignature(model.ElementId, model.Signature);

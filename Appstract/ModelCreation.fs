@@ -32,17 +32,18 @@ let nodeToSignatureCouples mapping (node: Node) =
             |> Seq.toList)
     |> Option.defaultValue List.empty
 
-//let getDoubles (seq: (string * string) seq) =
-//    let mutable set = HashSet()
-//    let mutable doubles = HashSet()
-//
-//    seq |> Seq.iter (fun s ->
-//            if set.Contains(fst s)
-//            then doubles.Add(fst s)
-//            else set.Add(fst s)
-//            |> ignore)
-//    
-//    doubles
+let getDoubles seq =
+    let mutable set = HashSet()
+    let mutable doubles = HashSet()
+
+    seq |> Seq.iter (fun s ->
+            if set.Contains(fst s)
+            then doubles.Add(fst s)
+            else set.Add(fst s)
+            |> ignore)
+    
+    seq
+    
     
 let identifyPage (model: AppModel) (src: string) =
     let model = model
@@ -56,7 +57,7 @@ let identifyPage (model: AppModel) (src: string) =
 
     page.Nodes()
     |> Seq.collect (nodeToSignatureCouples mapping)
-    |> Set.ofSeq
+    |> Utils.Seq.removeDoubles fst //TODO understand why there are doubles in the first place
     |> Dict.ofSeq
 
 let toSerializableTemplate (Template (node, mapping)) : TemplateSerializable =

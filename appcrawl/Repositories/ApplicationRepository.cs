@@ -56,7 +56,8 @@ namespace appcrawl.Repositories
             {
                 var model = ModelCreation.unserializeModel(application.Model);
                 foreach (var template in templates)
-                    template.TemplateModel = ModelCreation.identifyPage(model, template.Html);
+                    if (!string.IsNullOrWhiteSpace(template.Html))
+                        template.TemplateModel = ModelCreation.identifyPage(model, template.Html);
             }
                 
 
@@ -77,6 +78,12 @@ namespace appcrawl.Repositories
         public async Task UpdateModelApplication(string idApplication, byte[] model)
         {
             var update = Builders<Application>.Update.Set(a => a.Model, model);
+            await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
+        }
+        
+        public async Task UpdateHost(string idApplication, string host)
+        {
+            var update = Builders<Application>.Update.Set(a => a.Host, host);
             await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
         }
     }

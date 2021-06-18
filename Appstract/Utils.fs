@@ -94,3 +94,16 @@ module HashSet =
         |> Seq.filter (fun s -> s1.Contains(s))
         |> Seq.iter (fun s -> result.Add(s) |> ignore)
         result
+        
+module Seq =
+    let removeDoubles p seq =
+        let mutable set = HashSet()
+        let mutable unique = List()
+
+        seq |> Seq.iter (fun s ->
+                if not(set.Contains(p s))
+                then
+                    set.Add(p s)
+                    unique.Add(s))
+        unique
+        

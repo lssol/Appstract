@@ -19,6 +19,7 @@ namespace appcrawl.Entities
         public string                Name      { get; set; }
         [BsonIgnore]
         public IEnumerable<Template> Templates { get; set; } = new List<Template>();
-        public byte[]?               Model     { get; set; }
+        public byte[]? Model { get;                   set; }
+        public string  Host  { get;                   set; }
     }
 }

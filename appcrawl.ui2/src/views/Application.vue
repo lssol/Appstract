@@ -29,6 +29,7 @@
       <div v-if="template" class="full-height full-width">
         <label-edit v-bind:text="template.name" v-on:update="renameTemplate"></label-edit>
         <label-edit v-bind:text="template.url" v-on:update="setUrl" placeholder="Type URL here"></label-edit>
+        <label-edit v-bind:text="element.name" v-if="element" v-on:update="renameElement" placeholder="Element name here"></label-edit>
         <em v-if="content_loading">Loading...</em>
         <div v-if="error" class="notification is-danger is-light">
           <button class="delete" v-on:click="removeError"></button>
@@ -42,7 +43,7 @@
     </div>
     
     <div id="model_creation">
-
+      <span class="tag is-primary is-light">{{ application.host }}</span>
       <button
           v-on:click="createModel"
           class="button is-light"
@@ -103,13 +104,15 @@ export default {
       name: '',
       templates: [],
       model: false,
+      host: ''
     },
     iframe: null,
     template: null,
     element: null,
     content_loading: false,
     error: "",
-    creating_model: false
+    creating_model: false,
+    unselect: () => {}
   }},
 
   components: {
@@ -129,6 +132,7 @@ export default {
         this.application.name = application.name
         this.application.templates = application.templates
         this.application.model = !!application.model
+        this.application.host = application.host
       }
     },
     
@@ -142,8 +146,29 @@ export default {
       this.template.elements = this.template.elements.filter(e => e.id === item.id)
     },
     
+    async renameElement(name) {
+      this.element.name = name
+      await api.renameElement(this.element.id, name)
+    },
+    
+    selectSignature(signature) {
+      this.unselect()
+      const model = this.template.templateModel
+      let signaturesToSelect = new Set()
+      for (let key in model) {
+        if (model[key] === model[signature])
+          signaturesToSelect.add(key)
+      }
+      let elementsToSelect =
+          Array.from(this.iframe
+              .querySelectorAll('*'))
+              .filter(e => signaturesToSelect.has(e.getAttribute('signature')))
+
+      console.log("About to select all corresponding elements", elementsToSelect)
+      this.unselect = utils.selectElements(elementsToSelect).unselect
+    },
+
     initSelectMode() {
-      let unselect = () => {}
       this.iframe = document.querySelector('iframe').contentWindow.document
       this.iframe
           .querySelectorAll('*')
@@ -151,26 +176,27 @@ export default {
             if (!evt.altKey)
               return
 
-            unselect()
             let signature = e.getAttribute('signature')
             if (!signature)
               return 
             
             this.element.modelSignature = signature
-            unselect = utils.selectElements([e]).unselect
+            this.saveModelSignature(signature)
+            this.selectSignature(signature)
           }))
     },
     
     async saveModelSignature(signature) {
-      
+        await api.updateModelSignature(this.element.id, signature)
     },
     
     async highlightElement(element) {
       this.element = element
+      this.unselect()
       if (element.modelSignature == null || this.iframe == null)
         return
       
-      this.iframe.querySelector(`[signature=${element.modelSignature}]`)
+      this.selectSignature(element.modelSignature)
     },
 
     async createModel() {
@@ -199,10 +225,15 @@ export default {
       this.error = ''
       this.template.url = newUrl
       this.content_loading = true
+      
       console.log("Attempting to retrieve Html")
       try {
+        let host = new URL(newUrl).host.replace('www.', '')
+        let c = await api.setHostApplication(this.application.id, host)
+        this.application.host = host
         const {html} = await api.setUrlTemplate(this.template.id, newUrl)
         this.template.html = html
+        await c
       }
       catch(e) {
         this.error = "Could not load url"
@@ -236,42 +267,39 @@ export default {
     redirectToTemplate(template) {
       this.$router.push(`/application/${this.application.id}?templateId=${template.id}`);
     },
-
+    
     createTemplate: async function() {
       console.log("Creating a new Template in application " + this.application.name)
       const template = await api.createTemplate(this.application.id)
       this.redirectToTemplate(template.id)
     },
-
-    async init(url) {
-      const applicationId = url.params['applicationId']
-      const templateId    = url.query['templateId']
-
-      if (!applicationId) {
-        console.log('No id in params, creating a new application')
-        const newApplication = await api.createApplication()
-        await this.$router.replace(`/application/${newApplication.id}`)
-        return
-      }
-
-      await this.loadApplication(applicationId)
-
-      if (templateId)
-        this.template = this.application.templates.find(t => t.id === templateId)
-    }
   },
 
   created: async function() {
-      await this.init(this.$route)
+    const url = this.$route
+    const applicationId = url.params['applicationId']
+    const templateId    = url.query['templateId']
+
+    if (!applicationId) {
+      console.log('No id in params, creating a new application')
+      const newApplication = await api.createApplication()
+      await this.$router.replace(`/application/${newApplication.id}`)
+      return
+    }
+
+    await this.loadApplication(applicationId)
+    
+    if (templateId)
+      this.template = this.application.templates.find(t => t.id === templateId)
   },
 
   watch: {
     $route: async function(to) {
-      await this.init(to)
+      const templateId = to.query['templateId']
+      if (templateId)
+        this.template = this.application.templates.find(t => t.id === templateId)
+      this.element = null
     },
-    template: function() {
-
-    }
   }
 }
 </script>
