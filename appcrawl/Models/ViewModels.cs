@@ -27,7 +27,7 @@ namespace appcrawl.Models
 
     public class IdentifyPageModel
     {
-        public string ApplicationId { get; set; }
+        public string Host { get; set; }
         public string Page { get; set; }
     }
     

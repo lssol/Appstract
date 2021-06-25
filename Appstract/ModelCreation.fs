@@ -1,6 +1,5 @@
 module Appstract.ModelCreation
 
-open System
 open System.Collections.Generic
 open Appstract.Types
 open Appstract.DOM
@@ -12,11 +11,20 @@ open MBrace.FsPickler
 type PageIdentificationData = { signature: string; id: string }
 
 let createModel (requestPages: string seq) =
-    requestPages
-    |> Seq.choose Node.FromString
-    |> Seq.map IntraPageAbstraction.appstract
-    |> Seq.toList
-    |> InterPageAbstraction.createModel
+    let templates = requestPages |> Seq.map Node.FromString
+    let templateIds =
+        templates
+        |> Seq.map (fun template -> template.Value.signature)
+        |> Seq.zip requestPages
+        |> Seq.map (fun (templateSignature, page) -> {|page = page; templateSignature = templateSignature|})
+    let model =
+        templates
+        |> Seq.map (fun op -> op |> Option.get)
+        |> Seq.map IntraPageAbstraction.appstract
+        |> Seq.toList
+        |> InterPageAbstraction.createModel
+        
+    model
 
 let sourceToSignatureCouple (NodeId id) (source: HtmlNode) : (string * string) option =
     source.TryGetAttribute "signature"
@@ -43,7 +51,6 @@ let getDoubles seq =
             |> ignore)
     
     seq
-    
     
 let identifyPage (model: AppModel) (src: string) =
     let model = model

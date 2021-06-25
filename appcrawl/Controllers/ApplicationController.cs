@@ -9,6 +9,7 @@ using appcrawl.Models;
 using appcrawl.Options;
 using appcrawl.Repositories;
 using Appstract.Types;
+using FSharpPlus.Control;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -83,6 +84,7 @@ namespace appcrawl.Controllers
             var appModel = Appstract.ModelCreation.createModel(model.Pages);
             var binaryModel = Appstract.ModelCreation.serializeModel(appModel);
             await _repo.UpdateModelApplication(model.ApplicationId, binaryModel);
+            _cache.Remove(model.ApplicationId);
             
             return Ok();
         }
@@ -91,15 +93,18 @@ namespace appcrawl.Controllers
         [HttpGet]
         public async Task<IActionResult> Identify(IdentifyPageModel m)
         {
-            var app   = _repo.GetApplication(m.ApplicationId);
-
-            var model = _cache.GetOrCreate(m.ApplicationId, entry =>
+            var model = _cache.GetOrCreate(m.Host, entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(3);
-                return Appstract.ModelCreation.createModel(app.Templates.Select(t => t.Html));
+                
+                var app  = _repo.GetApplicationFromHost(m.Host);
+                if (app.Model == null)
+                    throw new Exception("No Associated Model");
+                return Appstract.ModelCreation.unserializeModel(app.Model);
             });
             
             var identification = Appstract.ModelCreation.identifyPage(model, m.Page);
+            
             
             return Ok(identification);
         }

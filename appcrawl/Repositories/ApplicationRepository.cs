@@ -5,6 +5,7 @@ using appcrawl.Controllers;
 using appcrawl.Entities;
 using appcrawl.Options;
 using Appstract;
+using FSharpPlus.Control;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -41,6 +42,20 @@ namespace appcrawl.Repositories
             return _applicationCollection
                 .FindAsync(Builders<Application>.Filter.Empty);
         }
+
+        public Application GetApplicationFromHost(string host)
+        {
+            var id = _applicationCollection
+                .AsQueryable()
+                .Where(a => a.Host == host)
+                .Select(a => a.Id)
+                .FirstOrDefault();
+
+            if (id == null)
+                throw new Exception("There is not application with such host");
+            
+            return GetApplication(id);
+        }
         
         public Application GetApplication(string id)
         {
@@ -59,7 +74,6 @@ namespace appcrawl.Repositories
                     if (!string.IsNullOrWhiteSpace(template.Html))
                         template.TemplateModel = ModelCreation.identifyPage(model, template.Html);
             }
-                
 
             return application;
         }

@@ -17,11 +17,12 @@ namespace appcrawl.Entities
 
         [BsonId(IdGenerator = typeof(StringObjectIdGenerator))] 
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id            { get; set; }
+        public string? Id { get;            set; }
         public string? Url           { get; set; }
         public string? Html          { get; set; }
-        public string Name          { get; set; }
+        public string  Name          { get; set; }
         public string  ApplicationId { get; set; }
+        public string  SignatureRoot { get; set; }
         
         public IEnumerable<Element> Elements { get; set; } = new List<Element>();
         
