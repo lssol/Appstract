@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Appstract.Front.Entities;
 
 namespace Appstract.Front.Data
 {
@@ -11,10 +12,10 @@ namespace Appstract.Front.Data
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        public Task<WeatherForecast[]> GetForecastAsync(DateTime startDate)
+        public Task<Application[]> GetForecastAsync(DateTime startDate)
         {
             var rng = new Random();
-            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new Application
             {
                 Date = startDate.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),

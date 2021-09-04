@@ -1,8 +1,8 @@
 using System;
 
-namespace Appstract.Front.Data
+namespace Appstract.Front.Entities
 {
-    public class WeatherForecast
+    public class Application
     {
         public DateTime Date { get; set; }
 

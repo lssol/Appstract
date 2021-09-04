@@ -1,0 +1,60 @@
+﻿@page "/fetchdata"
+@using Appstract.Front.Entities
+@using Appstract.Front.Services
+@using MongoDB.Driver.Core.Operations
+@inject ApplicationService ApplicationService
+
+<h1>Applications</h1>
+
+@if (_applications == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Domain</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var application in _applications)
+        {
+            <tr>
+                <td>@application.Name</td>
+                <td>@application.Domain</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <InputText id="name" @bind-Value="exampleModel.Name" />
+
+    <button type="submit">Submit</button>
+</EditForm>
+
+
+<button class="btn btn-primary" @onclick="AddApplication">Add an Application</button>
+
+@code {
+    private List<Application> _applications;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _applications = await ApplicationService.GetApplications();
+    }
+
+    private void AddApplication()
+    {
+        
+    }
+
+}

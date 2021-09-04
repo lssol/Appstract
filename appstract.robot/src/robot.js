@@ -33,6 +33,83 @@ export const urlToHtml = async (url) => {
     return html
 }
 
+export const explore = async (domain, depth, width, delay, minNodes) => {
+    const browser = await getBrowser()
+    const page = await browser.newPage()
+    try {
+        await page.goto(url, {waitUntil: 'networkidle2'})
+    } catch (e) {
+        page.close()
+        throw "Invalid url"
+    } 
+
+    let pagesReturned = []
+    let errors = []
+    let taskQueue = [{url: domain, depth: 0, origin: null}]
+
+    let rec = () => {
+        if (taskQueue.length == 0) {
+            console.log("No more tasks")
+            return
+        }
+
+        let {url, currentDepth, origin} = taskQueue[0]
+
+        if (currentDepth > depth) {
+            console.log("Reached depth limit")
+            return
+        }
+
+        console.log("Exploring " + url)
+
+        try {
+            await page.goto(url, {waitUntil: 'networkidle2'})
+            let res = {...pagesReturned.push(getPage(page)), origin, domain}
+            if (res.nbNodes > minNodes) {
+                console.Warn(`Url: ${url} has`)
+            }
+
+            const nextLinks = await page.evaluate(() => { 
+                let links = Array.from(document.querySelectorAll('a')).map(a => a.href)
+                return shuffleArray(links).take(width)
+            })
+
+            Array.from(nextLinks)
+                .map(link => taskQueue.push({url: link, depth: currentDepth + 1, origin: url}))
+
+        } catch (e) {
+            errors.push(url)
+            console.warn(`Error while loading ${url}`)
+        } 
+        
+
+    }
+    
+    rec
+    page.close()
+
+    return html
+}
+
+const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+const getPage = (page) => {
+    await addBase(page)
+    await removeOverlayOnPage(page)
+    await addSignature(page)
+    
+    const content = await page.evaluate(() => document.documentElement.outerHTML)
+    const nbLinks = await page.evaluate(() => document.documentElement.querySelectorAll('a').length)
+    const nbNodes = await page.evaluate(() => document.documentElement.querySelectorAll('*').length)
+    const url     = await page.url()
+    return { content, nbLinks, nbNodes, url }
+}
+
 const genString = () => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0
