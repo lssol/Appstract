@@ -5,4 +5,20 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
+    <ItemGroup>
+        <Folder Include="ModelViews" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
+        <PackageReference Include="Google.Protobuf" Version="3.8.0" />
+        <PackageReference Include="Grpc" Version="2.23.0" />
+        <PackageReference Include="Grpc.Tools" Version="2.23.0" PrivateAssets="All" /> 
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Appstract\Appstract.fsproj" />
+        <Protobuf Include="../robot.proto" Link="robot.proto" />
+    </ItemGroup>
+
 </Project>

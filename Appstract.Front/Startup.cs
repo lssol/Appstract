@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using appcrawl.Options;
+using Appstract.Front.Repositories;
+using Appstract.Front.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -9,7 +12,6 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Appstract.Front.Data;
 
 namespace Appstract.Front
 {
@@ -28,7 +30,17 @@ namespace Appstract.Front
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddSingleton<ApplicationService>();
+            services.AddSingleton<ApplicationRepository>();
+            services.AddSingleton<RpcChannel>();
+            
+            ConfigureOptions(services);
+        }
+
+        private void ConfigureOptions(IServiceCollection services)
+        {
+            services.Configure<MongoOptions>(Configuration.GetSection(MongoOptions.Key));
+            services.Configure<RobotOptions>(Configuration.GetSection(RobotOptions.Key));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

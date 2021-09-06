@@ -1,9 +1,10 @@
-﻿@page "/applications"
+﻿@page "/"
 @using Appstract.Front.Entities
 @using Appstract.Front.Services
 @using System.Linq
 @using System.Threading
 @using FSharpPlus
+@using FSharpPlus.Control
 @using Robot
 @using Task = System.Threading.Tasks.Task
 @inject ApplicationService ApplicationService
@@ -22,7 +23,6 @@ else if (applications.Any())
     <table class="table">
         <thead>
         <tr>
-            <th>Id</th>
             <th>Name</th>
             <th>Domain</th>
             <th>Pages</th>
@@ -32,13 +32,12 @@ else if (applications.Any())
         @foreach (var application in applications)
         {
             <tr>
-                <td>@application.Id</td>
                 <td>@application.Name</td>
                 <td>@application.Domain</td>
                 <td>
-                    @if (exploration.ContainsKey(application))
+                    @if (exploration.ContainsKey(application.Id))
                     {
-                        <strong>@exploration[application]</strong>
+                        <strong>@exploration[application.Id]</strong>
                     }
                     else if (application.Pages.Any())
                     {
@@ -46,7 +45,7 @@ else if (applications.Any())
                     }
                     else
                     {
-                        <a href="#" @onclick="() => Explore(application)">Explore</a>
+                        <a href="#" @onclick="async () => await Explore(application.Id)">Explore</a>
                     }
                 </td>
             </tr>
@@ -55,12 +54,12 @@ else if (applications.Any())
     </table>
 }
 
-<EditForm class="form-inline" Model="@application" OnValidSubmit="@HandleValidSubmit">
+<EditForm class="form-inline" Model="@_application" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
 
-    <InputText placeholder="Name" class="form-control" id="name" @bind-Value="application.Name"/>
-    <InputText placeholder="Domain" class="form-control" id="domain" @bind-Value="application.Domain"/>
+    <InputText placeholder="Name" class="form-control" id="name" @bind-Value="_application.Name"/>
+    <InputText placeholder="Domain" class="form-control" id="domain" @bind-Value="_application.Domain"/>
 
     <button class="btn-primary btn" type="submit">Add an application</button>
 </EditForm>
@@ -68,9 +67,9 @@ else if (applications.Any())
 
 @code {
     private List<Application> applications;
-    private Application application = new();
+    private Application _application = new();
 
-    private Dictionary<Application, int> exploration = new();
+    private Dictionary<string, int> exploration = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -79,19 +78,29 @@ else if (applications.Any())
 
     private void HandleValidSubmit()
     {
-        var result = ApplicationService.CreateApplication(application);
-        application = new();
+        var result = ApplicationService.CreateApplication(_application);
+        _application = new();
         applications.Add(result);
     }
 
-    private async void Explore(Application application)
+    private async Task Explore(string id)
     {
-        exploration.Add(application, 0);
+        var application = applications.Find(a => a.Id == id);
+        exploration.Add(id, 0);
         var stream = RpcChannel.Client.Explore(new ExploreRequest {Domain = application.Domain}).ResponseStream;
         while (await stream.MoveNext(CancellationToken.None))
         {
+            var res = stream.Current;
+            if (res.Error)
+            {
+                Console.WriteLine($"Error occured when exploring {res.Url}");
+                continue;
+            }
+
+            Console.WriteLine($"Explored {res.Url}");
+            exploration[id]++;
+            StateHasChanged();
         }
     }
 
 }
-

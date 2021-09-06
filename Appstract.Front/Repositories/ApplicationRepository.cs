@@ -1,104 +1,50 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using appcrawl.Controllers;
-using appcrawl.Entities;
 using appcrawl.Options;
-using Appstract;
-using FSharpPlus.Control;
-using Microsoft.AspNetCore.Mvc;
+using Appstract.Front.Entities;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
-// ReSharper disable ReplaceWithSingleCallToFirstOrDefault
 
-namespace appcrawl.Repositories
+namespace Appstract.Front.Repositories
 {
     public class ApplicationRepository
     {
-        private readonly TemplateRepository _templateRepository;
         private readonly MongoOptions _options;
         private readonly IMongoCollection<Application> _applicationCollection;
+        private readonly IMongoCollection<Page> _pageCollection;
 
-        public ApplicationRepository(IOptionsMonitor<MongoOptions> options, TemplateRepository templateRepository)
+        public ApplicationRepository(IOptionsMonitor<MongoOptions> options)
         {
-            _templateRepository = templateRepository;
             _options = options.CurrentValue;
-            
-            _applicationCollection = new MongoClient(_options.ConnectionString)
-                .GetDatabase(_options.Database)
-                .GetCollection<Application>(nameof(Application));
+            var db = new MongoClient(_options.ConnectionString).GetDatabase(_options.Database);
+            _applicationCollection = db.GetCollection<Application>(nameof(Application));
+            _pageCollection = db.GetCollection<Page>(nameof(Page));
         }
 
-        public async Task<Application> CreateApplication(Application application)
+        public Application CreateApplication(Application application)
         {
-            await _applicationCollection.InsertOneAsync(application);
+            _applicationCollection.InsertOne(application);
             return application;
         }
 
-        public Task<IAsyncCursor<Application>> GetApplications()
+        public Task<List<Application>> GetApplications()
         {
             return _applicationCollection
-                .FindAsync(Builders<Application>.Filter.Empty);
+                .Aggregate()
+                .Lookup<Application, Page, Application>(_pageCollection, a => a.Id, p => p.ApplicationId, a => a.Pages)
+                // .Lookup("Page", "Id", "ApplicationId", "Pages")
+                // .As<Application>()
+                .ToListAsync();
         }
 
-        public Application GetApplicationFromHost(string host)
-        {
-            var id = _applicationCollection
-                .AsQueryable()
-                .Where(a => a.Host == host)
-                .Select(a => a.Id)
-                .FirstOrDefault();
-
-            if (id == null)
-                throw new Exception("There is not application with such host");
-            
-            return GetApplication(id);
-        }
-        
-        public Application GetApplication(string id)
-        {
-            var application = _applicationCollection
-                .AsQueryable()
-                .Where(a => a.Id == id)
-                .FirstOrDefault();
-
-            var templates = _templateRepository.GetTemplates(id);
-            application.Templates = templates;
-
-            if (application.Model != null)
-            {
-                var model = ModelCreation.unserializeModel(application.Model);
-                foreach (var template in templates)
-                    if (!string.IsNullOrWhiteSpace(template.Html))
-                        template.TemplateModel = ModelCreation.identifyPage(model, template.Html);
-            }
-
-            return application;
-        }
-        
         public async Task RemoveApplication(string idApplication)
         {
             await _applicationCollection.DeleteOneAsync(a => a.Id == idApplication);
         }
 
-        public async Task RenameApplication(string idApplication, string newName)
+        public async Task UpdateApplication(Application application)
         {
-            var update = Builders<Application>.Update.Set(a => a.Name, newName);
-            await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
-        }
-        
-        public async Task UpdateModelApplication(string idApplication, byte[] model)
-        {
-            var update = Builders<Application>.Update.Set(a => a.Model, model);
-            await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
-        }
-        
-        public async Task UpdateHost(string idApplication, string host)
-        {
-            var update = Builders<Application>.Update.Set(a => a.Host, host);
-            await _applicationCollection.UpdateOneAsync(a => a.Id == idApplication, update);
+            await _applicationCollection.ReplaceOneAsync(a => a.Id == application.Id, application);
         }
     }
 }

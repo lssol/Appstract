@@ -1,26 +1,36 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Appstract.Front.Entities;
+using Appstract.Front.Repositories;
+using MongoDB.Driver;
 
-namespace Appstract.Front.Data
+namespace Appstract.Front.Services
 {
-    public class WeatherForecastService
+    public class ApplicationService
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly ApplicationRepository _repo;
+        private readonly RpcChannel _channel;
 
-        public Task<Application[]> GetForecastAsync(DateTime startDate)
+        public ApplicationService(ApplicationRepository repo, RpcChannel channel)
         {
-            var rng = new Random();
-            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new Application
-            {
-                Date = startDate.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            }).ToArray());
+            _repo = repo;
+            _channel = channel;
+        }
+
+        public Task<List<Application>> GetApplications()
+        {
+            return _repo.GetApplications();
+        }
+        public Application CreateApplication(Application application)
+        {
+            return _repo.CreateApplication(application);
+        }
+
+        public void Explore()
+        {
+            
         }
     }
 }

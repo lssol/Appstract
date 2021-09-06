@@ -1,6 +1,23 @@
 @page "/TestDict"
+@using MongoDB.Driver.Core.Operations
 <h3>TestDict</h3>
 
+<p>@counter</p>
+
+<button @onclick="Count">Count</button>
+
 @code {
-    
+    private int counter;
+
+    private async Task Count()
+    {
+        for (var i = 0; i < 20; i++)
+        {
+            counter++;
+            StateHasChanged();
+            Console.WriteLine("counter = " + counter);
+            await Task.Delay(500);
+        }
+    }
+
 }

@@ -1,15 +1,26 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace Appstract.Front.Entities
 {
     public class Application
     {
-        public DateTime Date { get; set; }
+        [Editable(false)]
+        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))] 
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+        
+        [Required]
+        public string Name { get; set; }
 
-        public int TemperatureC { get; set; }
+        [Required]
+        public string Domain { get; set; }
 
-        public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
-
-        public string Summary { get; set; }
+        [Editable(false)] public IEnumerable<Page> Pages { get; set; } = new List<Page>();
     }
 }

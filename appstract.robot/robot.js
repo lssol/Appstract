@@ -1,10 +1,11 @@
+'use strict';
 import puppeteer from 'puppeteer'
-import {removeOverlay} from './removeOverlay.js'
+// import {removeOverlay} from './removeOverlay.js'
 
 let browser
 
 const getBrowser = async () => {
-    if (browser)
+    if (browser && browser.isConnected())
         return browser
 
     browser = await puppeteer.launch()
@@ -33,81 +34,109 @@ export const urlToHtml = async (url) => {
     return html
 }
 
-export const explore = async (domain, depth, width, delay, minNodes) => {
+const getHostname = (url) => {
+    try {
+        let h = new URL(url).hostname
+        return h.replace(/^www\./, '')
+    } catch (e) {
+        return ""
+    }
+}
+
+export const explore = async (handles, options) => {
+    const {domain, depth, width, delay, minNodes} = options
+
+    const hostname = getHostname(domain)
     const browser = await getBrowser()
     const page = await browser.newPage()
+    stopRedirect(page)
+
+    page.setDefaultNavigationTimeout(5000)
+
     try {
-        await page.goto(url, {waitUntil: 'networkidle2'})
+        await page.goto(domain, {waitUntil: 'networkidle0'})
     } catch (e) {
         page.close()
+        console.error("Error when opening entry page. The explorer will stop.", e)
         throw "Invalid url"
     } 
 
-    let pagesReturned = []
-    let errors = []
+    await page.exposeFunction("genString", genString)
+
     let taskQueue = [{url: domain, depth: 0, origin: null}]
+    let alreadyVisited = new Set()
 
-    let rec = () => {
-        if (taskQueue.length == 0) {
-            console.log("No more tasks")
-            return
-        }
+    while (taskQueue.length > 0) {
+        let {url, depth: currentDepth, origin} = taskQueue.shift()
 
-        let {url, currentDepth, origin} = taskQueue[0]
 
-        if (currentDepth > depth) {
-            console.log("Reached depth limit")
-            return
-        }
-
-        console.log("Exploring " + url)
+        console.log(`[depth=${currentDepth}] Exploring ${url}`)
 
         try {
-            await page.goto(url, {waitUntil: 'networkidle2'})
-            let res = {...pagesReturned.push(getPage(page)), origin, domain}
-            if (res.nbNodes > minNodes) {
-                console.Warn(`Url: ${url} has`)
+            await page.goto(url, {waitUntil: 'networkidle2', timeout: 3000})
+            console.info("Page loaded")
+
+            let links = await page.evaluate(() => Array.from(document.documentElement.querySelectorAll('a')).map(e => e.href))
+            links = links.filter(l => (getHostname(l) === hostname) && !alreadyVisited.has(l))
+
+            let pageResult = await getPageResult(page)
+            let res = {...pageResult, origin, domain, nbLinks: links.length}
+            
+            if (res.nbNodes < minNodes)
+                throw `Url was ignored because it has less than ${minNodes} nodes": ${res}`
+
+            handles.success(res)
+
+            if (currentDepth == depth) {
+                console.log("Reached depth limit")
+                continue
             }
 
-            const nextLinks = await page.evaluate(() => { 
-                let links = Array.from(document.querySelectorAll('a')).map(a => a.href)
-                return shuffleArray(links).take(width)
-            })
-
-            Array.from(nextLinks)
-                .map(link => taskQueue.push({url: link, depth: currentDepth + 1, origin: url}))
-
+            const nextLinks = shuffleArray(links).slice(0, width)
+            const newTasks = nextLinks.map(link => ({url: link, depth: currentDepth + 1, origin: url}))
+            taskQueue.push(...newTasks)
         } catch (e) {
-            errors.push(url)
-            console.warn(`Error while loading ${url}`)
-        } 
-        
-
+            handles.failure(url)
+            console.warn(`Error while loading ${url}`, e)
+        } finally {
+            await new Promise(r => setTimeout(r, delay)) // SLEEP
+        }
     }
     
-    rec
+    console.log(`Finished exploring`)
     page.close()
+}
 
-    return html
+const stopRedirect = page => {
+    await page.setRequestInterception(true);
+
+    page.on('request', request => {
+    if (request.isNavigationRequest() && request.redirectChain().length !== 0) {
+        request.abort();
+    } else {
+        request.continue();
+    }
+    });
 }
 
 const shuffleArray = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
+    let arr = array.slice()
+    for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [arr[i], arr[j]] = [arr[j], arr[i]];
     }
+    return arr
 }
 
-const getPage = (page) => {
+const getPageResult = async (page) => {
     await addBase(page)
     await removeOverlayOnPage(page)
     await addSignature(page)
     
     const content = await page.evaluate(() => document.documentElement.outerHTML)
-    const nbLinks = await page.evaluate(() => document.documentElement.querySelectorAll('a').length)
     const nbNodes = await page.evaluate(() => document.documentElement.querySelectorAll('*').length)
     const url     = await page.url()
-    return { content, nbLinks, nbNodes, url }
+    return { content, nbNodes, url }
 }
 
 const genString = () => {
@@ -348,7 +377,6 @@ const removeOverlayOnPage = async (page) => {
 }
 
 const addSignature = async (page) => {
-    await page.exposeFunction("genString", genString)
     return page.evaluate(async () => {
         const elements = document.querySelectorAll("*")
         elements.forEach(async (e) => e.setAttribute('signature', await genString()))
