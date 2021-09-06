@@ -1,7 +1,97 @@
-@page "/"
+﻿@page "/applications"
+@using Appstract.Front.Entities
+@using Appstract.Front.Services
+@using System.Linq
+@using System.Threading
+@using FSharpPlus
+@using Robot
+@using Task = System.Threading.Tasks.Task
+@inject ApplicationService ApplicationService
+@inject RpcChannel RpcChannel
 
-<h1>Hello, world!</h1>
+<h1>Applications</h1>
 
-Welcome to your new app.
+@if (applications == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else if (applications.Any())
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Domain</th>
+            <th>Pages</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var application in applications)
+        {
+            <tr>
+                <td>@application.Id</td>
+                <td>@application.Name</td>
+                <td>@application.Domain</td>
+                <td>
+                    @if (exploration.ContainsKey(application))
+                    {
+                        <strong>@exploration[application]</strong>
+                    }
+                    else if (application.Pages.Any())
+                    {
+                        <span>@application.Pages.Count()</span>
+                    }
+                    else
+                    {
+                        <a href="#" @onclick="() => Explore(application)">Explore</a>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
 
-<SurveyPrompt Title="How is Blazor working for you?"/>
+<EditForm class="form-inline" Model="@application" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <InputText placeholder="Name" class="form-control" id="name" @bind-Value="application.Name"/>
+    <InputText placeholder="Domain" class="form-control" id="domain" @bind-Value="application.Domain"/>
+
+    <button class="btn-primary btn" type="submit">Add an application</button>
+</EditForm>
+
+
+@code {
+    private List<Application> applications;
+    private Application application = new();
+
+    private Dictionary<Application, int> exploration = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        applications = await ApplicationService.GetApplications();
+    }
+
+    private void HandleValidSubmit()
+    {
+        var result = ApplicationService.CreateApplication(application);
+        application = new();
+        applications.Add(result);
+    }
+
+    private async void Explore(Application application)
+    {
+        exploration.Add(application, 0);
+        var stream = RpcChannel.Client.Explore(new ExploreRequest {Domain = application.Domain}).ResponseStream;
+        while (await stream.MoveNext(CancellationToken.None))
+        {
+        }
+    }
+
+}
+
