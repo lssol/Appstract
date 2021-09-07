@@ -46,5 +46,11 @@ namespace Appstract.Front.Repositories
         {
             await _applicationCollection.ReplaceOneAsync(a => a.Id == application.Id, application);
         }
+
+        public async Task<Page> CreatePage(Page page)
+        {
+            await _pageCollection.InsertOneAsync(page);
+            return page;
+        }
     }
 }

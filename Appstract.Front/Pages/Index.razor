@@ -3,12 +3,14 @@
 @using Appstract.Front.Services
 @using System.Linq
 @using System.Threading
+@using Appstract.Front.Repositories
 @using FSharpPlus
 @using FSharpPlus.Control
 @using Robot
 @using Task = System.Threading.Tasks.Task
 @inject ApplicationService ApplicationService
 @inject RpcChannel RpcChannel
+@inject ApplicationRepository ApplicationRepository
 
 <h1>Applications</h1>
 
@@ -98,6 +100,16 @@ else if (applications.Any())
             }
 
             Console.WriteLine($"Explored {res.Url}");
+            await ApplicationRepository.CreatePage(new Page
+            {
+                Content = res.Content,
+                Domain = res.Domain,
+                Origin = res.Origin,
+                Url = res.Url,
+                ApplicationId = id,
+                NbLinks = res.NbLinks,
+                NbNodes = res.NbNodes
+            });
             exploration[id]++;
             StateHasChanged();
         }
