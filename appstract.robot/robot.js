@@ -15,18 +15,18 @@ const getBrowser = async () => {
 export const urlToHtml = async (url) => {
     const browser = await getBrowser()
     const page = await browser.newPage()
-    
+
     try {
-        await page.goto(url, {waitUntil: 'networkidle2'})
+        await page.goto(url, { waitUntil: 'networkidle2' })
     } catch (e) {
         page.close()
         throw "Invalid url"
-    } 
-    
+    }
+
     await addBase(page)
     await removeOverlayOnPage(page)
     await addSignature(page)
-    
+
     const html = await page.evaluate(() => document.documentElement.outerHTML)
 
     page.close()
@@ -44,7 +44,7 @@ const getHostname = (url) => {
 }
 
 export const explore = async (handles, options) => {
-    const {domain, depth, width, delay, minNodes} = options
+    const { domain, depth, width, delay, minNodes } = options
 
     const hostname = getHostname(domain)
     const browser = await getBrowser()
@@ -54,34 +54,33 @@ export const explore = async (handles, options) => {
     page.setDefaultNavigationTimeout(5000)
 
     try {
-        await page.goto(domain, {waitUntil: 'networkidle0'})
+        await page.goto(domain, { waitUntil: 'networkidle0' })
     } catch (e) {
         page.close()
         console.error("Error when opening entry page. The explorer will stop.", e)
         throw "Invalid url"
-    } 
+    }
 
     await page.exposeFunction("genString", genString)
 
-    let taskQueue = [{url: domain, depth: 0, origin: null}]
+    let taskQueue = [{ url: domain, depth: 0, origin: null }]
     let alreadyVisited = new Set()
 
     while (taskQueue.length > 0) {
-        let {url, depth: currentDepth, origin} = taskQueue.shift()
-
+        let { url, depth: currentDepth, origin } = taskQueue.shift()
 
         console.log(`[depth=${currentDepth}] Exploring ${url}`)
 
         try {
-            await page.goto(url, {waitUntil: 'networkidle2', timeout: 3000})
+            await page.goto(url, { waitUntil: 'networkidle2', timeout: 3000 })
             console.info("Page loaded")
 
             let links = await page.evaluate(() => Array.from(document.documentElement.querySelectorAll('a')).map(e => e.href))
             links = links.filter(l => (getHostname(l) === hostname) && !alreadyVisited.has(l))
 
             let pageResult = await getPageResult(page)
-            let res = {...pageResult, origin, domain, nbLinks: links.length}
-            
+            let res = { ...pageResult, origin, domain, nbLinks: links.length }
+
             if (res.nbNodes < minNodes)
                 throw `Url was ignored because it has less than ${minNodes} nodes": ${res}`
 
@@ -93,7 +92,7 @@ export const explore = async (handles, options) => {
             }
 
             const nextLinks = shuffleArray(links).slice(0, width)
-            const newTasks = nextLinks.map(link => ({url: link, depth: currentDepth + 1, origin: url}))
+            const newTasks = nextLinks.map(link => ({ url: link, depth: currentDepth + 1, origin: url }))
             taskQueue.push(...newTasks)
         } catch (e) {
             handles.failure(url)
@@ -102,20 +101,27 @@ export const explore = async (handles, options) => {
             await new Promise(r => setTimeout(r, delay)) // SLEEP
         }
     }
-    
+
     console.log(`Finished exploring`)
     page.close()
 }
 
-const stopRedirect = page => {
+const stopRedirect = async page => {
     await page.setRequestInterception(true);
 
     page.on('request', request => {
-    if (request.isNavigationRequest() && request.redirectChain().length !== 0) {
-        request.abort();
-    } else {
-        request.continue();
-    }
+        var redirectChain = request.redirectChain().map(r => r.url()).reverse();
+        var shouldAbort =
+            request.isNavigationRequest() &&
+            redirectChain.length !== 0 &&
+            getHostname(redirectChain[0]) !== getHostname(request.url());
+
+        if (shouldAbort) {
+            console.log("Aborting due to redirection: ", redirectChain)
+            request.abort();
+        } else {
+            request.continue();
+        }
     });
 }
 
@@ -130,17 +136,17 @@ const shuffleArray = (array) => {
 
 const getPageResult = async (page) => {
     await addBase(page)
-    await removeOverlayOnPage(page)
+    // await removeOverlayOnPage(page)
     await addSignature(page)
-    
+
     const content = await page.evaluate(() => document.documentElement.outerHTML)
     const nbNodes = await page.evaluate(() => document.documentElement.querySelectorAll('*').length)
-    const url     = await page.url()
+    const url = await page.url()
     return { content, nbNodes, url }
 }
 
 const genString = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0
         var v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -154,7 +160,7 @@ const addBase = (page) => {
         const baseTag = document.createElement('base')
         baseTag.setAttribute('href', baseUrl)
         document.head.appendChild(baseTag)
-    }) 
+    })
 }
 
 const removeOverlayOnPage = async (page) => {

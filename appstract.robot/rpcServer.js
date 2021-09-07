@@ -24,10 +24,15 @@ async function Explore(call) {
     const {domain} = call.request;
     console.log("Received explore call with domain: " + domain)
 
-    await explore({
-        success: (res) => {call.write(res)},
-        failure: (url) => {call.write({url, error: true})}
-    }, {domain, depth: 3, width: 3, delay: 500, minNode: 35})
+    try {
+      await explore({
+          success: (res) => {call.write(res)},
+          failure: (url) => {call.write({url, error: true})}
+      }, {domain, depth: 3, width: 3, delay: 500, minNode: 35})
+    }
+    catch (e) {
+      call.end()
+    }
 
     call.end()
     console.log("Finished exploration of " + domain)
