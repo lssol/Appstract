@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using appcrawl.Options;
 using Appstract.Front.Entities;
@@ -17,12 +18,27 @@ namespace Appstract.Front.Repositories
         private readonly IMongoCollection<Application> _applicationCollection;
         private readonly IMongoCollection<Page> _pageCollection;
 
+        private readonly List<Expression<Func<Page, object>>> pageIndices = new()
+        {
+            p => p.ApplicationId
+        };
+
         public ApplicationRepository(IOptionsMonitor<MongoOptions> options)
         {
             _options = options.CurrentValue;
             var db = new MongoClient(_options.ConnectionString).GetDatabase(_options.Database);
             _applicationCollection = db.GetCollection<Application>(nameof(Application));
             _pageCollection = db.GetCollection<Page>(nameof(Page));
+            CreateIndices();
+        }
+
+        public void CreateIndices()
+        {
+            pageIndices.ForEach(i =>
+            {
+                var indexKeysDefinition = Builders<Page>.IndexKeys.Ascending(i);
+                _pageCollection.Indexes.CreateOne(new CreateIndexModel<Page>(indexKeysDefinition));
+            });
         }
 
         public Application CreateApplication(Application application)

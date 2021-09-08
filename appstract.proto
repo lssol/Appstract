@@ -1,0 +1,44 @@
+syntax = "proto3";
+package appstract;
+
+// ----------------------------------------------------------------------------
+service Clustering {
+  rpc CreateClustering (CreateClusteringRequest) returns (ClusteringResponse) {}
+  rpc GetClusterers () returns (ClusterersReply) {}
+}
+
+message Page {
+  string content = 1;
+  string url = 2;
+}
+message Cluster {
+  repeated Page pages = 1;
+  double confidence = 2; 
+}
+message CreateClusteringRequest {
+  string clusterer = 1;
+  string domain = 2;
+  repeated Page pages = 3;
+}
+message ClusteringResponse {
+  repeated Cluster clusters = 1;
+  double confidence = 2;
+}
+
+// ----------------------------------------------------------------------------
+service Robot {
+  rpc Explore (ExploreRequest) returns (stream ExploreReply) {}
+}
+
+message ExploreRequest {
+  string domain = 1;
+}
+message ExploreReply {
+  string content = 1;
+  string url = 2;
+  string domain = 3;
+  string origin = 4;
+  int32 nbNodes = 5;
+  int32 nbLinks = 6;
+  bool error = 7;
+}

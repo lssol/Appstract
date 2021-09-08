@@ -5,7 +5,7 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-let PROTO_PATH = __dirname + '/../robot.proto';
+let PROTO_PATH = __dirname + '/../appstract.proto';
 let packageDefinition = protoLoader.loadSync(
     PROTO_PATH,
     {keepCase: true,
@@ -15,7 +15,7 @@ let packageDefinition = protoLoader.loadSync(
      oneofs: true
     });
 
-let rpc = grpc.loadPackageDefinition(packageDefinition).robot;
+let rpc = grpc.loadPackageDefinition(packageDefinition).appstract;
 
 /**
  * Implements the SayHello RPC method.
