@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using appcrawl.Options;
 using Appstract.Front.Entities;
+using FSharpPlus;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Task = System.Threading.Tasks.Task;
 
 namespace Appstract.Front.Repositories
 {
@@ -29,12 +33,22 @@ namespace Appstract.Front.Repositories
 
         public Task<List<Application>> GetApplications()
         {
-            return _applicationCollection
-                .Aggregate()
-                .Lookup<Application, Page, Application>(_pageCollection, a => a.Id, p => p.ApplicationId, a => a.Pages)
-                // .Lookup("Page", "Id", "ApplicationId", "Pages")
-                // .As<Application>()
-                .ToListAsync();
+            return _applicationCollection.AsQueryable().ToListAsync();
+        }
+
+        public Dictionary<string, int> GetPagesLength()
+        {
+            return _pageCollection.AsQueryable()
+                .GroupBy(p => p.ApplicationId)
+                .Select(p => new Tuple<string, int>(p.Key, p.Count())) // Needed because of limitation of Linq2MQL
+                .ToDictionary(p => p.Item1, p => p.Item2);
+        }
+
+        public List<Page> GetPages(string applicationId)
+        {
+            return _pageCollection.AsQueryable()
+                .Where(p => p.ApplicationId == applicationId)
+                .ToList();
         }
 
         public async Task RemoveApplication(string idApplication)

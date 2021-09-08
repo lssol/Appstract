@@ -19,10 +19,15 @@ namespace Appstract.Front.Services
             _channel = channel;
         }
 
-        public Task<List<Application>> GetApplications()
+        public async Task<dynamic> GetApplications()
         {
-            return _repo.GetApplications();
+            return new 
+            {
+                Applications = await _repo.GetApplications(),
+                PageNumbers = _repo.GetPagesLength()
+            };
         }
+        
         public Application CreateApplication(Application application)
         {
             return _repo.CreateApplication(application);

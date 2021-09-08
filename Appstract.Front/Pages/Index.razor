@@ -8,9 +8,13 @@
 @using FSharpPlus.Control
 @using Robot
 @using Task = System.Threading.Tasks.Task
-@inject ApplicationService ApplicationService
-@inject RpcChannel RpcChannel
-@inject ApplicationRepository ApplicationRepository
+@using System.Collections.Concurrent
+
+@implements IDisposable
+
+@inject ApplicationService _applicationService
+@inject ApplicationRepository _applicationRepository
+@inject ExplorationService _explorationService
 
 <h1>Applications</h1>
 
@@ -25,29 +29,27 @@ else if (applications.Any())
     <table class="table">
         <thead>
         <tr>
-            <th>Name</th>
+            <th></th>
             <th>Domain</th>
             <th>Pages</th>
+            <th>Exploration</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var application in applications)
+        @foreach (var app in applications)
         {
             <tr>
-                <td>@application.Name</td>
-                <td>@application.Domain</td>
+                <td><span class="oi oi-trash" @onclick="() => RemoveApplication(app.Id)"></span></td>
+                <td>@app.Domain</td>
+                <td><span>@pagesAlreadyExplored.GetValueOrDefault(app.Id, 0)</span></td>
                 <td>
-                    @if (exploration.ContainsKey(application.Id))
+                    @if (exploration.ContainsKey(app.Id))
                     {
-                        <strong>@exploration[application.Id]</strong>
-                    }
-                    else if (application.Pages.Any())
-                    {
-                        <span>@application.Pages.Count()</span>
+                        <strong>@exploration[app.Id]</strong>
                     }
                     else
                     {
-                        <a href="#" @onclick="async () => await Explore(application.Id)">Explore</a>
+                        <a href="#" @onclick="async () => await Explore(app.Id)">Explore</a>
                     }
                 </td>
             </tr>
@@ -56,12 +58,11 @@ else if (applications.Any())
     </table>
 }
 
-<EditForm class="form-inline" Model="@_application" OnValidSubmit="@HandleValidSubmit">
+<EditForm class="form-inline" Model="@application" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
 
-    <InputText placeholder="Name" class="form-control" id="name" @bind-Value="_application.Name"/>
-    <InputText placeholder="Domain" class="form-control" id="domain" @bind-Value="_application.Domain"/>
+    <InputText placeholder="Domain" class="form-control" id="domain" @bind-Value="application.Domain"/>
 
     <button class="btn-primary btn" type="submit">Add an application</button>
 </EditForm>
@@ -69,51 +70,48 @@ else if (applications.Any())
 
 @code {
     private List<Application> applications;
-    private Application _application = new();
+    private Application application = new();
 
-    private Dictionary<string, int> exploration = new();
+    private ConcurrentDictionary<string, int> exploration = new();
+    private Dictionary<string, int> pagesAlreadyExplored = new();
 
     protected override async Task OnInitializedAsync()
     {
-        applications = await ApplicationService.GetApplications();
+        var model = await _applicationService.GetApplications();
+        pagesAlreadyExplored = model.PageNumbers;
+        applications = model.Applications;
+        exploration = _explorationService.exploration;
+        _explorationService.OnChange += OnChange;
     }
 
     private void HandleValidSubmit()
     {
-        var result = ApplicationService.CreateApplication(_application);
-        _application = new();
+        var result = _applicationService.CreateApplication(application);
+        application = new();
         applications.Add(result);
+    }
+
+    private async void RemoveApplication(string id)
+    {
+        await _applicationRepository.RemoveApplication(id);
+        applications = applications.Where(a => a.Id != id).ToList();
+        StateHasChanged();
     }
 
     private async Task Explore(string id)
     {
-        var application = applications.Find(a => a.Id == id);
-        exploration.Add(id, 0);
-        var stream = RpcChannel.Client.Explore(new ExploreRequest {Domain = application.Domain}).ResponseStream;
-        while (await stream.MoveNext(CancellationToken.None))
-        {
-            var res = stream.Current;
-            if (res.Error)
-            {
-                Console.WriteLine($"Error occured when exploring {res.Url}");
-                continue;
-            }
-
-            Console.WriteLine($"Explored {res.Url}");
-            await ApplicationRepository.CreatePage(new Page
-            {
-                Content = res.Content,
-                Domain = res.Domain,
-                Origin = res.Origin,
-                Url = res.Url,
-                ApplicationId = id,
-                NbLinks = res.NbLinks,
-                NbNodes = res.NbNodes
-            });
-            exploration[id]++;
-            StateHasChanged();
-        }
-        Console.WriteLine("Finished exploration");
+        var app = applications.FirstOrDefault(a => a.Id == id);
+        await _explorationService.Explore(app);
+    }
+    
+    private async void OnChange()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    } 
+    
+    public void Dispose()
+    {
+        _explorationService.OnChange -= OnChange;
     }
 
 }

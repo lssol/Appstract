@@ -16,11 +16,6 @@ namespace Appstract.Front.Entities
         public string Id { get; set; }
         
         [Required]
-        public string Name { get; set; }
-
-        [Required]
         public string Domain { get; set; }
-
-        [Editable(false)] public IEnumerable<Page> Pages { get; set; } = new List<Page>();
     }
 }
