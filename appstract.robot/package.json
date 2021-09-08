@@ -15,6 +15,6 @@
     "@grpc/proto-loader": "^0.5.0",
     "google-protobuf": "^3.0.0",
     "@grpc/grpc-js": "^1.1.0",
-    "puppeteer": "^9.1.0"
+    "puppeteer": "^9.1.1"
   }
 }

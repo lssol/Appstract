@@ -51,7 +51,7 @@ export const explore = async (handles, options) => {
     const page = await browser.newPage()
     stopRedirect(page)
 
-    page.setDefaultNavigationTimeout(5000)
+    page.setDefaultNavigationTimeout(10000)
 
     try {
         await page.goto(domain, { waitUntil: 'networkidle0' })
@@ -72,7 +72,7 @@ export const explore = async (handles, options) => {
         console.log(`[depth=${currentDepth}] Exploring ${url}`)
 
         try {
-            await page.goto(url, { waitUntil: 'networkidle2', timeout: 3000 })
+            await page.goto(url, { waitUntil: 'networkidle2', timeout: 5000 })
             console.info("Page loaded")
 
             let links = await page.evaluate(() => Array.from(document.documentElement.querySelectorAll('a')).map(e => e.href))
