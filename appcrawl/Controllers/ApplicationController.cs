@@ -23,7 +23,6 @@ namespace appcrawl.Controllers
         private readonly ApplicationRepository        _repo;
         private readonly IMemoryCache                 _cache;
         private const    string                       DefaultNameApplication = "New Application";
-        static           HttpClient                   _client                = new();
 
         public ApplicationController(ApplicationRepository repo, IMemoryCache cache)
         {

@@ -1,0 +1,28 @@
+@page "/Clustering"
+@using Appstract.Front.Entities
+@using Appstract.Front.Repositories
+@using Appstract.Front.Services
+@inject ApplicationService ApplicationService
+@inject RpcChannel RpcChannel
+@inject ApplicationRepository ApplicationRepository
+
+<h3>Clustering</h3>
+<EditForm Model="selectedApplication">
+    <InputSelect @bind-Value="selectedApplication">
+        @foreach (var app in applications)
+        {
+            <option value="@app.Id">@app.Domain</option>
+        }
+    </InputSelect>
+</EditForm>
+
+@code {
+    private List<Application> applications;
+    private string selectedApplication;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var model = await ApplicationService.GetApplications();
+        applications = model.Applications;
+    }
+}

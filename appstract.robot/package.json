@@ -2,7 +2,6 @@
   "name": "appstract.robot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "start": "node src/app.js"
   },
@@ -13,6 +12,9 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "puppeteer": "^9.1.0"
+    "@grpc/proto-loader": "^0.5.0",
+    "google-protobuf": "^3.0.0",
+    "@grpc/grpc-js": "^1.1.0",
+    "puppeteer": "^9.1.1"
   }
 }

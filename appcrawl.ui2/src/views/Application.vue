@@ -271,7 +271,8 @@ export default {
     createTemplate: async function() {
       console.log("Creating a new Template in application " + this.application.name)
       const template = await api.createTemplate(this.application.id)
-      this.redirectToTemplate(template.id)
+      this.application.templates.push(template)
+      this.redirectToTemplate(template)
     },
   },
 

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Appstract", "Appstract\Appstract.fsproj", "{1A4C116A-459A-448A-9AFB-DCA9B25E7F56}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Appstract.Tests", "Appstract.Tests\Appstract.Tests.fsproj", "{A6DD9712-496E-4FA0-BEDD-500ACAF5AA3F}"
@@ -8,6 +8,8 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Appstract.WebApi", "Appstract.WebApi\Appstract.WebApi.fsproj", "{429E7B55-6515-4702-B478-362FE2B92759}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "appcrawl", "appcrawl\appcrawl.csproj", "{6947222B-A455-4135-A524-48D3CF9F2E99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Appstract.Front", "Appstract.Front\Appstract.Front.csproj", "{AE217922-13A3-4DB2-9D6D-D822FA88AB79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,5 +37,9 @@ Global
 		{6947222B-A455-4135-A524-48D3CF9F2E99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6947222B-A455-4135-A524-48D3CF9F2E99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6947222B-A455-4135-A524-48D3CF9F2E99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE217922-13A3-4DB2-9D6D-D822FA88AB79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE217922-13A3-4DB2-9D6D-D822FA88AB79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE217922-13A3-4DB2-9D6D-D822FA88AB79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE217922-13A3-4DB2-9D6D-D822FA88AB79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

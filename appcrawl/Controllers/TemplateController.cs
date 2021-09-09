@@ -24,7 +24,7 @@ namespace appcrawl.Controllers
         private readonly TemplateRepository _repo;
         private readonly RobotOptions _robotOptions;
         private const    string                  DefaultNameTemplate = "New Template";
-        static readonly HttpClient Client = new();
+        private static readonly HttpClient Client = new HttpClient();
 
         public TemplateController(TemplateRepository repo, IOptionsMonitor<RobotOptions> robotOptions)
         {
