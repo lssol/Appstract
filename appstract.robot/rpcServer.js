@@ -15,7 +15,7 @@ let packageDefinition = protoLoader.loadSync(
      oneofs: true
     });
 
-let rpc = grpc.loadPackageDefinition(packageDefinition).appstract;
+let rpc = grpc.loadPackageDefinition(packageDefinition).proto_appstract;
 
 /**
  * Implements the SayHello RPC method.

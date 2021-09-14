@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Appstract.Front.Entities;
 using Appstract.Front.Repositories;
+using ProtoAppstract;
+using Page = Appstract.Front.Entities.Page;
 
 namespace Appstract.Front.Services
 {
@@ -30,7 +32,7 @@ namespace Appstract.Front.Services
                 Console.WriteLine($"An exploration is already running for {application.Domain}");
             }
 
-            var stream = _rpcChannel.Client.Explore(new ExploreRequest {Domain = application.Domain}).ResponseStream;
+            var stream = _rpcChannel.RobotClient.Explore(new ExploreRequest {Domain = application.Domain}).ResponseStream;
             while (await stream.MoveNext(CancellationToken.None))
             {
                 var res = stream.Current;
