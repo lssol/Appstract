@@ -1,28 +1,65 @@
-@page "/Clustering"
+@page "/clustering"
+
 @using Appstract.Front.Entities
 @using Appstract.Front.Repositories
 @using Appstract.Front.Services
-@inject ApplicationService ApplicationService
-@inject RpcChannel RpcChannel
-@inject ApplicationRepository ApplicationRepository
+@using ProtoAppstract
+@inject ApplicationService _applicationService
+@inject RpcChannel _rpcChannel
+@inject ApplicationRepository _applicationRepository
 
 <h3>Clustering</h3>
-<EditForm Model="selectedApplication">
-    <InputSelect @bind-Value="selectedApplication">
-        @foreach (var app in applications)
+<EditForm EditContext="_editContext" OnValidSubmit="OnValidSubmit" class="form-inline">
+    <InputSelect @bind-Value="_clusteringSelection.SelectedApplication" class="form-control">
+        @foreach (var app in _applications)
         {
             <option value="@app.Id">@app.Domain</option>
         }
     </InputSelect>
+    <InputSelect @bind-Value="_clusteringSelection.SelectedClusterer" class="form-control">
+        @foreach (var clusterer in _clusterers)
+        {
+            <option value="@clusterer">@clusterer</option>
+        }
+    </InputSelect>
+    <button class="btn btn-primary" type="submit">Start Clustering</button>
 </EditForm>
 
 @code {
-    private List<Application> applications;
-    private string selectedApplication;
+    class ClusteringSelection
+    {
+        public string SelectedApplication { get; set; }
+        public string SelectedClusterer { get; set; }
+    }
+
+    private ClusteringSelection _clusteringSelection = new();
+    private EditContext _editContext;
+    private List<Application> _applications = new();
+    private List<string> _clusterers = new();
+    
+    protected override void OnInitialized()
+    {
+        _editContext = new(_clusteringSelection);
+    }
     
     protected override async Task OnInitializedAsync()
     {
-        var model = await ApplicationService.GetApplications();
-        applications = model.Applications;
+        var model = await _applicationService.GetApplications();
+        _applications = model.Applications;
+        _clusterers = _rpcChannel.ClusteringClient.GetClusterers(new Empty()).Labels.ToList();
+        _editContext.OnFieldChanged += OnFieldChange;
+        
+        _clusteringSelection.SelectedApplication = _applications.FirstOrDefault()?.Id;
+        _clusteringSelection.SelectedClusterer = _clusterers.FirstOrDefault();
+    }
+
+    private void OnFieldChange(object editContext, FieldChangedEventArgs args)
+    {
+        
+    }
+    
+    private void OnValidSubmit()
+    {
+        
     }
 }

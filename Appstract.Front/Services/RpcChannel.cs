@@ -7,19 +7,24 @@ namespace Appstract.Front.Services
     {
         public readonly Robot.RobotClient RobotClient;
         public readonly Clustering.ClusteringClient ClusteringClient;
-        private readonly Channel _channel;
+        private readonly Channel _channelRobot;
+        private readonly Channel _channelClustering;
 
         public RpcChannel()
         {
-            const int port = 50051;
-            _channel = new Channel($"127.0.0.1:{port}", ChannelCredentials.Insecure);
-            RobotClient = new Robot.RobotClient(_channel);
-            ClusteringClient = new Clustering.ClusteringClient(_channel);
+            const int portRobot = 50051;
+            const int portClustering = 50052;
+            _channelRobot = new Channel($"127.0.0.1:{portRobot}", ChannelCredentials.Insecure);
+            _channelClustering = new Channel($"127.0.0.1:{portClustering}", ChannelCredentials.Insecure);
+            RobotClient = new Robot.RobotClient(_channelRobot);
+            ClusteringClient = new Clustering.ClusteringClient(_channelClustering);
         }
 
         public void Deconstruct()
         {
-            _channel.ShutdownAsync().Wait();
+            var a = _channelRobot.ShutdownAsync();
+            _channelClustering.ShutdownAsync().Wait();
+            a.Wait();
         }
     }
 }

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0f\x61ppstract.proto\x12\x0fproto_appstract\"\x07\n\x05\x45mpty\"$\n\x04Page\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\"C\n\x07\x43luster\x12$\n\x05pages\x18\x01 \x03(\x0b\x32\x15.proto_appstract.Page\x12\x12\n\nconfidence\x18\x02 \x01(\x01\"b\n\x17\x43reateClusteringRequest\x12\x11\n\tclusterer\x18\x01 \x01(\t\x12\x0e\n\x06\x64omain\x18\x02 \x01(\t\x12$\n\x05pages\x18\x03 \x03(\x0b\x32\x15.proto_appstract.Page\"T\n\x12\x43lusteringResponse\x12*\n\x08\x63lusters\x18\x01 \x03(\x0b\x32\x18.proto_appstract.Cluster\x12\x12\n\nconfidence\x18\x02 \x01(\x01\" \n\x0f\x43lusterersReply\x12\r\n\x05label\x18\x01 \x01(\t\" \n\x0e\x45xploreRequest\x12\x0e\n\x06\x64omain\x18\x01 \x01(\t\"}\n\x0c\x45xploreReply\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x0e\n\x06\x64omain\x18\x03 \x01(\t\x12\x0e\n\x06origin\x18\x04 \x01(\t\x12\x0f\n\x07nbNodes\x18\x05 \x01(\x05\x12\x0f\n\x07nbLinks\x18\x06 \x01(\x05\x12\r\n\x05\x65rror\x18\x07 \x01(\x08\x32\xbe\x01\n\nClustering\x12\x63\n\x10\x43reateClustering\x12(.proto_appstract.CreateClusteringRequest\x1a#.proto_appstract.ClusteringResponse\"\x00\x12K\n\rGetClusterers\x12\x16.proto_appstract.Empty\x1a .proto_appstract.ClusterersReply\"\x00\x32V\n\x05Robot\x12M\n\x07\x45xplore\x12\x1f.proto_appstract.ExploreRequest\x1a\x1d.proto_appstract.ExploreReply\"\x00\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x0f\x61ppstract.proto\x12\x0fproto_appstract\"\x07\n\x05\x45mpty\"$\n\x04Page\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\"C\n\x07\x43luster\x12$\n\x05pages\x18\x01 \x03(\x0b\x32\x15.proto_appstract.Page\x12\x12\n\nconfidence\x18\x02 \x01(\x01\"R\n\x17\x43reateClusteringRequest\x12\x11\n\tclusterer\x18\x01 \x01(\t\x12$\n\x05pages\x18\x03 \x03(\x0b\x32\x15.proto_appstract.Page\"T\n\x12\x43lusteringResponse\x12*\n\x08\x63lusters\x18\x01 \x03(\x0b\x32\x18.proto_appstract.Cluster\x12\x12\n\nconfidence\x18\x02 \x01(\x01\"!\n\x0f\x43lusterersReply\x12\x0e\n\x06labels\x18\x01 \x03(\t\" \n\x0e\x45xploreRequest\x12\x0e\n\x06\x64omain\x18\x01 \x01(\t\"}\n\x0c\x45xploreReply\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x0e\n\x06\x64omain\x18\x03 \x01(\t\x12\x0e\n\x06origin\x18\x04 \x01(\t\x12\x0f\n\x07nbNodes\x18\x05 \x01(\x05\x12\x0f\n\x07nbLinks\x18\x06 \x01(\x05\x12\r\n\x05\x65rror\x18\x07 \x01(\x08\x32\xbe\x01\n\nClustering\x12\x63\n\x10\x43reateClustering\x12(.proto_appstract.CreateClusteringRequest\x1a#.proto_appstract.ClusteringResponse\"\x00\x12K\n\rGetClusterers\x12\x16.proto_appstract.Empty\x1a .proto_appstract.ClusterersReply\"\x00\x32V\n\x05Robot\x12M\n\x07\x45xplore\x12\x1f.proto_appstract.ExploreRequest\x1a\x1d.proto_appstract.ExploreReply\"\x00\x30\x01\x62\x06proto3'
 )
 
 
@@ -144,14 +144,7 @@ _CREATECLUSTERINGREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='domain', full_name='proto_appstract.CreateClusteringRequest.domain', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='pages', full_name='proto_appstract.CreateClusteringRequest.pages', index=2,
+      name='pages', full_name='proto_appstract.CreateClusteringRequest.pages', index=1,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -170,7 +163,7 @@ _CREATECLUSTERINGREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=152,
-  serialized_end=250,
+  serialized_end=234,
 )
 
 
@@ -208,8 +201,8 @@ _CLUSTERINGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=252,
-  serialized_end=336,
+  serialized_start=236,
+  serialized_end=320,
 )
 
 
@@ -222,9 +215,9 @@ _CLUSTERERSREPLY = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='label', full_name='proto_appstract.ClusterersReply.label', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='labels', full_name='proto_appstract.ClusterersReply.labels', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -240,8 +233,8 @@ _CLUSTERERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=338,
-  serialized_end=370,
+  serialized_start=322,
+  serialized_end=355,
 )
 
 
@@ -272,8 +265,8 @@ _EXPLOREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=372,
-  serialized_end=404,
+  serialized_start=357,
+  serialized_end=389,
 )
 
 
@@ -346,8 +339,8 @@ _EXPLOREREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=406,
-  serialized_end=531,
+  serialized_start=391,
+  serialized_end=516,
 )
 
 _CLUSTER.fields_by_name['pages'].message_type = _PAGE
@@ -428,8 +421,8 @@ _CLUSTERING = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=534,
-  serialized_end=724,
+  serialized_start=519,
+  serialized_end=709,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateClustering',
@@ -464,8 +457,8 @@ _ROBOT = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=726,
-  serialized_end=812,
+  serialized_start=711,
+  serialized_end=797,
   methods=[
   _descriptor.MethodDescriptor(
     name='Explore',

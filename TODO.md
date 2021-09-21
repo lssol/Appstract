@@ -2,8 +2,8 @@
 
 ### Training phase
 User enters: domain
-(debug) User checks that clustering works
-(debug) User checks that appstraction works (data extraction)
+- (debug) User checks that clustering works
+- (debug) User checks that appstraction works (data extraction)
 
 ### Prediction phase
 User enters: whole page

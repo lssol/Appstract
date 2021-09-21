@@ -189,7 +189,6 @@ type Appstracter() =
         let commonTags = HashSet.intersect (concatTags nodes1) (concatTags nodes2)
         let isOrphan = getTags >> HashSet.intersect commonTags >> Seq.isEmpty
 
-
         let orphans =
             nodes1
             |> Array.append nodes2

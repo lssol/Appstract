@@ -19,7 +19,6 @@ message Cluster {
 }
 message CreateClusteringRequest {
   string clusterer = 1;
-  string domain = 2;
   repeated Page pages = 3;
 }
 message ClusteringResponse {
@@ -27,7 +26,7 @@ message ClusteringResponse {
   double confidence = 2;
 }
 message ClusterersReply {
-  string label = 1;
+  repeated string labels = 1;
 }
 
 // ----------------------------------------------------------------------------
