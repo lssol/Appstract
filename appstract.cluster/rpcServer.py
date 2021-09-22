@@ -3,8 +3,8 @@ import logging
 
 import grpc
 
-import appstract_pb2
-import appstract_pb2_grpc
+import _rpc.appstract_pb2 as appstract_pb2
+import _rpc.appstract_pb2_grpc as appstract_pb2_grpc
 import dumbClusterer
 
 clusterers = {

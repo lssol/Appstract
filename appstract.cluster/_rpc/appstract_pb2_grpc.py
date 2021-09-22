@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import appstract_pb2 as appstract__pb2
+import _rpc.appstract_pb2 as appstract__pb2
 
 
 class ClusteringStub(object):

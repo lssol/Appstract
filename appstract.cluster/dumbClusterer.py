@@ -1,4 +1,4 @@
-import appstract_pb2
+import _rpc.appstract_pb2 as appstract_pb2
 import math
 
 def dumbClusterer(pages):
