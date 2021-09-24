@@ -3,8 +3,7 @@ package proto_appstract;
 
 // ----------------------------------------------------------------------------
 service Clustering {
-  rpc CreateClustering (CreateClusteringRequest) returns (ClusteringResponse) {}
-  rpc GetClusterers (Empty) returns (ClusterersReply) {}
+  rpc StartClustering (CreateClusteringRequest) returns (Empty) {}
 }
 
 message Empty {}
@@ -13,20 +12,9 @@ message Page {
   string content = 1;
   string url = 2;
 }
-message Cluster {
-  repeated Page pages = 1;
-  double confidence = 2; 
-}
+
 message CreateClusteringRequest {
-  string clusterer = 1;
   repeated Page pages = 3;
-}
-message ClusteringResponse {
-  repeated Cluster clusters = 1;
-  double confidence = 2;
-}
-message ClusterersReply {
-  repeated string labels = 1;
 }
 
 // ----------------------------------------------------------------------------

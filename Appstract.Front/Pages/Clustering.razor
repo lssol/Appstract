@@ -46,7 +46,6 @@
     {
         var model = await _applicationService.GetApplications();
         _applications = model.Applications;
-        _clusterers = _rpcChannel.ClusteringClient.GetClusterers(new Empty()).Labels.ToList();
         _editContext.OnFieldChanged += OnFieldChange;
         
         _clusteringSelection.SelectedApplication = _applications.FirstOrDefault()?.Id;

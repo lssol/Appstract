@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using appcrawl.Options;
 using Appstract.Front.Entities;
+using Appstract.Front.Utils;
 using FSharpPlus;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -79,6 +81,7 @@ namespace Appstract.Front.Repositories
 
         public async Task<Page> CreatePage(Page page)
         {
+            page.PageHash = Hashing.GetHashString(page.Content);
             await _pageCollection.InsertOneAsync(page);
             return page;
         }

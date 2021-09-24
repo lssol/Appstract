@@ -1,16 +1,10 @@
 from concurrent import futures
 import logging
-
 import grpc
-
 import _rpc.appstract_pb2 as appstract_pb2
 import _rpc.appstract_pb2_grpc as appstract_pb2_grpc
-import dumbClusterer
+import clusterers.dumbClusterer as dumbClusterer
 
-clusterers = {
-    "Dumb_Clusterer": dumbClusterer,
-    "Branch_Clusterer": dumbClusterer,
-}
 
 class Clustering(appstract_pb2_grpc.ClusteringServicer):
     def CreateClustering(self, request, context):
