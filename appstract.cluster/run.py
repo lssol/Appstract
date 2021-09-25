@@ -7,5 +7,9 @@ clusterers = {
 }
 
 def synchronize():
-    differ.compute_tasks()
+    tasks = differ.compute_tasks(clusterers)
+    for appId, clusterer in tasks:
+        clusterer()
+
+
 

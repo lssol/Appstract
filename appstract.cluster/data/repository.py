@@ -20,3 +20,7 @@ class Repository:
 
     def getClusteringDone(self): # Each clustering done is: {applicationId, clusterer, pagesHash}
         return self.clustering.find({}, {'applicationId': 1, 'clusterer': 1, 'pagesHash': 1})
+
+    def getPagesFromAppId(self, applicationsId):
+        return self.pages.find({'ApplicationId': applicationsId}, {'Content': 1, '_id': 0})
+
