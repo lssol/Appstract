@@ -1,10 +1,10 @@
-import repository
 import hashlib
 from typing import List, Tuple, Set
+from appstract.data.repository import Repository
 
 def compute_tasks(clusterers) -> List[Tuple[str, str]]: # Each task is {applicationId, clusterer} 
     # a unit of work is: (applicationId, clusterer, pageHashes)
-    repo = repository.Repository()
+    repo = Repository()
 
     applications = repo.getApplicationsAndPageHashes()
     clusteringDone = repo.getClusteringDone()
@@ -20,11 +20,11 @@ def compute_tasks(clusterers) -> List[Tuple[str, str]]: # Each task is {applicat
 def projectApplication(app):
     return {
         'applicationId': app['_id'],
-        'hash': hashArray(app['applicationId']),
+        'hash': hashArray(app['hashes']),
     }
 
 def hashArray(array):
-    return hashlib.sha256(b''.join(array)).hexdigest()
+    return hashlib.sha256(''.join(array).encode()).hexdigest()
 
 def get_clustering_we_should_have(applications, clusterers) -> Set[Tuple[str, str, str]]: # [(applicationId, pagesHash, clusterer)]
     res = set()
