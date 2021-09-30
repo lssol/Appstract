@@ -35,7 +35,7 @@ class Extractor:
 
         traverse(self.root, '')
 
-def get_features(page):
+def get_features(page: str):
     ex = Extractor(page)
     return {
         'branches': ' '.join(ex.branches),

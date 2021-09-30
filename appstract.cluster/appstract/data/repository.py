@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from typing import List, Tuple
-from appstract.types import Page
+from appstract.types import ClusteringResultDatabase, Page
 
 class Repository:
     def __init__(self):
@@ -26,4 +26,7 @@ class Repository:
         res = self.pages.find({'ApplicationId': applicationsId}, {'Url': 1, 'Content': 1, '_id': 0})
 
         return [Page(page['Content'], page['Url']) for page in res]
+
+    def saveClustering(self, clustering: ClusteringResultDatabase):
+        self.clustering.insert_one(clustering.__dict__)
 

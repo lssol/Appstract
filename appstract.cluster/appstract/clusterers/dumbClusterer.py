@@ -1,11 +1,11 @@
 from typing import List
 import math
 from typing import List, Tuple
-from appstract.types import Cluster, Page
+from appstract.types import Cluster, ClusteringResult, Page
 
-def dumbClusterer(pages: List[Page]) -> List[Cluster]:
+def dumbClusterer(pages: List[Page]) -> ClusteringResult:
     halfPages = math.floor((len(pages)/2))
-    cluster1 = [(p, 0.5) for p in pages[::halfPages]]
-    cluster2 = [(p, 0.5) for p in pages[halfPages::]]
+    cluster1 = Cluster(0.5, [(p, 0.5) for p in pages[::halfPages]])
+    cluster2 = Cluster(0.5, [(p, 0.5) for p in pages[halfPages::]])
 
-    return [cluster1, cluster2]
+    return ClusteringResult(0.5, [cluster1, cluster2])

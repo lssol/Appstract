@@ -1,3 +1,4 @@
+from typing import List
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, FunctionTransformer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer

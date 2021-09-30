@@ -1,11 +1,15 @@
 from typing import List, Dict
+
+from sklearn import cluster
 from appstract.data.repository import Repository
 from appstract.data.diff import compute_tasks
 from appstract.clusterers.dumbClusterer import dumbClusterer
-from appstract.types import Clusterer, Cluster
+from appstract.types import Clusterer, Cluster, ClusteringResult, ClusteringResultDatabase
+from appstract.clusterers.branch_clustering import branch_clustering
 
 clusterers: Dict[str, Clusterer] = {
-    "Dumb_Clusterer": dumbClusterer,
+    "dumb": dumbClusterer,
+    "branch": branch_clustering(),
 }
 
 def synchronize(repo: Repository):
@@ -13,16 +17,40 @@ def synchronize(repo: Repository):
     tasks = compute_tasks(clusterers.keys())
     print(f'{len(tasks)} clustering tasks to synchronize...')
 
-    for appId, clusterer_name in tasks:
+    for appId, pagesHash, clusterer_name in tasks:
+        print(f'Synchronizing {appId} with {clusterer_name}')
         clusterer = clusterers[clusterer_name]
         print("Getting pages from app ", appId)
         pages = repo.getPagesFromAppId(appId)
         print(f'Retrieved {len(pages)} pages')
-        clusters = clusterer(pages)
-        displayClusters(clusters)
+        resultClustering = clusterer(pages)
+        displayClusters(resultClustering)
+        repo.saveClustering(toDatabaseFormat(resultClustering, pagesHash, appId, clusterer_name))
 
-def displayClusters(clusters: List[Cluster]):
+def displayClusters(res: ClusteringResult):
+    clusters = res.clusters
     for i, cluster in enumerate(clusters):
         print(f'Cluster {i}')
-        for page, confidence in cluster:
-            print(f'[{confidence}] {page.url}')
+        for page, silhouette in cluster.pages:
+            print(f'[{silhouette}] {page.url}')
+
+def toDatabaseFormat(res: ClusteringResult, pagesHash, appId, clusterer) -> ClusteringResultDatabase:
+    clusters = []
+    for cluster in res.clusters:
+        c = []
+        for page, silhouette in cluster.pages:
+            c.append({
+                'url': page.url,
+                'silhouette': silhouette
+            })
+        clusters.append(c)
+
+    return ClusteringResultDatabase(
+        silhouette = res.silhouette,
+        pagesHash = pagesHash,
+        applicationId = appId,
+        domain = "",
+        nb_clusters = len(clusters),
+        clusterer = clusterer,
+        clusters = clusters
+    )

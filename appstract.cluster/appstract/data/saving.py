@@ -5,7 +5,7 @@ from statistics import mean
 import numpy as np
 from typing import Dict
 
-def format(label, parameters, domain, urls, predicted_clusters, silhouette, silhouette_values):
+def format(clusterer, domain, urls, pageHashes, predicted_clusters, silhouette, silhouette_values, applicationId):
     nb_clusters = max(predicted_clusters)
 
     clusters = []
@@ -25,10 +25,10 @@ def format(label, parameters, domain, urls, predicted_clusters, silhouette, silh
         clusters.append(cluster)
 
     return {
-        'label': label, 
+        'clusterer': clusterer, 
         'k': len(clusters),
-        'params': parameters,
         'domain': domain,
+        'applicationId': applicationId,
         'silhouette': silhouette,
         'clusters': clusters
     }

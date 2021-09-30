@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Utils.fs" />
-    <Compile Include="RelationalDatabase.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Settings.fs" />
     <Compile Include="DOM.fs" />

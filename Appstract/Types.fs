@@ -3,7 +3,6 @@
 open System.Collections.Generic
 open System
 open System.Runtime.CompilerServices
-open Appstract.RelationalDatabase
 open Appstract.Utils
 open FSharp.Data
 
@@ -93,4 +92,3 @@ type AppModel = { appTemplate: Template; templates: Template list }
 type AppModelSerializable = { appTemplate: TemplateSerializable; templates: TemplateSerializable list }
     
 type ModelCreator = Node list -> AppModel
-type InformationExtractor = AppModel -> RelDb -> Node -> RelDb

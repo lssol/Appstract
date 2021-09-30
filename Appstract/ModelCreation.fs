@@ -40,17 +40,17 @@ let nodeToSignatureCouples mapping (node: Node) =
             |> Seq.toList)
     |> Option.defaultValue List.empty
 
-let getDoubles seq =
+let getDuplicates seq =
     let mutable set = HashSet()
-    let mutable doubles = HashSet()
+    let mutable duplicates = HashSet()
 
     seq |> Seq.iter (fun s ->
             if set.Contains(fst s)
-            then doubles.Add(fst s)
+            then duplicates.Add(fst s)
             else set.Add(fst s)
             |> ignore)
     
-    seq
+    duplicates
     
 let identifyPage (model: AppModel) (src: string) =
     let model = model
