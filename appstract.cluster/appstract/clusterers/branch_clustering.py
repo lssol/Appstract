@@ -9,7 +9,6 @@ from sklearn.model_selection import GridSearchCV, cross_val_predict, train_test_
 from importlib import reload
 from sklearn.base import TransformerMixin
 import time
-from tqdm import tqdm
 from pprint import pprint
 from statistics import mean
 import math

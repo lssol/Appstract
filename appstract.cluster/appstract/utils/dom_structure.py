@@ -1,7 +1,6 @@
 #%%
 from lxml import etree
 from io import StringIO, BytesIO
-from tqdm import tqdm
 
 class Extractor:
     MAX_LENGTH_ATTR = 21
