@@ -3,10 +3,14 @@ package proto_appstract;
 
 // ----------------------------------------------------------------------------
 service Clustering {
-  rpc StartClustering (CreateClusteringRequest) returns (Empty) {}
+  rpc StartClustering (Empty) returns (stream Progress) {}
 }
 
 message Empty {}
+
+message Progress {
+  string message = 1;
+}
 
 message Page {
   string content = 1;
