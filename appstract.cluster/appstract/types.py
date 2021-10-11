@@ -3,27 +3,28 @@ from dataclasses import dataclass
 
 @dataclass
 class Page:
-    content: str
-    url: str
+    Content: str
+    Url: str
 
 @dataclass
 class Cluster:
-    silhouette: float
-    pages: List[Tuple[Page, float]]
+    Silhouette: float
+    Pages: List[Tuple[Page, float]]
 
 @dataclass
 class ClusteringResult:
-    silhouette: float
-    clusters: List[Cluster]
+    Siohouette: float
+    Clusters: List[Cluster]
 
 @dataclass
 class ClusteringResultDatabase:
-    silhouette: float
-    clusters: List[List[Dict]]
-    pagesHash: str
-    applicationId: str
-    domain: str
-    nb_clusters: int
-    clusterer: str
+    Silhouette: float
+    Clusters: List[List[Dict]]
+    PagesHash: str
+    ApplicationId: str
+    Domain: str
+    NbClusters: int
+    Clusterer: str
+    Outdated: bool
 
 Clusterer = Callable[[List[Page]], ClusteringResult]

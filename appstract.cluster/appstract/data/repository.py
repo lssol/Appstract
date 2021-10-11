@@ -28,5 +28,7 @@ class Repository:
         return [Page(page['Content'], page['Url']) for page in res]
 
     def saveClustering(self, clustering: ClusteringResultDatabase):
+        self.clustering.update({'applicationId': clustering.ApplicationId, 'clusterer': clustering.Clusterer},
+                                {'$set': {'outdated': True}})
         self.clustering.insert_one(clustering.__dict__)
 

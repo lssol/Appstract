@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import appstract_pb2 as appstract__pb2
+import appstract.__rpc.appstract_pb2 as appstract__pb2
 
 
 class ClusteringStub(object):
@@ -15,10 +15,10 @@ class ClusteringStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.StartClustering = channel.unary_unary(
+        self.StartClustering = channel.unary_stream(
                 '/proto_appstract.Clustering/StartClustering',
-                request_serializer=appstract__pb2.CreateClusteringRequest.SerializeToString,
-                response_deserializer=appstract__pb2.Empty.FromString,
+                request_serializer=appstract__pb2.Empty.SerializeToString,
+                response_deserializer=appstract__pb2.Progress.FromString,
                 )
 
 
@@ -35,10 +35,10 @@ class ClusteringServicer(object):
 
 def add_ClusteringServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'StartClustering': grpc.unary_unary_rpc_method_handler(
+            'StartClustering': grpc.unary_stream_rpc_method_handler(
                     servicer.StartClustering,
-                    request_deserializer=appstract__pb2.CreateClusteringRequest.FromString,
-                    response_serializer=appstract__pb2.Empty.SerializeToString,
+                    request_deserializer=appstract__pb2.Empty.FromString,
+                    response_serializer=appstract__pb2.Progress.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -62,9 +62,9 @@ class Clustering(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/proto_appstract.Clustering/StartClustering',
-            appstract__pb2.CreateClusteringRequest.SerializeToString,
-            appstract__pb2.Empty.FromString,
+        return grpc.experimental.unary_stream(request, target, '/proto_appstract.Clustering/StartClustering',
+            appstract__pb2.Empty.SerializeToString,
+            appstract__pb2.Progress.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

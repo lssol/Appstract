@@ -25,12 +25,15 @@ namespace Appstract.Front.Repositories
             p => p.ApplicationId
         };
 
+        private IMongoCollection<Clustering> _clusteringCollection;
+
         public ApplicationRepository(IOptionsMonitor<MongoOptions> options)
         {
             _options = options.CurrentValue;
             var db = new MongoClient(_options.ConnectionString).GetDatabase(_options.Database);
             _applicationCollection = db.GetCollection<Application>(nameof(Application));
             _pageCollection = db.GetCollection<Page>(nameof(Page));
+            _clusteringCollection = db.GetCollection<Clustering>(nameof(Clustering));
             CreateIndices();
         }
 
@@ -52,6 +55,14 @@ namespace Appstract.Front.Repositories
         public Task<List<Application>> GetApplications()
         {
             return _applicationCollection.AsQueryable().ToListAsync();
+        }
+        
+        public List<Clustering> GetClustering(string appId)
+        {
+            return _clusteringCollection.AsQueryable()
+                // .ToList()
+                .Where(app => app.ApplicationId == appId && app.Outdated == false)
+                .ToList();
         }
 
         public Dictionary<string, int> GetPagesLength()

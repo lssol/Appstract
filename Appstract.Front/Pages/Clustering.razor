@@ -4,11 +4,30 @@
 @using Appstract.Front.Repositories
 @using Appstract.Front.Services
 @using ProtoAppstract
+@using System.Threading
+@using MoreLinq.Extensions
 @inject ApplicationService _applicationService
 @inject RpcChannel _rpcChannel
+@inject ClusteringService _clusteringService
 @inject ApplicationRepository _applicationRepository
 
 <h3>Clustering</h3>
+
+@if (_clusteringService._synchronizing)
+{
+    <button disabled>Synchronizing...</button>
+}
+else
+{
+    <button @onclick="Synchronize">Synchronize</button>
+}
+
+<div class="terminal">
+    @foreach (var message in _clusteringService._messages)
+    {
+        <span>@message</span><br/>
+    }
+</div>
 <EditForm EditContext="_editContext" OnValidSubmit="OnValidSubmit" class="form-inline">
     <InputSelect @bind-Value="_clusteringSelection.SelectedApplication" class="form-control">
         @foreach (var app in _applications)
@@ -22,8 +41,30 @@
             <option value="@clusterer">@clusterer</option>
         }
     </InputSelect>
-    <button class="btn btn-primary" type="submit">Start Clustering</button>
 </EditForm>
+
+<div>
+    <table class="table">
+        <tr>
+            <th scope="col">Url</th>
+            <th scope="col">Silhouette</th>
+        </tr>
+        @foreach (var cluster in _clustering?.Clusters ?? new List<List<ClusterEntry>>())
+        {
+            <tr>
+                <td>*****************</td>
+                <td><strong>@cluster.Average(c => c.Silhouette)</strong></td>
+            </tr>
+            @foreach (var entry in cluster)
+            {
+                <tr>
+                    <td><a href="@entry.Url">@entry.Url</a></td>
+                    <td>@entry.Silhouette</td>
+                </tr>
+            }
+        }
+    </table>
+</div>
 
 @code {
     class ClusteringSelection
@@ -36,6 +77,8 @@
     private EditContext _editContext;
     private List<Application> _applications = new();
     private List<string> _clusterers = new();
+    private List<Entities.Clustering> _clusterings = new();
+    private Entities.Clustering _clustering = new();
     
     protected override void OnInitialized()
     {
@@ -47,14 +90,38 @@
         var model = await _applicationService.GetApplications();
         _applications = model.Applications;
         _editContext.OnFieldChanged += OnFieldChange;
+        _clusteringService.OnChange += OnMessage;
         
         _clusteringSelection.SelectedApplication = _applications.FirstOrDefault()?.Id;
         _clusteringSelection.SelectedClusterer = _clusterers.FirstOrDefault();
+        UpdateClustering();
     }
 
+    protected async Task Synchronize()
+    {
+        await _clusteringService.StartClustering();
+    }
+
+    protected void UpdateSelection()
+    {
+        _clustering = _clusterings.FirstOrDefault(clustering => clustering.Clusterer == _clusteringSelection.SelectedClusterer);
+    }
+    protected void UpdateClustering()
+    {
+        _clusterings = _applicationRepository.GetClustering(_clusteringSelection.SelectedApplication);
+        _clusterers = _clusterings.Select(c => c.Clusterer).Distinct().ToList();
+        _clusteringSelection.SelectedClusterer = _clusterers.FirstOrDefault();
+        UpdateSelection();
+    }
+    
     private void OnFieldChange(object editContext, FieldChangedEventArgs args)
     {
-        
+        UpdateClustering();
+    }
+
+    private async void OnMessage()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
     }
     
     private void OnValidSubmit()

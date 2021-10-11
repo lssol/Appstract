@@ -102,7 +102,7 @@ def find_best_clusterer(X, clusteringAlgorithm = 'kmeans'):
 def cluster_pages(pages: List[Page], params):
       features = {}
       for page in pages:
-            for feature_name, feature in dom_structure.get_features(page.content).items():
+            for feature_name, feature in dom_structure.get_features(page.Content).items():
                   features.setdefault(feature_name, []).append(feature)
       
       vectors = {}

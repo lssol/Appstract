@@ -34,6 +34,7 @@ namespace Appstract.Front
             services.AddSingleton<ApplicationRepository>();
             services.AddSingleton<RpcChannel>();
             services.AddSingleton<ExplorationService>();
+            services.AddSingleton<ClusteringService>();
             
             ConfigureOptions(services);
         }
