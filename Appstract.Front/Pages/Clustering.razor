@@ -28,6 +28,7 @@ else
         <span>@message</span><br/>
     }
 </div>
+
 <EditForm EditContext="_editContext" OnValidSubmit="OnValidSubmit" class="form-inline">
     <InputSelect @bind-Value="_clusteringSelection.SelectedApplication" class="form-control">
         @foreach (var app in _applications)
@@ -58,7 +59,9 @@ else
             @foreach (var entry in cluster)
             {
                 <tr>
-                    <td><a href="@entry.Url">@entry.Url</a></td>
+                    <td><a href="@entry.Url">
+                        @(entry.Url.Length > 80 ? entry.Url[..80] + "..." : entry.Url)
+                    </a></td>
                     <td>@entry.Silhouette</td>
                 </tr>
             }
@@ -95,6 +98,7 @@ else
         _clusteringSelection.SelectedApplication = _applications.FirstOrDefault()?.Id;
         _clusteringSelection.SelectedClusterer = _clusterers.FirstOrDefault();
         UpdateClustering();
+        _clusteringSelection.SelectedClusterer = _clusterers.FirstOrDefault();
     }
 
     protected async Task Synchronize()
@@ -110,7 +114,6 @@ else
     {
         _clusterings = _applicationRepository.GetClustering(_clusteringSelection.SelectedApplication);
         _clusterers = _clusterings.Select(c => c.Clusterer).Distinct().ToList();
-        _clusteringSelection.SelectedClusterer = _clusterers.FirstOrDefault();
         UpdateSelection();
     }
     
