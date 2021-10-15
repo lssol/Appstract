@@ -12,7 +12,7 @@ namespace Appstract.Front.Services
 
         public RpcChannel()
         {
-            const int portRobot = 50051;
+            const int portRobot = 50076;
             const int portClustering = 50052;
             _channelRobot = new Channel($"127.0.0.1:{portRobot}", ChannelCredentials.Insecure);
             _channelClustering = new Channel($"127.0.0.1:{portClustering}", ChannelCredentials.Insecure);

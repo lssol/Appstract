@@ -44,12 +44,11 @@ async function Explore(call) {
  */
 function main() {
   let server = new grpc.Server();
-  let port = 50051;
+  let port = 50076;
   server.addService(rpc.Robot.service, {Explore: Explore});
-  server.bindAsync('0.0.0.0:' + port, grpc.ServerCredentials.createInsecure(), () => {
-    server.start();
-    console.log("Started the server at port: " + port)
-  });
+  server.bindAsync('0.0.0.0:' + port, 
+    grpc.ServerCredentials.createInsecure(), 
+    () => { server.start(); console.log("Started the server at port: " + port) });
 }
 
 main();

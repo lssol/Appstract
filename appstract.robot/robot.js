@@ -68,6 +68,7 @@ export const explore = async (handles, options) => {
 
     while (taskQueue.length > 0) {
         let { url, depth: currentDepth, origin } = taskQueue.shift()
+        alreadyVisited.add(url)
 
         console.log(`[depth=${currentDepth}] Exploring ${url}`)
 
