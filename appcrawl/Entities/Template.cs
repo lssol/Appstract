@@ -22,7 +22,6 @@ namespace appcrawl.Entities
         public string? Html          { get; set; }
         public string  Name          { get; set; }
         public string  ApplicationId { get; set; }
-        public string  SignatureRoot { get; set; }
         
         public IEnumerable<Element> Elements { get; set; } = new List<Element>();
         

@@ -82,8 +82,8 @@ export default {
         return await send(`${urlApi}/template/rename`, 'POST', {templateId: templateId, newName: name})
     },
     
-    async createModel(applicationId, pages) {
-        return await send(`${urlApi}/application/model`, 'POST', {applicationId, pages})
+    async createModel(applicationId, templates) {
+        return await send(`${urlApi}/application/model`, 'POST', {applicationId, templates})
     },
     
     setUrlTemplate: async function(templateId, url) {

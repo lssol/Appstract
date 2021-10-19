@@ -86,10 +86,10 @@ type Matcher = Node -> Node -> MatcherResult
 type NodeId = NodeId of string with
     static member Gen () = NodeId (String.genId())
 
-type Template = Template of Node * Map<Node, NodeId>
+type Template = Template of Id: string * Node * Map<Node, NodeId>
 type TemplateSerializable = TemplateSerializable of Node * Map<string, string>
 
 type AppModel = { appTemplate: Template; templates: Template list }
 type AppModelSerializable = { appTemplate: TemplateSerializable; templates: TemplateSerializable list }
     
-type ModelCreator = Node list -> AppModel
+type ModelCreator = (string * Node) list -> AppModel

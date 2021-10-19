@@ -204,7 +204,7 @@ export default {
       this.creating_model = true
       console.log(this.creating_model)
       try {
-        await api.createModel(this.application.id, this.application.templates.map(t => t.html))
+        await api.createModel(this.application.id, this.application.templates.map(t => ({content: t.html, templateId: t.id})))
         console.log("Successfully created the model")
         this.application.model = true
       }

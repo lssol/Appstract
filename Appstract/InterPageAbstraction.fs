@@ -7,15 +7,15 @@ open Appstract.Utils
 open Appstract.DOM
 open FSharpPlus.Operators
 
-let pageToTemplate (page: Node) : Template =
+let pageToTemplate (templateId, page: Node) : Template =
     let mapping =
         page.Nodes()
         |> Seq.fold (fun map n -> map |> Map.add n (NodeId.Gen())) Map.empty
                      
-    Template(page, mapping)
+    Template(templateId, page, mapping)
     
 let getTemplateFromTemplates (templates: Template seq) : Template =
-    let reducer (Template (template1, mapping)) (Template (template2, _)) =
+    let reducer (Template (id1, template1, mapping)) (Template (id2, template2, _)) =
         let matching = Sftm.Match template1 template2
         let edges = matching.Edges |> Map.ofSeq
         
@@ -23,7 +23,7 @@ let getTemplateFromTemplates (templates: Template seq) : Template =
             mapping
             |> Map.filter (fun n _ -> edges |> Map.containsKey n)
             
-        Template (template1, newMapping)
+        Template ("", template1, newMapping)
         
     templates |> Seq.reduce reducer
 
@@ -36,23 +36,23 @@ let updateMapping refMapping mapping matching =
     
     mapping |> Map.map updateId
     
-let identify (Template(refPage, refMapping)) (Template(page, mapping)) : Template =
+let identify (Template(_, refPage, refMapping)) (Template(id, page, mapping)) : Template =
     let matching = Sftm.Match page refPage
     let edges = matching.Edges |> Map.ofSeq
     let newMapping = updateMapping refMapping mapping edges
         
-    Template(page, newMapping)
+    Template(id, page, newMapping)
 
-let matchToClosestTemplate (model:AppModel) (Template(page, mapping)) = 
+let matchToClosestTemplate (model:AppModel) (Template(_, page, mapping)) = 
     let templates = model.templates
-    let bestMatching, templateMapping = 
+    let bestId, bestMatching, templateMapping = 
         templates 
-        |> Seq.map (fun (Template(p, mapping)) -> ((Sftm.Match page p), mapping))
-        |> Seq.minBy (fun (matching, _) -> matching.Cost)
+        |> Seq.map (fun (Template(id, p, m)) -> (id, (Sftm.Match page p), m))
+        |> Seq.minBy (fun (_, matching, _) -> matching.Cost)
     
     let newMapping = updateMapping templateMapping mapping (bestMatching.Edges |> Map.ofSeq)
     
-    Template(page, newMapping)
+    Template(bestId, page, newMapping)
     
 let createModel : ModelCreator = fun pages ->
     let templates = pages |> List.map pageToTemplate

@@ -8,19 +8,12 @@ open FSharp.Data
 open FSharpPlus
 open MBrace.FsPickler
 
-type PageIdentificationData = { signature: string; id: string }
-
-let createModel (requestPages: string seq) =
-    let templates = requestPages |> Seq.map Node.FromString
-    let templateIds =
-        templates
-        |> Seq.map (fun template -> template.Value.signature)
-        |> Seq.zip requestPages
-        |> Seq.map (fun (templateSignature, page) -> {|page = page; templateSignature = templateSignature|})
+// template = Id * Content
+let createModel (templates: (string * string) seq) =
     let model =
         templates
-        |> Seq.map (fun op -> op |> Option.get)
-        |> Seq.map IntraPageAbstraction.appstract
+        |> Seq.map (fun (id, content) -> (id, content |> Node.FromString |> Option.get))
+        |> Seq.map (fun (id, node) -> (id, IntraPageAbstraction.appstract node)) 
         |> Seq.toList
         |> InterPageAbstraction.createModel
         

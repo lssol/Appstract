@@ -80,7 +80,7 @@ namespace appcrawl.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateModel(CreateModelViewModel model)
         {
-            var appModel = Appstract.ModelCreation.createModel(model.Pages);
+            var appModel    = Appstract.ModelCreation.createModel(model.Templates.Select(t => new Tuple<string, string>(t.TemplateId, t.Content)));
             var binaryModel = Appstract.ModelCreation.serializeModel(appModel);
             await _repo.UpdateModelApplication(model.ApplicationId, binaryModel);
             _cache.Remove(model.ApplicationId);
@@ -103,7 +103,6 @@ namespace appcrawl.Controllers
             });
             
             var identification = Appstract.ModelCreation.identifyPage(model, m.Page);
-            
             
             return Ok(identification);
         }

@@ -30,11 +30,17 @@ namespace appcrawl.Models
         public string Host { get; set; }
         public string Page { get; set; }
     }
+
+    public class TemplateViewModel
+    {
+        public string Content    { get; set; }
+        public string TemplateId { get; set; }
+    }
     
     public class CreateModelViewModel
     {
         public string              ApplicationId { get; set; }
-        public IEnumerable<string> Pages         { get; set; }
+        public IEnumerable<TemplateViewModel> Templates         { get; set; }
     }
     
     public class RemoveTemplateModel
