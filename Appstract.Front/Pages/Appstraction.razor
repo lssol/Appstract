@@ -1,0 +1,46 @@
+﻿@page "/Appstraction"
+@using Appstract.Front.Entities
+@using System.Collections.Concurrent
+@using Appstract.Front.Repositories
+@using Appstract.Front.Services
+@using Microsoft.AspNetCore.Components
+
+@inject ApplicationService _applicationService
+@inject ApplicationRepository _applicationRepository
+
+<h1>Applications</h1>
+
+<EditForm Model="_applicationId" class="form-inline">
+    <InputSelect @bind-Value="_applicationId" class="form-control">
+        @foreach (var app in _applications)
+        {
+            <option value="@app.Id">@app.Domain</option>
+        }
+    </InputSelect>
+</EditForm>
+
+<div>
+    @Application?.Domain has been chosen!
+</div>
+
+@code {
+    private List<Application> _applications = new();
+    private string _applicationId = "";
+    private Application Application => _applications.FirstOrDefault(a => a.Id == _applicationId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var model = await _applicationService.GetApplications();
+        _applications = model.Applications;
+        _applicationId = _applications.FirstOrDefault()?.Id;
+    }
+
+    private async void OnChange()
+    {
+        await InvokeAsync(() => { StateHasChanged(); });
+    } 
+    
+    public void Dispose()
+    {
+    } 
+}

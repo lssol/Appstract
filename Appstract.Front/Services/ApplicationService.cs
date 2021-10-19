@@ -32,5 +32,10 @@ namespace Appstract.Front.Services
         {
             return _repo.CreateApplication(application);
         }
+
+        public void CreateModel(Application application)
+        {
+            
+        }
     }
 }
