@@ -87,7 +87,7 @@ type NodeId = NodeId of string with
     static member Gen () = NodeId (String.genId())
 
 type Template = Template of Id: string * Node * Map<Node, NodeId>
-type TemplateSerializable = TemplateSerializable of Node * Map<string, string>
+type TemplateSerializable = TemplateSerializable of Id: string * Node * Map<string, string>
 
 type AppModel = { appTemplate: Template; templates: Template list }
 type AppModelSerializable = { appTemplate: TemplateSerializable; templates: TemplateSerializable list }

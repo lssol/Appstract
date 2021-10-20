@@ -20,14 +20,16 @@ namespace appcrawl.Controllers
     [Route("/")]
     public class ApplicationController : Controller
     {
-        private readonly ApplicationRepository        _repo;
-        private readonly IMemoryCache                 _cache;
-        private const    string                       DefaultNameApplication = "New Application";
+        private readonly ApplicationRepository _repo;
+        private readonly IMemoryCache          _cache;
+        private readonly ElementRepository     _elementRepository;
+        private const    string                DefaultNameApplication = "New Application";
 
-        public ApplicationController(ApplicationRepository repo, IMemoryCache cache)
+        public ApplicationController(ApplicationRepository repo, IMemoryCache cache, ElementRepository elementRepository)
         {
-            _repo       = repo;
-            _cache = cache;
+            _repo                   = repo;
+            _cache                  = cache;
+            _elementRepository = elementRepository;
         }
 
         [Route("application")]
@@ -103,7 +105,12 @@ namespace appcrawl.Controllers
             });
             
             var identification = Appstract.ModelCreation.identifyPage(model, m.Page);
+            var elements = _repo. identification.templateId
             
+            var result = new
+            {
+                
+            }
             return Ok(identification);
         }
     }

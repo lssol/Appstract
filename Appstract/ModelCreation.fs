@@ -10,14 +10,11 @@ open MBrace.FsPickler
 
 // template = Id * Content
 let createModel (templates: (string * string) seq) =
-    let model =
-        templates
-        |> Seq.map (fun (id, content) -> (id, content |> Node.FromString |> Option.get))
-        |> Seq.map (fun (id, node) -> (id, IntraPageAbstraction.appstract node)) 
-        |> Seq.toList
-        |> InterPageAbstraction.createModel
-        
-    model
+    templates
+    |> Seq.map (fun (id, content) -> (id, content |> Node.FromString |> Option.get))
+    |> Seq.map (fun (id, node) -> (id, IntraPageAbstraction.appstract node)) 
+    |> Seq.toList
+    |> InterPageAbstraction.createModel
 
 let sourceToSignatureCouple (NodeId id) (source: HtmlNode) : (string * string) option =
     source.TryGetAttribute "signature"
@@ -45,31 +42,37 @@ let getDuplicates seq =
     
     duplicates
     
+type identifyPageResultMappingEntry = {signature: string; id: string}
+type identifyPageResult = {templateId: string; mapping: identifyPageResultMappingEntry seq}
 let identifyPage (model: AppModel) (src: string) =
     let model = model
 
-    let (Template (page, mapping)) =
+    let (Template (id, page, mapping)) =
         src
         |> Node.FromString
         |> Option.get
         |> IntraPageAbstraction.appstract
+        |> fun n -> ("", n)
         |> InterPageAbstraction.appstract model
 
-    page.Nodes()
-    |> Seq.collect (nodeToSignatureCouples mapping)
-    |> Utils.Seq.removeDoubles fst //TODO understand why there are doubles in the first place
-    |> Dict.ofSeq
+    let finalMapping =
+        page.Nodes()
+        |> Seq.collect (nodeToSignatureCouples mapping)
+        |> Utils.Seq.removeDoubles fst //TODO understand why there are doubles in the first place
+        |> Seq.map (fun (signature, id) -> {signature = signature; id = id})
+        
+    {templateId = id; mapping = finalMapping}
 
-let toSerializableTemplate (Template (node, mapping)) : TemplateSerializable =
+let toSerializableTemplate (Template (id, node, mapping)) : TemplateSerializable =
     let newMapping =
         mapping
         |> Map.toList
         |> List.map (fun (node, (NodeId id)) -> (node.signature, id))
         |> Map.ofList
 
-    TemplateSerializable(node, newMapping)
+    TemplateSerializable(id, node, newMapping)
 
-let fromSerializableTemplate (TemplateSerializable (node, mapping)) : Template =
+let fromSerializableTemplate (TemplateSerializable (id, node, mapping)) : Template =
     let signatureToNode =
         node.Nodes()
         |> Seq.map (fun node -> (node.signature, node))
@@ -81,7 +84,7 @@ let fromSerializableTemplate (TemplateSerializable (node, mapping)) : Template =
         |> Seq.map (fun (signature, nodeId) -> (signatureToNode.[signature], NodeId nodeId))
         |> Map.ofSeq
 
-    Template(node, newMapping)
+    Template(id, node, newMapping)
 
 let toSerializableModel (model: AppModel) =
     let appTemplate =

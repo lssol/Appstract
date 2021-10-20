@@ -61,8 +61,6 @@ export const explore = async (handles, options) => {
         throw "Invalid url"
     }
 
-    await page.exposeFunction("genString", genString)
-
     let taskQueue = [{ url: domain, depth: 0, origin: null }]
     let alreadyVisited = new Set()
 
@@ -146,13 +144,6 @@ const getPageResult = async (page) => {
     return { content, nbNodes, url }
 }
 
-const genString = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0
-        var v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
 
 const addBase = (page) => {
     return page.evaluate(() => {
@@ -347,8 +338,6 @@ const removeOverlayOnPage = async (page) => {
                     var candidate = methodTwoHideElementMiddle();
                     var first = i == 0;
                     if (candidate === false) {
-                        if (first)
-                            alert('No overlay has been found on this website.');
                         break;
                     } else {
                         if (!first) {
@@ -385,7 +374,8 @@ const removeOverlayOnPage = async (page) => {
 
 const addSignature = async (page) => {
     return page.evaluate(async () => {
+        const genString = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { let r = Math.random() * 16 | 0; let v = c == 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); });
         const elements = document.querySelectorAll("*")
-        elements.forEach(async (e) => e.setAttribute('signature', await genString()))
+        elements.forEach(e => e.setAttribute('signature', genString()))
     })
 }
