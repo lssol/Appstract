@@ -28,9 +28,9 @@ namespace appcrawl.Repositories
                 .GetCollection<Element>(nameof(Element));
         }
 
-        public IEnumerable<Element> GetElements()
+        public IEnumerable<Element> GetElements(string templateId)
         {
-            
+            return _elementCollection.AsQueryable().Where(e => e.TemplateId == templateId).ToList();
         }
 
         public async Task RenameElement(string elementId, string newName)
