@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using appcrawl.Controllers;
@@ -25,6 +26,11 @@ namespace appcrawl.Repositories
             _elementCollection = new MongoClient(_options.ConnectionString)
                 .GetDatabase(_options.Database)
                 .GetCollection<Element>(nameof(Element));
+        }
+
+        public IEnumerable<Element> GetElements()
+        {
+            
         }
 
         public async Task RenameElement(string elementId, string newName)
