@@ -1,4 +1,11 @@
 ﻿var appstract = (function () {
+    Map.prototype.map = function(f) {
+        const newMap = new Map()
+        this.forEach((value, key) => newMap.set(key, f(value)))
+        
+        return newMap
+    }
+    
     let Appstract = () => {
         let host = "https://localhost:5001/"
         let POST = 'POST'
@@ -75,9 +82,10 @@
         console.log(`Searching for host: ${host}`)
         let response = await Appstract().identify(body.outerHTML, getHostname())
         console.log("Identification done", response)
-        let signatureToColor = new Map(
-            Array.from(response.mapping)
-            .map(({signature: s, id: id}) => [s, idToColor(id)]))
+        let signatureToId = new Map(Array.from(response.mapping).map(({signature: s, id: id}) => [s, id]))
+        let signatureToColor = new Map(signatureToId.map(({signature: s, id: id}) => [s, idToColor(id)]))
+        let signatureToLabel = new Map(signatureToId.map(({id: id, label: label}) => [])
+        )
         
         let unselect = () => {}
         document.body.querySelectorAll('*').forEach(e => e.addEventListener("mouseenter", (evt) => {
@@ -86,8 +94,10 @@
 
             unselect()
             let signature = e.getAttribute('signature')
-            if (signatureToColor.has(signature))
+            if (signatureToColor.has(signature)) {
                 unselect = DOM.selectElements([e], signatureToColor.get(signature)).unselect
+                
+            }
         }))
     }
 
