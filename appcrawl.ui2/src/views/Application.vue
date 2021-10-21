@@ -123,11 +123,13 @@ export default {
   
   methods: {
     loadApplication: async function(id) {
+      console.log('Attempting to load application ', id)
       const application = await api.getApplication(id)
       if (!application) {
         await this.$router.replace('/?error=' + 'No application found under this id')
       }
       else {
+        console.log('Application loaded: ', application)
         this.application.id = application.id
         this.application.name = application.name
         this.application.templates = application.templates
@@ -282,8 +284,9 @@ export default {
     const templateId    = url.query['templateId']
 
     if (!applicationId) {
-      console.log('No id in params, creating a new application')
+      console.log('No id in params, creating a new application...')
       const newApplication = await api.createApplication()
+      console.log('New application created: ', newApplication)
       await this.$router.replace(`/application/${newApplication.id}`)
       return
     }
@@ -295,7 +298,11 @@ export default {
   },
 
   watch: {
-    $route: async function(to) {
+    $route: async function(to, from) {
+      const newApplicationId = to.params['applicationId']
+      if (from.params['applicationId'] != newApplicationId) {
+        await this.loadApplication(newApplicationId)
+      }
       const templateId = to.query['templateId']
       if (templateId)
         this.template = this.application.templates.find(t => t.id === templateId)

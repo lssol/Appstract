@@ -100,6 +100,6 @@ namespace appcrawl.Models
         public string TemplateId { get; set; }
         public string TemplateUrl { get; set; }
         public IEnumerable<Element> Elements { get; set; }
-        public IEnumerable<MappingEntry> Mappping { get; set; }
+        public IEnumerable<MappingEntry> Mapping { get; set; }
     }
 }

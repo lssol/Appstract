@@ -1,6 +1,6 @@
 ﻿var appstract = (function () {
     let Appstract = () => {
-        let host = "http://localhost:5000/"
+        let host = "https://localhost:5001/"
         let POST = 'POST'
 
         let sendRequest = (method, endpoint, body) => {
@@ -75,7 +75,10 @@
         console.log(`Searching for host: ${host}`)
         let response = await Appstract().identify(body.outerHTML, getHostname())
         console.log("Identification done", response)
-        let signatureToColor = new Map(Array.from(response.ids).map(({signature: s, id: id}) => [s, idToColor(id)]))
+        let signatureToColor = new Map(
+            Array.from(response.mapping)
+            .map(({signature: s, id: id}) => [s, idToColor(id)]))
+        
         let unselect = () => {}
         document.body.querySelectorAll('*').forEach(e => e.addEventListener("mouseenter", (evt) => {
             if (!evt.altKey)

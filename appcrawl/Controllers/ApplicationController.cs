@@ -88,7 +88,7 @@ namespace appcrawl.Controllers
         }
 
         [Route("application/identify")]
-        [HttpGet]
+        [HttpPost]
         public async Task<ActionResult<IdentifyResultModel>> Identify(IdentifyPageModel m)
         {
             var model = _cache.GetOrCreate(m.Host, entry =>
@@ -112,7 +112,7 @@ namespace appcrawl.Controllers
                 TemplateId = identification.templateId,
                 TemplateUrl = template.Url,
                 Elements = elements.Select(e => new IdentifyResultModel.Element { Id = e.Id, Label = e.Name }),
-                Mappping = identification.mapping.Select(entry => new IdentifyResultModel.MappingEntry
+                Mapping = identification.mapping.Select(entry => new IdentifyResultModel.MappingEntry
                     { Id = entry.id, Signature = entry.signature })
             };
             
