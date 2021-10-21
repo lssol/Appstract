@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace appcrawl.Models
 {
@@ -80,5 +81,25 @@ namespace appcrawl.Models
     {
         public string ElementId { get; set; }
         public string Signature { get; set; }
+    }
+
+    public class IdentifyResultModel
+    {
+        public class Element
+        {
+            public string Label { get; set; }
+            public string Id { get; set; }
+        }
+
+        public class MappingEntry
+        {
+            public string Signature { get; set; }
+            public string Id { get; set; }
+        }
+        
+        public string TemplateId { get; set; }
+        public string TemplateUrl { get; set; }
+        public IEnumerable<Element> Elements { get; set; }
+        public IEnumerable<MappingEntry> Mappping { get; set; }
     }
 }

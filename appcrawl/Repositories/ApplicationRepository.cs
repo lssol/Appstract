@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using AngleSharp.Common;
 using appcrawl.Controllers;
 using appcrawl.Entities;
 using appcrawl.Options;
@@ -45,11 +47,10 @@ namespace appcrawl.Repositories
 
         public Application GetApplicationFromHost(string host)
         {
-            var id = _applicationCollection
-                .AsQueryable()
-                .Where(a => a.Host == host)
-                .Select(a => a.Id)
-                .FirstOrDefault();
+            var id = IAsyncCursorSourceExtensions.FirstOrDefault(_applicationCollection
+                    .AsQueryable()
+                    .Where(a => a.Host == host)
+                    .Select(a => a.Id));
 
             if (id == null)
                 throw new Exception("There is not application with such host");
@@ -59,21 +60,22 @@ namespace appcrawl.Repositories
         
         public Application GetApplication(string id)
         {
-            var application = _applicationCollection
-                .AsQueryable()
-                .Where(a => a.Id == id)
-                .FirstOrDefault();
+            var application = IAsyncCursorSourceExtensions.FirstOrDefault(_applicationCollection
+                    .AsQueryable()
+                    .Where(a => a.Id == id));
 
             var templates = _templateRepository.GetTemplates(id);
             application.Templates = templates;
 
-            if (application.Model != null)
-            {
-                var model = ModelCreation.unserializeModel(application.Model);
-                foreach (var template in templates)
-                    if (!string.IsNullOrWhiteSpace(template.Html))
-                        template.TemplateModel = ModelCreation.identifyPage(model, template.Html);
-            }
+            if (application.Model == null) return application;
+            
+            var model = ModelCreation.unserializeModel(application.Model);
+            foreach (var template in templates)
+                if (!string.IsNullOrWhiteSpace(template.Html))
+                    template.TemplateModel = ModelCreation
+                        .identifyPage(model, template.Html)
+                        .mapping
+                        .ToDictionary(e => e.signature, e => e.id);
 
             return application;
         }

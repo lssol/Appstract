@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using appcrawl.Entities;
 using Microsoft.AspNetCore.Mvc;
 using appcrawl.Models;
-using appcrawl.Options;
 using appcrawl.Repositories;
-using Appstract.Types;
-using FSharpPlus.Control;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace appcrawl.Controllers
@@ -23,13 +18,15 @@ namespace appcrawl.Controllers
         private readonly ApplicationRepository _repo;
         private readonly IMemoryCache          _cache;
         private readonly ElementRepository     _elementRepository;
+        private readonly TemplateRepository _templateRepository;
         private const    string                DefaultNameApplication = "New Application";
 
-        public ApplicationController(ApplicationRepository repo, IMemoryCache cache, ElementRepository elementRepository)
+        public ApplicationController(ApplicationRepository repo, IMemoryCache cache, ElementRepository elementRepository, TemplateRepository templateRepository)
         {
             _repo                   = repo;
             _cache                  = cache;
             _elementRepository = elementRepository;
+            _templateRepository = templateRepository;
         }
 
         [Route("application")]
@@ -92,7 +89,7 @@ namespace appcrawl.Controllers
 
         [Route("application/identify")]
         [HttpGet]
-        public async Task<IActionResult> Identify(IdentifyPageModel m)
+        public async Task<ActionResult<IdentifyResultModel>> Identify(IdentifyPageModel m)
         {
             var model = _cache.GetOrCreate(m.Host, entry =>
             {
@@ -105,14 +102,21 @@ namespace appcrawl.Controllers
             });
             
             var identification = Appstract.ModelCreation.identifyPage(model, m.Page);
-            var elements = _elementRepository.b;
-            identification.templateId
-            
-            var result = new
+            var elements = _elementRepository.GetElements(identification.templateId);
+            var template = _templateRepository.GetTemplate(identification.templateId);
+            if (template == null)
+                throw new Exception("There is such template in the database");
+
+            var result = new IdentifyResultModel
             {
-                
-            }
-            return Ok(identification);
+                TemplateId = identification.templateId,
+                TemplateUrl = template.Url,
+                Elements = elements.Select(e => new IdentifyResultModel.Element { Id = e.Id, Label = e.Name }),
+                Mappping = identification.mapping.Select(entry => new IdentifyResultModel.MappingEntry
+                    { Id = entry.id, Signature = entry.signature })
+            };
+            
+            return Ok(result);
         }
     }
 }

@@ -62,5 +62,9 @@ namespace appcrawl.Repositories
             _templateCollection.DeleteOne(t => t.Id == id);
         }
 
+        public Template GetTemplate(string templateId)
+        {
+            return _templateCollection.AsQueryable().Where(t => t.Id == templateId).FirstOrDefault();
+        }
     }
 }
