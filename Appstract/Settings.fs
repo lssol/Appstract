@@ -13,7 +13,7 @@ let sftmParameters =
             Gamma                   = 1f, // MUST be < 1
             Lambda                  = 2.5f,
             NbIterations            = 1,
-            MetropolisNormalisation = true                  
+            MetropolisNormalisation = false                  
         ),
         MaxTokenAppearance = Func<int, int>(float >> sqrt >> int),
         PropagationParameters = SimilarityPropagation.Parameters(

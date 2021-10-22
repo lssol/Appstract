@@ -1,5 +1,6 @@
 ﻿module Appstract.DOM
 
+open System
 open FSharp.Data
 open FSharp.Data.HtmlActivePatterns
 open Appstract.Types
@@ -11,25 +12,34 @@ type ParentDict = Dictionary<Node, Node option>
 let ignoredTags = Set.ofList ["script"]
 let ignoredAttributes = Set.ofList ["signature"]
 let fromString html =
-    let fromAttrs =
-        List.map (fun (HtmlAttribute(name, value)) -> (name, value))
-        >> Map.ofList
+    let fromAttrs attrs =
+        attrs
+        |> List.map (fun (HtmlAttribute(name, value)) -> (name, value))
+        |> Map.ofList
         
     let getSignature attrs = attrs |> Map.tryFind "signature" |> Option.defaultValue ""
-
+    
+    let removeIgnoredAttributes (attrs: Map<string, string>) =
+        attrs
+        |> Map.filter (fun key _ -> not (ignoredAttributes.Contains(key)))
+        
     let rec fromNode node =
         match node with
         | HtmlElement (name, attributes, children) when not (ignoredTags.Contains(name)) ->
             let attrs = fromAttrs attributes
             Some { signature = getSignature attrs
                    name = name
-                   attributes = attrs
+                   attributes = attrs |> removeIgnoredAttributes
                    abstractionData = AbstractionData.Default node
                    children = children |> Array.ofList |> Array.choose fromNode}
         | _ -> None
 
-    (HtmlDocument.Parse html).TryGetBody()
-    |> Option.bind fromNode
+    let parsed = (HtmlDocument.Parse html)
+    
+    parsed.TryGetBody()
+    |> Option.GetOrRaise (Exception($"Could not parse HTML: {html.Substring(0, 1000)}...{html.Substring(html.Length - 1000, 1000)}"))
+    |> fromNode
+    |> Option.GetOrRaise (Exception($"The HTML was parsed, but the obtained document parsed was not formed as expected"))
 
 let getNodes root =
     let result = List<Node>()
@@ -74,4 +84,3 @@ type Node with
     member this.ParentDict() = computeParentsDict this
     member this.Nodes() = getNodes this
     member this.ActOnBranch parentDict f = actOnBranch parentDict f this
-    member this.ToHtml = 0

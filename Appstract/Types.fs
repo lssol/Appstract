@@ -85,6 +85,7 @@ type Matcher = Node -> Node -> MatcherResult
 // INTER
 type NodeId = NodeId of string with
     static member Gen () = NodeId (String.genId())
+    override this.ToString () = match this with NodeId id -> id
 
 type Template = Template of Id: string * Node * Map<Node, NodeId>
 type TemplateSerializable = TemplateSerializable of Id: string * Node * Map<string, string>

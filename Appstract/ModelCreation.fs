@@ -10,8 +10,9 @@ open MBrace.FsPickler
 
 // template = Id * Content
 let createModel (templates: (string * string) seq) =
+    printfn "------------ CREATING A MODEL ------------"
     templates
-    |> Seq.map (fun (id, content) -> (id, content |> Node.FromString |> Option.get))
+    |> Seq.map (fun (id, content) -> (id, content |> Node.FromString))
     |> Seq.map (fun (id, node) -> (id, IntraPageAbstraction.appstract node)) 
     |> Seq.toList
     |> InterPageAbstraction.createModel
@@ -45,13 +46,15 @@ let getDuplicates seq =
 type identifyPageResultMappingEntry = {signature: string; id: string}
 type identifyPageResult = {templateId: string; mapping: identifyPageResultMappingEntry seq}
 let identifyPage (model: AppModel) (src: string) =
+    printfn $"******* Identifying a page containing {src.Length} characters"
     let model = model
 
     let (Template (id, page, mapping)) =
         src
         |> Node.FromString
-        |> Option.get
+        |> Debug.print (fun n -> $"# nodes: {n.Nodes().Length}")
         |> IntraPageAbstraction.appstract
+        |> Debug.print (fun n -> $"# nodes after intra: {n.Nodes().Length}")
         |> fun n -> ("", n)
         |> InterPageAbstraction.appstract model
 
@@ -61,13 +64,17 @@ let identifyPage (model: AppModel) (src: string) =
         |> Utils.Seq.removeDoubles fst //TODO understand why there are doubles in the first place
         |> Seq.map (fun (signature, id) -> {signature = signature; id = id})
         
+    let debug = finalMapping
+                |> Seq.filter (fun e -> e.id = "5eb52893-0516-406a-9a52-d029d5ae966f")
+                |> Seq.toList
+    
     {templateId = id; mapping = finalMapping}
 
 let toSerializableTemplate (Template (id, node, mapping)) : TemplateSerializable =
     let newMapping =
         mapping
         |> Map.toList
-        |> List.map (fun (node, (NodeId id)) -> (node.signature, id))
+        |> List.map (fun (node, (NodeId nodeId)) -> (node.signature, nodeId))
         |> Map.ofList
 
     TemplateSerializable(id, node, newMapping)

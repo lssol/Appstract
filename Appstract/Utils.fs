@@ -9,10 +9,22 @@ open FuzzyString
 open System.Linq
 open FSharpPlus
 
+module Debug =
+    let print<'a> (f: 'a -> string) (arg: 'a) : 'a =
+        printfn $"{f arg}"
+        arg
 module String =
     let LCS string1 string2 =
         ComparisonMetrics.LongestCommonSubsequence(string1, string2)
     let genId () = Guid.NewGuid().ToString()
+    let union (s1: string) (s2: string) : string =
+        let split1 = HashSet<string>(s1.Split(' '))
+        let split2 = HashSet<string>(s2.Split(' '))
+        String.Join(' ', split1, split2)
+//        let split1 = String.split [" "] s1 |> Set.ofSeq 
+//        let split2 = String.split [" "] s2 |> Set.ofSeq
+//        Set.union split1 split2
+//        |> String.concat " "
 module Map =
     let push key value = 
         let addToSeq = function
@@ -107,3 +119,8 @@ module Seq =
                     unique.Add(s))
         unique
         
+module Option =
+    let GetOrRaise ex option =
+        match option with
+        | None -> raise ex
+        | Some x -> x

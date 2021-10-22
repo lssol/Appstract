@@ -1,7 +1,7 @@
 ﻿var appstract = (function () {
     Map.prototype.map = function(f) {
         const newMap = new Map()
-        this.forEach((value, key) => newMap.set(key, f(value)))
+        this.forEach((value, key) => newMap.set(key, f(value, key)))
         
         return newMap
     }
@@ -82,10 +82,22 @@
         console.log(`Searching for host: ${host}`)
         let response = await Appstract().identify(body.outerHTML, getHostname())
         console.log("Identification done", response)
+        let idToLabel = new Map(response.elements.map(({id: id, label: label}) => [id, label]))
         let signatureToId = new Map(Array.from(response.mapping).map(({signature: s, id: id}) => [s, id]))
-        let signatureToColor = new Map(signatureToId.map(({signature: s, id: id}) => [s, idToColor(id)]))
-        let signatureToLabel = new Map(signatureToId.map(({id: id, label: label}) => [])
-        )
+        let signatureToColor = signatureToId.map(id => idToColor(id))
+        let signatureToLabel = signatureToId.map(id => idToLabel.get(id))
+        
+        let idToSignatures = {}
+        for (let entry of response.mapping) {
+            if (entry.id in idToSignatures)
+                idToSignatures[entry.id].push(entry.signature)
+            else
+                idToSignatures[entry.id] = [entry.signature]
+        }
+        let labelsToSignatures = new Map(Array.from(response.elements).map(({id: id, label: label}) => [label, idToSignatures[id]]))
+            
+        console.log('Id to signatures', idToSignatures)
+        console.log('Labels to signatures', labelsToSignatures)
         
         let unselect = () => {}
         document.body.querySelectorAll('*').forEach(e => e.addEventListener("mouseenter", (evt) => {
@@ -96,9 +108,14 @@
             let signature = e.getAttribute('signature')
             if (signatureToColor.has(signature)) {
                 unselect = DOM.selectElements([e], signatureToColor.get(signature)).unselect
-                
+                console.log('Id Selected: ', signatureToId.get(signature))
+                console.log('Selected: ', signatureToLabel.get(signature))
             }
         }))
+        
+        return {
+            getId: id => signatureToId.get(id)
+        }
     }
 
     return {

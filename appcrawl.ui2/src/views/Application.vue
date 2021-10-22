@@ -38,7 +38,8 @@
         <iframe v-if="template.html && !content_loading" class="full-height full-width" 
                 v-bind:srcdoc="template.html"
                 v-on:load="initSelectMode"                
-        />
+                sandbox="allow-same-origin"
+         />
       </div>
     </div>
     
@@ -152,14 +153,14 @@ export default {
       this.element.name = name
       await api.renameElement(this.element.id, name)
     },
-    
-    selectSignature(signature) {
+
+    selectSignature(idToSelect) {
       this.unselect()
       const model = this.template.templateModel
       let signaturesToSelect = new Set()
-      for (let key in model) {
-        if (model[key] === model[signature])
-          signaturesToSelect.add(key)
+      for (let signature in model) {
+        if (model[signature] === idToSelect)  
+          signaturesToSelect.add(signature)
       }
       let elementsToSelect =
           Array.from(this.iframe
@@ -182,14 +183,21 @@ export default {
             if (!signature)
               return 
             
-            this.element.modelSignature = signature
+            const correspondingId = this.template.templateModel[signature]
+            this.element.modelSignature = correspondingId
             this.saveModelSignature(signature)
-            this.selectSignature(signature)
+            this.selectSignature(correspondingId)
           }))
     },
     
     async saveModelSignature(signature) {
-        await api.updateModelSignature(this.element.id, signature)
+        if (!this.template.templateModel) {
+          console.error('No model found for this template. Cannot save the element')
+          return
+        }
+        const templateSignature = this.template.templateModel[signature]
+        console.log("Saving element with id: ", templateSignature)
+        await api.updateModelSignature(this.element.id, templateSignature)
     },
     
     async highlightElement(element) {

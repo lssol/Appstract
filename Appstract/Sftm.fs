@@ -5,6 +5,7 @@ open Appstract.Types
 open FSharpPlus.Operators
 open tree_matching_csharp
 open System.Collections.Generic
+open Appstract.DOM
 
 type Node = Appstract.Types.Node
 type TM_Node = tree_matching_csharp.Node
@@ -40,6 +41,7 @@ let NodeToTM_Node node =
     (nodes, mapping)
     
 let Match : Matcher = fun node1 node2 ->
+    printfn $"Matching two pages of sizes {node1.Nodes().Length} and {node2.Nodes().Length}"
     let matcher = SftmTreeMatcher(Settings.sftmParameters)
     let tm_node1, mapping1 = NodeToTM_Node node1
     let tm_node2, mapping2 = NodeToTM_Node node2
@@ -52,6 +54,7 @@ let Match : Matcher = fun node1 node2 ->
         |> Seq.filter (isNoMatch >> not)
         |> Seq.map (fun e -> (mapping1.[e.Source], mapping2.[e.Target]))
     
+    printfn $"Finished matching the two pages with ${numberOfNoMatch} no match"
     {Edges = edges; Cost = result.Cost; NoMatch = numberOfNoMatch}
         
 

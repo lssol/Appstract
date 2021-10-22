@@ -10,7 +10,7 @@ open Appstract.DOM
 
 let abstractionOnHeavyWebsite () =
     let html = File.ReadAllText "htmls/cdiscount.html"
-    let root = Node.FromString(html).Value
+    let root = Node.FromString(html)
     printf "number of nodes: %d" (root.Nodes().Length)
     let watch = Stopwatch()
     watch.Start()
@@ -20,7 +20,7 @@ let abstractionOnHeavyWebsite () =
     
 let generateClusterData () =
     let html = File.ReadAllText "htmls/cat.html"
-    let root = Node.FromString(html).Value
+    let root = Node.FromString(html)
     let appstracter = Appstracter()
     let parentDict = computeParentsDict root
     let leaves = root.Nodes() |> Array.filter isLeaf

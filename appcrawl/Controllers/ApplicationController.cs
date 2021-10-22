@@ -111,7 +111,7 @@ namespace appcrawl.Controllers
             {
                 TemplateId = identification.templateId,
                 TemplateUrl = template.Url,
-                Elements = elements.Select(e => new IdentifyResultModel.Element { Id = e.Id, Label = e.Name }),
+                Elements = elements.Select(e => new IdentifyResultModel.Element { Id = e.ModelSignature, Label = e.Name }),
                 Mapping = identification.mapping.Select(entry => new IdentifyResultModel.MappingEntry
                     { Id = entry.id, Signature = entry.signature })
             };
