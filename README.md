@@ -3,6 +3,8 @@
 This API exposes the appstract functionalities.
 Appstract allows to create and use an abstraction of any web app.
 
+To understand more about Appstract please check the corresponding chapter on my [PhD thesis](https://theses.hal.science/tel-03887742/).
+
 ## API
 
 In order to communicate between the server and the client, we use signatures attributes.
